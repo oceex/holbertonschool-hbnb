@@ -1,0 +1,28 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Page-1" id="2xGDQKE0aMhhcyNxUDTv">
+    <mxGraphModel dx="976" dy="658" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="BtOX1dpH75Z69WHXN9br-1" parent="1" style="shape=folder;fontStyle=1;spacingTop=10;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;" value="" vertex="1">
+          <mxGeometry height="140" width="265" x="130" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="KtdtraXtZxTtuyy9WfvH-1" parent="1" style="shape=folder;fontStyle=1;spacingTop=10;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;" value="package" vertex="1">
+          <mxGeometry height="220" width="390" x="35" y="310" as="geometry" />
+        </mxCell>
+        <mxCell id="KtdtraXtZxTtuyy9WfvH-2" parent="1" style="shape=folder;fontStyle=1;spacingTop=10;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;" value="package" vertex="1">
+          <mxGeometry height="170" width="255" x="510" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="KtdtraXtZxTtuyy9WfvH-3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#60a917;fontColor=#ffffff;strokeColor=#2D7600;" value="" vertex="1">
+          <mxGeometry height="40" width="210" x="157.5" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="KtdtraXtZxTtuyy9WfvH-4" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Text" vertex="1">
+          <mxGeometry height="30" width="60" x="400" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="KtdtraXtZxTtuyy9WfvH-5" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;strong style=&quot;box-sizing: border-box; font-weight: bold; scrollbar-color: rgb(95, 99, 104) rgb(49, 54, 60); color: rgb(245, 246, 251); font-family: aktiv-grotesk, sans-serif; font-size: 14px; text-align: start; background-color: rgb(49, 54, 60);&quot;&gt;Presentation Layer&lt;/strong&gt;" vertex="1">
+          <mxGeometry height="30" width="150" x="110" y="60" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
