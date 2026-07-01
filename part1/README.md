@@ -10,10 +10,10 @@ This repository contains Part 1 of the HBnB Evolution project. This initial phas
 
 ---
 
-## 2. High-Level Architecture & Package Structure
-The system is designed following the **Layered Architecture Pattern** to ensure a strict separation of concerns.
+## 2. High-Level Architecture & Package Diagram
+The HBnB Evolution system utilizes a **three-tier layered architecture** to ensure a clean separation of concerns and system modularity.
 
-### 2.1 Package Diagram
+
 ```mermaid
 classDiagram
     class PresentationLayer {
@@ -40,16 +40,25 @@ classDiagram
     PresentationLayer ..> BusinessLogicLayer : Facade Pattern
     BusinessLogicLayer ..> PersistenceLayer : Database Operations
 ```
-### Explanatory Notes:
+### I. Presentation Layer
+Acts as the system’s interface, managing all external communication.
 
-Purpose of the Diagram: To illustrate the overarching 3-tier architecture of the HBnB application and how different packages interact.
+Responsibility: Handles HTTP requests, validates incoming data, and formats outgoing JSON responses with appropriate HTTP status codes.
 
-Key Components Involved: * Presentation Layer: Handles incoming HTTP requests, routing, and JSON serialization.
+### II. Business Logic Layer
+Serves as the core processing engine, housing all application rules.
+
+Responsibility: Orchestrates system behavior via the HBnBFacade, which provides a unified entry point. It manages domain entities (User, Place, Review, Amenity) and enforces business constraints independent of the interface or database.
+
+### III. Persistence Layer
+Manages the interaction between the application and the data storage system.
+
+Responsibility: Executes all read/write operations. By abstracting the storage mechanism, it allows the system to switch storage technologies without affecting the upper layers.
 
 ## 3. Business Logic Layer
 This layer defines the core entities of the application, isolating pure domain state and behavior from the underlying infrastructure, API routes, or persistence frameworks.
 
-### 3.1 Detailed Class Diagram
+### I. Detailed Class Diagram
 ```mermaid
 classDiagram
     class BaseModel {
@@ -121,7 +130,7 @@ classDiagram
     Place "1" *-- "0..*" Review : receives
     Place "0..*" --> "0..*" Amenity : has
 ```
-### 3.2 Detailed Entity Analysis & Architectural Roles
+### II. Detailed Entity Analysis & Architectural Roles
 
 **BaseModel (Abstract Class)**
 Functions as the blueprint and root of the class hierarchy. It enforces cross-cutting concerns by providing a standardized identity and lifecycle tracking blueprint via a globally unique identifier (UUID) and auditing attributes (created_at, updated_at). Marking it as <<abstract>> prevents direct instantiation, guaranteeing it only serves as a reusable operational template.
@@ -138,7 +147,7 @@ Handles user-generated qualitative data. It encapsulates a localized feedback me
 **Amenity Entity**
 Implements a lookup-style classification structure. It stores simple metadata descriptions (name, description) describing features associated with accommodations without duplicating data across multiple listings.
 
-### 3.3 Advanced Relationship Dynamics & Multiplicity
+### III. Advanced Relationship Dynamics & Multiplicity
 
 **Generalization and Inheritance**
 The architecture structurally implements the Don't Repeat Yourself (DRY) principle by having all core domain models inherit directly from the abstract BaseModel. This inheritance strategy guarantees that common identity elements and tracking hooks, such as unique identifiers and lifecycle audit timestamps, are centrally managed and globally consistent across the User, Place, Review, and Amenity entities without rewriting boilerplate code.
@@ -155,7 +164,7 @@ The lifecycle of feedback relies on a strong composition connection between the 
 **Place to Amenity Association**
 Descriptive property tags are decoupled using a many-to-many association network between places and amenities. This structural layout provides maximum operational flexibility, enabling a single accommodation listing to gather and display an array of distinct amenities, while allowing a single amenity instance to safely interface with thousands of properties simultaneously.
 
-### 3.4 Design Decisions & OOP Compliance (SOLID Principles)
+### IV. Design Decisions & OOP Compliance (SOLID Principles)
 
 **Single Responsibility Principle**
 Every model within the business logic boundary is dedicated to tracking exactly one standalone area of the domain. The Place class, for example, encapsulates attributes concerning the actual property dimensions and pricing metrics, deliberately leaving author tracing rules to the User model and rating analytics to the Review class.
@@ -171,7 +180,13 @@ Internal fields are actively shielded using visibility modifiers to establish ro
 ## 4. API Interaction Flow (Sequence Diagrams)
 The following diagrams illustrate the Request Lifecycle across the application's layers for core operations.
 
-### 4.1 User Registration
+**Business Logic Layer:** Encapsulates the core domain models and business rules.
+
+**Persistence Layer:** Manages data storage and retrieval abstractions.
+
+**Design Decisions & Rationale:** We implemented the Facade Pattern (HBnBFacade) to act as a unified interface between the Presentation and Business layers. This decision decouples the API from the complex internal subsystem logic, making the system easier to maintain and test.
+
+### I. User Registration
 Flow Explanation: The client sends a JSON payload. The HBnBFacade validates the data, instantiates the User object, and delegates the storage to the Persistence layer. A successful save returns the user representation.
 
 ```mermaid
@@ -194,7 +209,7 @@ sequenceDiagram
     deactivate Facade
     API-->>Client: 201 Created (User Data)
 ```
-### 4.2 Place Creation
+### II. Place Creation
 Flow Explanation: Place creation demands foreign key validation. The Facade ensures the owner_id correlates to a valid existing User before persisting the new Place, maintaining strict Data Integrity.
 
 ```mermaid
@@ -219,7 +234,7 @@ sequenceDiagram
     deactivate Facade
     API-->>Client: 201 Created (Place Data)
 ```
-### 4.3 Review Submission
+### III. Review Submission
 Flow Explanation: Reviews require dual validation. The Facade verifies both the user_id and place_id exist in the database before constructing the Review object and storing it.
 
 ```mermaid
@@ -246,7 +261,7 @@ sequenceDiagram
     deactivate Facade
     API-->>Client: 201 Created (Review Data)
 ```
-### 4.4 Fetching a List of Places
+### IV. Fetching a List of Places
 Flow Explanation: A pure Read Operation. The API requests a list; the Facade retrieves all place entities from the database, which are then serialized into a JSON array by the Presentation layer.
 
 ```mermaid
@@ -270,8 +285,5 @@ sequenceDiagram
     API-->>Client: 200 OK (Array of Places)
 
 ```
-Business Logic Layer: Encapsulates the core domain models and business rules.
 
-Persistence Layer: Manages data storage and retrieval abstractions.
 
-Design Decisions & Rationale: We implemented the Facade Pattern (HBnBFacade) to act as a unified interface between the Presentation and Business layers. This decision decouples the API from the complex internal subsystem logic, making the system easier to maintain and test.
