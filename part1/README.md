@@ -55,6 +55,8 @@ Manages the interaction between the application and the data storage system.
 
 Responsibility: Executes all read/write operations. By abstracting the storage mechanism, it allows the system to switch storage technologies without affecting the upper layers.
 
+---
+
 ## 3. Business Logic Layer
 This layer defines the core entities of the application, isolating pure domain state and behavior from the underlying infrastructure, API routes, or persistence frameworks.
 
@@ -132,48 +134,48 @@ classDiagram
 ```
 ### II. Detailed Entity Analysis & Architectural Roles
 
-**BaseModel (Abstract Class)**
-Functions as the blueprint and root of the class hierarchy. It enforces cross-cutting concerns by providing a standardized identity and lifecycle tracking blueprint via a globally unique identifier (UUID) and auditing attributes (created_at, updated_at). Marking it as <<abstract>> prevents direct instantiation, guaranteeing it only serves as a reusable operational template.
+**BaseModel**
+Provides the mandatory core identity framework (id, created_at, updated_at) shared globally across the domain lifecycle.
 
 **User Entity**
-Captures administrative and authentication properties. It handles the mapping of user profiles, credential encapsulation (-password hidden via private visibility), and authorization through the is_admin boolean flag.
+Manages system actors, handling credentials, demographic profiles, and roles (is_admin) required for ecosystem security.
 
 **Place Entity**
-Contains the core attributes defining listed accommodations, handling critical variables like geographic coordinates (latitude, longitude) and pricing details (price). It acts as a primary transactional hub within the domain.
+Acts as the central business node, encapsulating physical property specifications, pricing structures, and host relationships.
 
 **Review Entity**
-Handles user-generated qualitative data. It encapsulates a localized feedback mechanism (comment) and an integer rating scale (rating), capturing user opinions safely.
+Tracks transactional customer feedback, processing quantitative scales and comments tied to listing performances.
 
 **Amenity Entity**
-Implements a lookup-style classification structure. It stores simple metadata descriptions (name, description) describing features associated with accommodations without duplicating data across multiple listings.
+Serves as a global feature catalog linked across properties to maintain clean entity definitions.
 
 ### III. Advanced Relationship Dynamics & Multiplicity
 
 **Generalization and Inheritance**
-The architecture structurally implements the Don't Repeat Yourself (DRY) principle by having all core domain models inherit directly from the abstract BaseModel. This inheritance strategy guarantees that common identity elements and tracking hooks, such as unique identifiers and lifecycle audit timestamps, are centrally managed and globally consistent across the User, Place, Review, and Amenity entities without rewriting boilerplate code.
+Enforces structural uniformity across User, Place, Review, and Amenity via the abstract BaseModel, avoiding boilerplate model properties.
 
 **User to Place Association**
-The structural relationship between the User and Place entities is mapped using a strict one-to-many cardinality rule. Under this design rule, every listed accommodation must resolve and link back to exactly one dedicated creator or host account, whereas an individual user is permitted to hold, manage, and list anywhere from zero to an infinite number of properties within the ecosystem.
+A 1 to 0..* relationship confirming that every listing requires an explicit host node, while a user can manage multiple listings.
 
 **User to Review Association**
-Accountability across customer feedback loops is enforced by establishing a one-to-many directional mapping between users and reviews. This constraint dictates that anonymous or detached reviews are structurally impossible since every feedback entry must explicitly reference a single author entity, while still granting any individual user the freedom to write multiple independent reviews.
+A 1 to 0..* unidirectional relationship ensuring strict accountability by mapping every feedback record to a validated user.
 
 **Place to Review Composition**
-The lifecycle of feedback relies on a strong composition connection between the Place and Review components. This relationship institutes a strict lifetime dependency chain where a review cannot exist without its parent accommodation listing. If a specific property is purged or deleted from the system, the application triggers a cascading deletion that automatically drops all child review nodes to maintain clean data layers.
+A 1 to 0..* cascading lifecycle composition (*--). Reviews are structurally dependent on the target property; purging a Place cascades to clear all its feedback records.
 
 **Place to Amenity Association**
-Descriptive property tags are decoupled using a many-to-many association network between places and amenities. This structural layout provides maximum operational flexibility, enabling a single accommodation listing to gather and display an array of distinct amenities, while allowing a single amenity instance to safely interface with thousands of properties simultaneously.
+A 0..* to 0..* mapping, providing the flexibility to load diverse utility catalogs on individual properties without duplicating metadata.
 
 ### IV. Design Decisions & OOP Compliance (SOLID Principles)
 
-**Single Responsibility Principle**
-Every model within the business logic boundary is dedicated to tracking exactly one standalone area of the domain. The Place class, for example, encapsulates attributes concerning the actual property dimensions and pricing metrics, deliberately leaving author tracing rules to the User model and rating analytics to the Review class.
+**Single Responsibility Principle (SRP)**
+Domain tasks are tightly scoped per entity; Place exclusively tracks property attributes, leaving identity context to User and rating metrics to Review.
 
-**Open and Closed Principle**
-Future platform enhancements are decoupled by scaling through the abstract BaseModel. If incoming system updates demand adding entirely new business entities, developers can drop in those new classes as extensions of the BaseModel without altering or risking regressions in existing codebase files.
+**Open/Closed Principle (OCP)**
+The schema relies on BaseModel scaling, allowing the future addition of domain models (e.g., Bookings) without refactoring existing codebase configurations.
 
-**Data Encapsulation and Access Control**
-Internal fields are actively shielded using visibility modifiers to establish robust boundary control. High-security properties, such as user login credentials, utilize private visibility settings, while contextual structural references, including host and location foreign keys, adopt protected access levels to isolate operations from unverified external changes.
+**Encapsulation**
+Establishes clear visibility boundaries, restricting transactional entity tokens and sensitive operations from external layer modifications.
 
 --- 
 
@@ -285,5 +287,3 @@ sequenceDiagram
     API-->>Client: 200 OK (Array of Places)
 
 ```
-
-
