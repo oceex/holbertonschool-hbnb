@@ -22,9 +22,13 @@ classDiagram
         +Services
     }
 
-    class BusinessLogicLayer {
+    class HBnBFacade {
+        <<Facade / Interface>>
+        +orchestrate_requests()
+    }
+
+    class BusinessEntities {
         <<Package>>
-        +HBnBFacade
         +User
         +Place
         +Review
@@ -37,8 +41,9 @@ classDiagram
     }
 
     %% Relationships
-    PresentationLayer ..> BusinessLogicLayer : Facade Pattern
-    BusinessLogicLayer ..> PersistenceLayer : Database Operations
+    PresentationLayer ..> HBnBFacade : Calls
+    HBnBFacade ..> BusinessEntities : Coordinates Access
+    HBnBFacade ..> PersistenceLayer : Database Operations
 ```
 ### I. Presentation Layer
 Acts as the system’s interface, managing all external communication.
@@ -46,9 +51,9 @@ Acts as the system’s interface, managing all external communication.
 Responsibility: Handles HTTP requests, validates incoming data, and formats outgoing JSON responses with appropriate HTTP status codes.
 
 ### II. Business Logic Layer
-Serves as the core processing engine, housing all application rules.
+Serves as the core processing engine, housing all application rules and domain entities (User, Place, Review, Amenity).
 
-Responsibility: Orchestrates system behavior via the HBnBFacade, which provides a unified entry point. It manages domain entities (User, Place, Review, Amenity) and enforces business constraints independent of the interface or database.
+Responsibility: Orchestrates system behavior independent of the interface or database. It is accessed exclusively via the HBnBFacade, which acts as a mediator providing a unified entry point and coordinating all access to the business entities.
 
 ### III. Persistence Layer
 Manages the interaction between the application and the data storage system.
@@ -65,7 +70,7 @@ This layer defines the core entities of the application, isolating pure domain s
 classDiagram
     class BaseModel {
         <<abstract>>
-        +UUID id
+        +UUID4 id
         +DateTime created_at
         +DateTime updated_at
         +create(data: dict): BaseModel
@@ -78,11 +83,11 @@ classDiagram
         +String first_name
         +String last_name
         +String email
-        -String password
+        -String password_hash
         +Boolean is_admin
         +register(data: dict): User
-        +create(data: dict): User
-        +update(data: dict): void
+        +verify_password(password: String): Boolean
+        +update_profile(data: dict): void
         +delete(): boolean
         +list(): List~User~
     }
@@ -93,22 +98,25 @@ classDiagram
         +Float price
         +Float latitude
         +Float longitude
-        #UUID owner_id
+        #UUID4 owner_id
+        +add_review(review: Review): void
+        +add_amenity(amenity: Amenity): void
         +create(data: dict): Place
         +update(data: dict): void
         +delete(): boolean
-        +list(owner_id: UUID): List~Place~
+        +list(): List~Place~
     }
 
     class Review {
         +String comment
         +Integer rating
-        #UUID user_id
-        #UUID place_id
+        #UUID4 user_id
+        #UUID4 place_id
+        +validate_rating(rating: Integer): Boolean
         +create(data: dict): Review
         +update(data: dict): void
         +delete(): boolean
-        +list(place_id: UUID): List~Review~
+        +list(place_id: UUID4): List~Review~
     }
 
     class Amenity {
@@ -134,62 +142,55 @@ classDiagram
 ```
 ### II. Detailed Entity Analysis & Architectural Roles
 
-**BaseModel**
-Provides the mandatory core identity framework (id, created_at, updated_at) shared globally across the domain lifecycle.
+**BaseModel:** Provides core identity framework using UUID4, created_at, and updated_at timestamps.
 
-**User Entity**
-Manages system actors, handling credentials, demographic profiles, and roles (is_admin) required for ecosystem security.
+**User Entity:** Manages actors and profiles. It secures credentials via password_hash and handles domain behaviors like verify_password().
 
-**Place Entity**
-Acts as the central business node, encapsulating physical property specifications, pricing structures, and host relationships.
+**Place Entity:** The core property node (specs, price, owner_id). It actively manages state via methods like add_review().
 
-**Review Entity**
-Tracks transactional customer feedback, processing quantitative scales and comments tied to listing performances.
+**Review Entity:** Tracks customer feedback. It enforces rules using methods like validate_rating().
 
-**Amenity Entity**
-Serves as a global feature catalog linked across properties to maintain clean entity definitions.
+
+**Amenity Entity:** A global feature catalog linked across properties to enrich details.
 
 ### III. Advanced Relationship Dynamics & Multiplicity
 
-**Generalization and Inheritance**
-Enforces structural uniformity across User, Place, Review, and Amenity via the abstract BaseModel, avoiding boilerplate model properties.
+**Inheritance:** All entities inherit BaseModel to prevent code duplication.
 
-**User to Place Association**
-A 1 to 0..* relationship confirming that every listing requires an explicit host node, while a user can manage multiple listings.
 
-**User to Review Association**
-A 1 to 0..* unidirectional relationship ensuring strict accountability by mapping every feedback record to a validated user.
+**User to Place (1 to 0..*):** A user can host multiple listings.
 
-**Place to Review Composition**
-A 1 to 0..* cascading lifecycle composition (*--). Reviews are structurally dependent on the target property; purging a Place cascades to clear all its feedback records.
 
-**Place to Amenity Association**
-A 0..* to 0..* mapping, providing the flexibility to load diverse utility catalogs on individual properties without duplicating metadata.
+**User to Review (1 to 0..*):** Unidirectional mapping ensuring every review is tied to a valid user.
 
-### IV. Design Decisions & OOP Compliance (SOLID Principles)
 
-**Single Responsibility Principle (SRP)**
-Domain tasks are tightly scoped per entity; Place exclusively tracks property attributes, leaving identity context to User and rating metrics to Review.
+**Place to Review (1 to 0.. Composition):* ** Cascading deletion (*--); reviews are destroyed if the target Place is deleted.
 
-**Open/Closed Principle (OCP)**
-The schema relies on BaseModel scaling, allowing the future addition of domain models (e.g., Bookings) without refactoring existing codebase configurations.
 
-**Encapsulation**
-Establishes clear visibility boundaries, restricting transactional entity tokens and sensitive operations from external layer modifications.
+**Place to Amenity (0.. to 0..*):* ** Many-to-many mapping for flexible utility catalogs.
 
+### IV. Design Decisions (SOLID)
+
+**SRP (Single Responsibility Principle):** Each entity manages only its specific domain (e.g., Place for property specs, Review for metrics).
+
+
+**OCP (Open/Closed Principle):** Easily extensible for future models without breaking existing code.
+
+
+### Encapsulation: Protects sensitive data (like password_hash) and internal states from external interference.
 --- 
 
 ## 4. API Interaction Flow (Sequence Diagrams)
-The following diagrams illustrate the Request Lifecycle across the application's layers for core operations.
+The following diagrams illustrate the Request Lifecycle across the application's layers for core operations, including both successful executions (Happy Paths) and failure scenarios (Error Flows) using alt blocks.
 
-**Business Logic Layer:** Encapsulates the core domain models and business rules.
+**Business Logic Layer:** Encapsulates the core domain models, executes validations, and enforces business constraints.
 
 **Persistence Layer:** Manages data storage and retrieval abstractions.
 
-**Design Decisions & Rationale:** We implemented the Facade Pattern (HBnBFacade) to act as a unified interface between the Presentation and Business layers. This decision decouples the API from the complex internal subsystem logic, making the system easier to maintain and test.
+**Design Decisions & Rationale:** We implemented the Facade Pattern (HBnBFacade) to act as a unified interface between the Presentation and Business layers. This decision decouples the API from the complex internal subsystem logic and explicitly handles validation errors before they reach the database.
 
 ### I. User Registration
-Flow Explanation: The client sends a JSON payload. The HBnBFacade validates the data, instantiates the User object, and delegates the storage to the Persistence layer. A successful save returns the user representation.
+Flow Explanation: The client sends a JSON payload. The HBnBFacade first checks if the email already exists to prevent duplicates. If valid, it hashes the password for security, instantiates the User object, and delegates storage to the DB. If validation fails, it immediately returns a 400 or 409 error.
 
 ```mermaid
 sequenceDiagram
@@ -202,17 +203,27 @@ sequenceDiagram
     Client->>API: POST /users (JSON Payload)
     API->>Facade: register_user(data)
     activate Facade
-    Facade->>Facade: Validate & Instantiate User
-    Facade->>DB: save(User_Object)
-    activate DB
-    DB-->>Facade: Confirm Save
-    deactivate DB
-    Facade-->>API: Return User_Object
+    Facade->>DB: check_email_exists(data.email)
+    
+    alt Email Already Exists
+        DB-->>Facade: True
+        Facade-->>API: Raise ConflictError
+        API-->>Client: 409 Conflict (Email in use)
+    else Valid Data
+        DB-->>Facade: False
+        Facade->>Facade: Validate Inputs & Hash Password
+        Facade->>Facade: Instantiate User_Object
+        Facade->>DB: save(User_Object)
+        activate DB
+        DB-->>Facade: Confirm Save
+        deactivate DB
+        Facade-->>API: Return User_Object
+        API-->>Client: 201 Created (User Data without Password)
+    end
     deactivate Facade
-    API-->>Client: 201 Created (User Data)
 ```
 ### II. Place Creation
-Flow Explanation: Place creation demands foreign key validation. The Facade ensures the owner_id correlates to a valid existing User before persisting the new Place, maintaining strict Data Integrity.
+Flow Explanation: Place creation demands strict validation of fields (price, latitude, longitude, amenities) and foreign key integrity. The Facade ensures the owner_id correlates to a valid existing User. If any validation fails or the owner is missing, the flow aborts with an appropriate HTTP error.
 
 ```mermaid
 sequenceDiagram
@@ -225,19 +236,32 @@ sequenceDiagram
     Client->>API: POST /places (data + owner_id)
     API->>Facade: create_place(data)
     activate Facade
-    Facade->>DB: get_user(owner_id)
-    DB-->>Facade: Return User_Object (Valid)
-    Facade->>Facade: Instantiate Place_Object
-    Facade->>DB: save(Place_Object)
-    activate DB
-    DB-->>Facade: Confirm Save
-    deactivate DB
-    Facade-->>API: Return Place_Object
+    Facade->>Facade: Validate Fields (Price, Lat/Lon, Amenities)
+    
+    alt Invalid Fields (e.g., Negative Price)
+        Facade-->>API: Raise ValidationError
+        API-->>Client: 400 Bad Request (Invalid input)
+    else Fields Valid
+        Facade->>DB: get_user(owner_id)
+        alt Owner Not Found
+            DB-->>Facade: None
+            Facade-->>API: Raise NotFoundError
+            API-->>Client: 404 Not Found (Owner missing)
+        else Owner Exists
+            DB-->>Facade: Return User_Object
+            Facade->>Facade: Instantiate Place_Object
+            Facade->>DB: save(Place_Object)
+            activate DB
+            DB-->>Facade: Confirm Save
+            deactivate DB
+            Facade-->>API: Return Place_Object
+            API-->>Client: 201 Created (Place Data)
+        end
+    end
     deactivate Facade
-    API-->>Client: 201 Created (Place Data)
 ```
 ### III. Review Submission
-Flow Explanation: Reviews require dual validation. The Facade verifies both the user_id and place_id exist in the database before constructing the Review object and storing it.
+Flow Explanation: Reviews require multifaceted validation. The Facade verifies the rating constraints (e.g., 1-5 stars), ensures both the user_id and place_id exist, and crucially checks for duplicate reviews to prevent spam. All these constraints must be met before persisting the new record.
 
 ```mermaid
 sequenceDiagram
@@ -250,21 +274,40 @@ sequenceDiagram
     Client->>API: POST /reviews (data + place_id + user_id)
     API->>Facade: create_review(data)
     activate Facade
-    Facade->>DB: get_user(user_id)
-    DB-->>Facade: User Validated
-    Facade->>DB: get_place(place_id)
-    DB-->>Facade: Place Validated
-    Facade->>Facade: Instantiate Review_Object
-    Facade->>DB: save(Review_Object)
-    activate DB
-    DB-->>Facade: Confirm Save
-    deactivate DB
-    Facade-->>API: Return Review_Object
+    Facade->>Facade: validate_rating(data.rating)
+    
+    alt Invalid Rating
+        Facade-->>API: Raise ValidationError
+        API-->>Client: 400 Bad Request (Rating must be 1-5)
+    else Rating Valid
+        Facade->>DB: check_entities_exist(user_id, place_id)
+        alt User or Place Not Found
+            DB-->>Facade: Missing Entity
+            Facade-->>API: Raise NotFoundError
+            API-->>Client: 404 Not Found (Invalid User/Place)
+        else Entities Valid
+            DB-->>Facade: Entities Confirmed
+            Facade->>DB: check_duplicate_review(user_id, place_id)
+            alt Duplicate Review Exists
+                DB-->>Facade: True
+                Facade-->>API: Raise ConflictError
+                API-->>Client: 409 Conflict (Review already exists)
+            else No Duplicate
+                DB-->>Facade: False
+                Facade->>Facade: Instantiate Review_Object
+                Facade->>DB: save(Review_Object)
+                activate DB
+                DB-->>Facade: Confirm Save
+                deactivate DB
+                Facade-->>API: Return Review_Object
+                API-->>Client: 201 Created (Review Data)
+            end
+        end
+    end
     deactivate Facade
-    API-->>Client: 201 Created (Review Data)
 ```
-### IV. Fetching a List of Places
-Flow Explanation: A pure Read Operation. The API requests a list; the Facade retrieves all place entities from the database, which are then serialized into a JSON array by the Presentation layer.
+### IV. Fetching a List of Places (With Filters)
+Flow Explanation: A Read Operation based on specific search criteria (e.g., city, max_price). The API parses the query parameters and passes them to the Facade, which dynamically constructs a filtered lookup via the Persistence layer.
 
 ```mermaid
 sequenceDiagram
@@ -274,16 +317,23 @@ sequenceDiagram
     participant Facade as Business Logic (Facade)
     participant DB as Persistence Layer
 
-    Client->>API: GET /places
-    API->>Facade: get_all_places()
+    Client->>API: GET /places?city=Riyadh&max_price=500
+    API->>Facade: get_filtered_places(criteria)
     activate Facade
-    Facade->>DB: fetch_all(Place)
-    activate DB
-    DB-->>Facade: Return List~Place_Object~
-    deactivate DB
-    Facade-->>API: Return List~Place_Object~
+    Facade->>Facade: Parse and Validate Criteria
+    
+    alt Invalid Filter Parameters
+        Facade-->>API: Raise ValidationError
+        API-->>Client: 400 Bad Request (Invalid Filters)
+    else Valid Criteria
+        Facade->>DB: fetch_by_criteria(Place, criteria)
+        activate DB
+        DB-->>Facade: Return Filtered List~Place_Object~
+        deactivate DB
+        Facade-->>API: Return List~Place_Object~
+        API->>API: Serialize Objects to JSON Array
+        API-->>Client: 200 OK (Array of Filtered Places)
+    end
     deactivate Facade
-    API->>API: Serialize Objects to JSON Array
-    API-->>Client: 200 OK (Array of Places)
 
 ```
