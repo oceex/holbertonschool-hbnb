@@ -19,22 +19,24 @@ class User(BaseModel):
     # check to the repository/database instead.
     _emails_in_use = set()
 
-    def __init__(self, first_name, last_name, email, is_admin=False):
-        """Initialize a User.
+    def __init__(self, first_name, last_name, email, password, is_admin=False):
+        """Initialize a new User instance.
 
         Args:
-            first_name (str): Required, max length 50.
-            last_name (str): Required, max length 50.
-            email (str): Required, must be a valid, unique email format.
-            is_admin (bool): Defaults to False.
+            first_name (str): Required first name of the user (max 50 chars).
+            last_name (str): Required last name of the user (max 50 chars).
+            email (str): Required, must be a unique and valid email format.
+            password (str): Required, plaintext password to be validated.
+            is_admin (bool, optional): Administrative privilege flag. Defaults to False.
         """
         super().__init__()
         self.first_name = first_name
         self.last_name = last_name
         self.email = email
+        self.password = password  # Invokes the password setter for validation
         self.is_admin = is_admin
 
-        # Places owned and reviews written by this user
+        # Navigation properties for established relationships
         self.places = []
         self.reviews = []
 
@@ -91,6 +93,29 @@ class User(BaseModel):
         if not isinstance(value, bool):
             raise ValueError("is_admin must be a boolean")
         self._is_admin = value
+
+    @property
+    def password(self):
+        """str: Secure credentials for user authentication."""
+        return self._password
+
+    @password.setter
+    def password(self, value):
+        if not value or not isinstance(value, str):
+            raise ValueError("password is required and must be a string")
+        # NOTE: Cryptographic hashing (e.g., bcrypt) will be integrated in Part 3.
+        self._password = value
+
+    def verify_password(self, pwd):
+        """Verify if the provided plaintext password matches the stored credential.
+
+        Args:
+            pwd (str): The plaintext password submitted during login.
+
+        Returns:
+            bool: True if the verification succeeds, False otherwise.
+        """
+        return self._password == pwd
 
     # -- Relationship helpers ---------------------------------------------
     def add_place(self, place):

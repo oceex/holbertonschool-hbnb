@@ -1,11 +1,28 @@
+#!/usr/bin/python3
+"""Application factory module.
+
+Initializes the Flask application and registers the API Blueprint
+to connect all functional endpoints.
+"""
+
 from flask import Flask
-from flask_restx import Api
-from app.api.v1.users import api as users_ns
+from app.api.v1 import blueprint as api_v1
 
-def create_app():
+
+def create_app(config_class=None):
+    """Create and configure the Flask application instance.
+
+    Args:
+        config_class: Optional configuration object/module.
+
+    Returns:
+        Flask: The initialized Flask application.
+    """
     app = Flask(__name__)
-    api = Api(app, version='1.0', title='HBnB API', description='HBnB Application API', doc='/api/v1/')
 
-    # Register the users namespace
-    api.add_namespace(users_ns, path='/api/v1/users')
+    if config_class:
+        app.config.from_object(config_class)
+
+    app.register_blueprint(api_v1)
+
     return app

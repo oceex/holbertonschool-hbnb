@@ -130,6 +130,18 @@ class HBnBFacade:
     # Review
     # ------------------------------------------------------------------
     def create_review(self, review_data):
+        """Create a new Review instance, enforcing relationship constraint and preventing duplicate spam.
+
+        Args:
+            review_data (dict): Payload containing rating, text, place_id, and user_id.
+
+        Returns:
+            Review: The persisted Review entity instance.
+
+        Raises:
+            ValueError: If the place_id or user_id does not correlate to an existing entity,
+                        or if the user has already submitted a review for the specified place.
+        """
         place = self.get_place(review_data.get("place_id"))
         if not place:
             raise ValueError(
@@ -139,6 +151,12 @@ class HBnBFacade:
         if not user:
             raise ValueError(
                 f"user with id '{review_data.get('user_id')}' not found")
+
+        # Business Rule: Prevent duplicate reviews (Spam Prevention)
+        for existing_review in place.reviews:
+            if existing_review.user.id == user.id:
+                raise ValueError(
+                    f"User '{user.id}' has already reviewed place '{place.id}'")
 
         review = Review(
             text=review_data.get("text"),
