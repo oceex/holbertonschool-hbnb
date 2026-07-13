@@ -21,4 +21,12 @@ This phase covers the foundational software architecture and system design. Key 
 * **Business Logic Layer:** Detailed UML Class Diagrams for core entities (`User`, `Place`, `Review`, `Amenity`).
 * **API Interaction Flow:** Comprehensive Sequence Diagrams with validation, error handling, and criteria-based filtering.
 
-*👉 **[Click here to read the full Part 1 Technical Documentation](./part1/README.md)**.*
+*👉 **[Click here to read the full Part 1 Technical Documentation](./part1/README.md)***.
+
+### ➡️ [Part 2: Business Logic and API Endpoints](./part2/hbnb/README.md)
+This phase transitions the system from design to active code, focusing on the core business logic and presentation layers. Key implementations include:
+* **Presentation Layer (API):** RESTful API endpoints built with **Flask** and **Flask-RESTx**, utilizing Namespaces for structured routing.
+* **Business Logic Layer:** Core domain models implementing strict attribute validation (e.g., latitude/longitude bounds) and entity relationship handling (Nested Serialization).
+* **Facade Pattern:** A centralized `HBnBFacade` service orchestrating secure interactions between the layers.
+
+*👉 **[Click here to explore the Part 2 Codebase](./part2/hbnb/README.md)***.

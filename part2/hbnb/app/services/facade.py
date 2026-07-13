@@ -68,63 +68,67 @@ class HBnBFacade:
     # ------------------------------------------------------------------
     # Place
     # ------------------------------------------------------------------
+
     def create_place(self, place_data):
+        """Create and persist a new Place instance.
+
+        Args:
+            place_data (dict): Dictionary containing place attributes.
+
+        Returns:
+            Place: The newly created Place instance.
+
+        Raises:
+            ValueError: If the owner does not exist or validation fails.
+        """
+        from app.models.place import Place
+
         owner_id = place_data.get("owner_id")
         owner = self.get_user(owner_id)
         if not owner:
-            raise ValueError(f"owner with id '{owner_id}' not found")
+            raise ValueError(f"User with id '{owner_id}' not found.")
 
         place = Place(
             title=place_data.get("title"),
-            description=place_data.get("description"),
+            description=place_data.get("description", ""),
             price=place_data.get("price"),
             latitude=place_data.get("latitude"),
             longitude=place_data.get("longitude"),
-            owner=owner,
+            owner=owner
         )
 
-        for amenity_id in place_data.get("amenities", []):
+        amenities = place_data.get("amenities", [])
+        for amenity_id in amenities:
             amenity = self.get_amenity(amenity_id)
-            if not amenity:
-                raise ValueError(
-                    f"amenity with id '{amenity_id}' not found")
-            place.add_amenity(amenity)
+            if amenity:
+                place.add_amenity(amenity)
 
         return self.place_repo.add(place)
 
     def get_place(self, place_id):
+        """Retrieve a Place instance by its unique identifier."""
         return self.place_repo.get(place_id)
 
     def get_all_places(self):
+        """Retrieve all persisted Place instances."""
         return self.place_repo.get_all()
 
     def update_place(self, place_id, place_data):
+        """Update attributes of an existing Place instance.
+
+        Args:
+            place_id (str): The unique identifier of the place.
+            place_data (dict): Dictionary of fields to update.
+
+        Returns:
+            Place: The updated Place instance, or None if not found.
+        """
         place = self.get_place(place_id)
         if not place:
             return None
 
-        data = dict(place_data)
-        amenity_ids = data.pop("amenities", None)
-        owner_id = data.pop("owner_id", None)
-
-        if owner_id is not None:
-            owner = self.get_user(owner_id)
-            if not owner:
-                raise ValueError(f"owner with id '{owner_id}' not found")
-            data["owner"] = owner
-
-        updated_place = self.place_repo.update(place_id, data)
-
-        if amenity_ids is not None:
-            updated_place.amenities = []
-            for amenity_id in amenity_ids:
-                amenity = self.get_amenity(amenity_id)
-                if not amenity:
-                    raise ValueError(
-                        f"amenity with id '{amenity_id}' not found")
-                updated_place.add_amenity(amenity)
-
-        return updated_place
+        # Process validatable updates safely via the repository
+        return self.place_repo.update(place_id, place_data)
 
     # ------------------------------------------------------------------
     # Review
