@@ -32,6 +32,19 @@ class Place(BaseModel):
         self.amenities = []
 
     @property
+    def title(self):
+        """str: The title of the place."""
+        return self._title
+
+    @title.setter
+    def title(self, value):
+        if not value or not isinstance(value, str) or not value.strip():
+            raise ValueError("title is required and must be a non-empty string")
+        if len(value) > 100:
+            raise ValueError("title must be at most 100 characters")
+        self._title = value
+
+    @property
     def price(self):
         """float: The nightly price of the place."""
         return self._price
