@@ -112,20 +112,19 @@ class HBnBFacade:
         return self.place_repo.get_all()
 
     def update_place(self, place_id, place_data):
-        """Update attributes of an existing Place instance.
-
-        Args:
-            place_id (str): The unique identifier of the place.
-            place_data (dict): Dictionary of fields to update.
-
-        Returns:
-            Place: The updated Place instance, or None if not found.
-        """
         place = self.get_place(place_id)
         if not place:
             return None
 
-        # Process validatable updates safely via the repository
+        amenity_ids = place_data.pop("amenities", None)
+
+        if amenity_ids is not None:
+            place.amenities = []
+            for amenity_id in amenity_ids:
+                amenity = self.get_amenity(amenity_id)
+                if amenity:
+                    place.add_amenity(amenity)
+
         return self.place_repo.update(place_id, place_data)
 
     # ------------------------------------------------------------------
