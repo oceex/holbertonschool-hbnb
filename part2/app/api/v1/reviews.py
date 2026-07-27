@@ -1,5 +1,8 @@
 #!/usr/bin/python3
-"""Reviews API namespace: /api/v1/reviews/"""
+"""
+Reviews API namespace:
+/api/v1/reviews/
+"""
 from flask_restx import Namespace, Resource, fields
 
 from app.services import facade

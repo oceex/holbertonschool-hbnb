@@ -1,11 +1,7 @@
 #!/usr/bin/python3
 """Amenities API Namespace.
-
-Provides RESTful endpoints for managing amenities including registration,
-retrieval, and updates. This namespace handles JSON serialization and validation
-rules for input payloads.
+/api/amenities
 """
-
 from flask_restx import Namespace, Resource, fields
 from app.services import facade
 
