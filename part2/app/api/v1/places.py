@@ -1,10 +1,8 @@
 #!/usr/bin/python3
-"""Places API Namespace.
-
-Provides RESTful endpoints for Place entities, integrating nested
-serialization for related Users and Amenities.
 """
-
+Places API Namespace.
+/api/places
+"""
 from flask_restx import Namespace, Resource, fields
 from app.services import facade
 

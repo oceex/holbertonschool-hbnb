@@ -5,7 +5,7 @@ Defines the Place entity and its domain-specific validation rules.
 """
 
 from app.models.base_model import BaseModel
-
+from app.models.user import User
 
 class Place(BaseModel):
     """Represents a Place entity within the HBnB domain."""
@@ -89,11 +89,25 @@ class Place(BaseModel):
             raise ValueError("Longitude must be between -180.0 and 180.0.")
         self._longitude = val
 
+    @property
+    def owner(self):
+        return self._owner
+
+    @owner.setter
+    def owner(self, value):
+        if not isinstance(value, User):
+            raise TypeError("owner must be a User instance")
+        self._owner = value
+
     def add_review(self, review):
-        """Add a review to the place."""
+        from app.models.review import Review
+        if not isinstance(review, Review):
+            raise TypeError("review must be a Review instance")
         self.reviews.append(review)
 
     def add_amenity(self, amenity):
-        """Add an amenity to the place if not already present."""
+        from app.models.amenity import Amenity
+        if not isinstance(amenity, Amenity):
+            raise TypeError("amenity must be an Amenity instance")
         if amenity not in self.amenities:
             self.amenities.append(amenity)

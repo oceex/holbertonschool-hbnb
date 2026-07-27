@@ -1,5 +1,8 @@
 #!/usr/bin/python3
-"""Users API namespace: /api/v1/users/"""
+"""
+Users API namespace:
+/api/v1/users/
+"""
 from flask_restx import Namespace, Resource, fields
 
 from app.services import facade
