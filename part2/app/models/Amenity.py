@@ -4,7 +4,7 @@
 Defines the Amenity class, representing a feature that a Place can offer
 (e.g., "Wi-Fi", "Parking").
 """
-from app.models.base_model import BaseModel
+from app.models.Base_model import BaseModel
 
 
 class Amenity(BaseModel):

@@ -4,9 +4,9 @@
 Defines the Review class, representing feedback a User leaves for a
 Place.
 """
-from app.models.base_model import BaseModel
-from app.models.place import Place
-from app.models.user import User
+from app.models.Base_model import BaseModel
+from app.models.Place import Place
+from app.models.User import User
 
 
 class Review(BaseModel):

@@ -15,6 +15,8 @@ user_model = api.model("User", {
                                  max_length=50),
     "last_name": fields.String(required=True, description="Last name",
                                 max_length=50),
+    "password": fields.String(required=True, description="password",
+                                max_length=50),
     "email": fields.String(required=True, description="Email address"),
     "is_admin": fields.Boolean(description="Administrator flag",
                                 default=False),

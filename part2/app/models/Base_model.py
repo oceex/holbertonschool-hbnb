@@ -5,12 +5,17 @@ Defines the BaseModel class, which provides common attributes
 (id, created_at, updated_at) and common behavior (save, update, to_dict)
 shared by all business logic entities (User, Place, Review, Amenity).
 """
+from app import db
 import uuid
 from datetime import datetime
 
-
-class BaseModel:
+class BaseModel(db.Model):
     """Base class that all business logic entities inherit from."""
+    __abstract__ = True
+
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     def __init__(self):
         """Initialize a new instance with a unique id and timestamps."""
