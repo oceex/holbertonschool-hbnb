@@ -42,17 +42,7 @@ class User(BaseModel):
         self.is_admin = is_admin
         self.hash_password(password)
 
-        # Navigation collections. If/when Place and Review get a
-        # foreign key back to User, replace these with a real
-        # db.relationship(..., backref=...) so SQLAlchemy manages
-        # them instead of plain lists.
-        self.places = []
-        self.reviews = []
 
-    # -- Column validation -------------------------------------------
-    # Runs automatically on assignment (self.first_name = ..., etc.)
-    # because these are real db.Column attributes, not shadowed by a
-    # second set of @property definitions.
     @validates('first_name', 'last_name')
     def validate_name(self, key, value):
         if not value or not isinstance(value, str):
@@ -96,13 +86,4 @@ class User(BaseModel):
             bool: True if it matches the stored hash, False otherwise.
         """
         return bcrypt.check_password_hash(self.password, password)
-
-    # -- Relationship helpers ---------------------------------------------
-    def add_place(self, place):
-        """Associate a Place owned by this user."""
-        self.places.append(place)
-
-    def add_review(self, review):
-        """Associate a Review written by this user."""
-        self.reviews.append(review)
 

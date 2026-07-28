@@ -11,17 +11,18 @@ from app.models.User import User
 from app.models.Place import Place
 from app.models.Review import Review
 from app.models.Amenity import Amenity
-from app.persistence.repository import SQLAlchemyRepository
 from app.services.repositories.user_repository import UserRepository
+from app.services.repositories.place_repository import PlaceRepository
+from app.services.repositories.review_repository import ReviewRepository
+from app.services.repositories.amenity_repository import AmenityRepository
 
 
 class HBnBFacade:
     def __init__(self):
-        self.user_repo = UserRepository()  # Switched to SQLAlchemyRepository
-        self.place_repo = SQLAlchemyRepository(Place)
-        self.review_repo = SQLAlchemyRepository(Review)
-        self.amenity_repo = SQLAlchemyRepository(Amenity)
-
+        self.user_repo = UserRepository()
+        self.place_repo = PlaceRepository()
+        self.review_repo = ReviewRepository()
+        self.amenity_repo = AmenityRepository()
 
     # ------------------------------------------------------------------
     # User
@@ -155,10 +156,11 @@ class HBnBFacade:
                 f"user with id '{review_data.get('user_id')}' not found")
 
         # Business Rule: Prevent duplicate reviews (Spam Prevention)
-        for existing_review in place.reviews:
-            if existing_review.user.id == user.id:
-                raise ValueError(
-                    f"User '{user.id}' has already reviewed place '{place.id}'")
+        existing_review = self.review_repo.get_review_by_place_and_user(
+            place.id, user.id)
+        if existing_review:
+            raise ValueError(
+                f"User '{user.id}' has already reviewed place '{place.id}'")
 
         review = Review(
             text=review_data.get("text"),
@@ -178,7 +180,7 @@ class HBnBFacade:
         place = self.get_place(place_id)
         if not place:
             raise ValueError(f"place with id '{place_id}' not found")
-        return place.reviews
+        return self.review_repo.get_reviews_by_place(place_id)
 
     def update_review(self, review_id, review_data):
         review = self.get_review(review_id)
@@ -190,11 +192,6 @@ class HBnBFacade:
         review = self.get_review(review_id)
         if not review:
             return False
-
-        # Keep the related Place/User in sync
-        if review in review.place.reviews:
-            review.place.reviews.remove(review)
-        if review in review.user.reviews:
-            review.user.reviews.remove(review)
-
+        # Place.reviews and User.reviews are live relationships, so
+        # deleting the row here is enough to keep both sides in sync.
         return self.review_repo.delete(review_id)

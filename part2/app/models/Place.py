@@ -1,21 +1,49 @@
-#!/usr/bin/python3
-"""Place model module.
+# !/usr/bin/python3
+"""Place module.
 
-Defines the Place entity and its domain-specific validation rules.
+Defines the Place class, representing a listing owned by a User that
+can be reviewed and can offer a set of Amenities.
 """
-
+from sqlalchemy.orm import validates
+from app import db
 from app.models.Base_model import BaseModel
-from app.models.User import User
+
+# Association table for the many-to-many relationship between
+# Place and Amenity. This is a plain table (no model class needed)
+# since it carries no extra data of its own beyond the two foreign keys.
+place_amenity = db.Table(
+    'place_amenity',
+    db.Column('place_id', db.String(36), db.ForeignKey('places.id'), primary_key=True),
+    db.Column('amenity_id', db.String(36), db.ForeignKey('amenities.id'), primary_key=True)
+)
+
 
 class Place(BaseModel):
-    """Represents a Place entity within the HBnB domain."""
+    """Represents a place listed within the HBnB application."""
+
+    __tablename__ = 'places'
+
+    title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.String(1000), nullable=True)
+    price = db.Column(db.Float, nullable=False)
+    latitude = db.Column(db.Float, nullable=False)
+    longitude = db.Column(db.Float, nullable=False)
+    owner_id = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
+
+    # -- Relationships -------------------------------------------------
+    owner = db.relationship('User', backref=db.backref('places', lazy=True))
+    reviews = db.relationship('Review', backref='place', lazy=True,
+                               cascade='all, delete-orphan')
+    amenities = db.relationship('Amenity', secondary=place_amenity,
+                                 backref=db.backref('places', lazy=True),
+                                 lazy=True)
 
     def __init__(self, title, description, price, latitude, longitude, owner):
         """Initialize a new Place instance.
 
         Args:
-            title (str): The title of the place.
-            description (str): Detailed description of the place.
+            title (str): Required title of the place (max 100 chars).
+            description (str): Optional detailed description of the place.
             price (float): The nightly price (must be >= 0).
             latitude (float): Geographical latitude (-90.0 to 90.0).
             longitude (float): Geographical longitude (-180.0 to 180.0).
@@ -28,86 +56,55 @@ class Place(BaseModel):
         self.latitude = latitude
         self.longitude = longitude
         self.owner = owner
-        self.reviews = []
-        self.amenities = []
 
-    @property
-    def title(self):
-        """str: The title of the place."""
-        return self._title
-
-    @title.setter
-    def title(self, value):
+    # -- Column validation -------------------------------------------
+    # Runs automatically on assignment because these are real
+    # db.Column attributes, not shadowed by a second set of
+    # @property definitions.
+    @validates('title')
+    def validate_title(self, key, value):
         if not value or not isinstance(value, str) or not value.strip():
             raise ValueError("title is required and must be a non-empty string")
         if len(value) > 100:
             raise ValueError("title must be at most 100 characters")
-        self._title = value
+        return value
 
-    @property
-    def price(self):
-        """float: The nightly price of the place."""
-        return self._price
-
-    @price.setter
-    def price(self, value):
+    @validates('price')
+    def validate_price(self, key, value):
         try:
             val = float(value)
         except (ValueError, TypeError):
-            raise ValueError("Price must be a valid number.")
+            raise ValueError("price must be a valid number")
         if val < 0:
-            raise ValueError("Price cannot be negative.")
-        self._price = val
+            raise ValueError("price cannot be negative")
+        return val
 
-    @property
-    def latitude(self):
-        """float: The geographical latitude."""
-        return self._latitude
-
-    @latitude.setter
-    def latitude(self, value):
+    @validates('latitude')
+    def validate_latitude(self, key, value):
         try:
             val = float(value)
         except (ValueError, TypeError):
-            raise ValueError("Latitude must be a valid number.")
+            raise ValueError("latitude must be a valid number")
         if not (-90.0 <= val <= 90.0):
-            raise ValueError("Latitude must be between -90.0 and 90.0.")
-        self._latitude = val
+            raise ValueError("latitude must be between -90.0 and 90.0")
+        return val
 
-    @property
-    def longitude(self):
-        """float: The geographical longitude."""
-        return self._longitude
-
-    @longitude.setter
-    def longitude(self, value):
+    @validates('longitude')
+    def validate_longitude(self, key, value):
         try:
             val = float(value)
         except (ValueError, TypeError):
-            raise ValueError("Longitude must be a valid number.")
+            raise ValueError("longitude must be a valid number")
         if not (-180.0 <= val <= 180.0):
-            raise ValueError("Longitude must be between -180.0 and 180.0.")
-        self._longitude = val
+            raise ValueError("longitude must be between -180.0 and 180.0")
+        return val
 
-    @property
-    def owner(self):
-        return self._owner
-
-    @owner.setter
-    def owner(self, value):
-        if not isinstance(value, User):
-            raise TypeError("owner must be a User instance")
-        self._owner = value
-
+    # -- Relationship helpers -------------------------------------------
     def add_review(self, review):
-        from app.models.Review import Review
-        if not isinstance(review, Review):
-            raise TypeError("review must be a Review instance")
+        """Associate a Review left for this place."""
         self.reviews.append(review)
 
     def add_amenity(self, amenity):
-        from app.models.Amenity import Amenity
-        if not isinstance(amenity, Amenity):
-            raise TypeError("amenity must be an Amenity instance")
+        """Associate an Amenity offered by this place."""
         if amenity not in self.amenities:
             self.amenities.append(amenity)
