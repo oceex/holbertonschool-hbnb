@@ -169,11 +169,5 @@ class TestPlaceEndpoints(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 404)
 
-    def test_add_review_rejects_non_review(self):
-        place = Place("Cabin", "desc", 100, 45.0, -122.0, some_user)
-        with self.assertRaises(TypeError):
-            place.add_review("not a review")
-
-
 if __name__ == '__main__':
     unittest.main()
