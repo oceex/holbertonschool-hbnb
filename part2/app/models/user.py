@@ -14,11 +14,6 @@ EMAIL_REGEX = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 class User(BaseModel):
     """Represents a user of the HBnB application."""
 
-    # Tracks emails already in use so we can enforce uniqueness without
-    # a persistence layer. A real implementation would delegate this
-    # check to the repository/database instead.
-    _emails_in_use = set()
-
     def __init__(self, first_name, last_name, email, password, is_admin=False):
         """Initialize a new User instance.
 
@@ -47,7 +42,12 @@ class User(BaseModel):
 
     @first_name.setter
     def first_name(self, value):
-        if not value or not isinstance(value, str):
+        if not isinstance(value, str):
+            raise ValueError("first_name is required and must be a string")
+        # The old validation accepted whitespace-only names.
+        # Trimming before storage keeps the model valid and consistent.
+        value = value.strip()
+        if not value:
             raise ValueError("first_name is required and must be a string")
         if len(value) > 50:
             raise ValueError("first_name must be at most 50 characters")
@@ -59,7 +59,12 @@ class User(BaseModel):
 
     @last_name.setter
     def last_name(self, value):
-        if not value or not isinstance(value, str):
+        if not isinstance(value, str):
+            raise ValueError("last_name is required and must be a string")
+        # The old validation accepted whitespace-only last names.
+        # Trimming before storage prevents invalid names from passing.
+        value = value.strip()
+        if not value:
             raise ValueError("last_name is required and must be a string")
         if len(value) > 50:
             raise ValueError("last_name must be at most 50 characters")
@@ -71,17 +76,15 @@ class User(BaseModel):
 
     @email.setter
     def email(self, value):
-        if not value or not isinstance(value, str):
+        if not isinstance(value, str):
+            raise ValueError("email is required and must be a string")
+        # Email uniqueness belongs in the facade/repository, not on a class set.
+        # Normalizing whitespace here keeps lookup and duplicate checks reliable.
+        value = value.strip()
+        if not value:
             raise ValueError("email is required and must be a string")
         if not EMAIL_REGEX.match(value):
             raise ValueError("email must be a valid email address")
-        existing = getattr(self, "_email", None)
-        if value != existing:
-            if value in User._emails_in_use:
-                raise ValueError(f"email '{value}' is already in use")
-            if existing is not None:
-                User._emails_in_use.discard(existing)
-            User._emails_in_use.add(value)
         self._email = value
 
     @property
@@ -101,7 +104,11 @@ class User(BaseModel):
 
     @password.setter
     def password(self, value):
-        if not value or not isinstance(value, str):
+        if not isinstance(value, str):
+            raise ValueError("password is required and must be a string")
+        # The old password validation accepted whitespace-only passwords.
+        # Trimming only for validation keeps the stored value as the caller provided it.
+        if not value.strip():
             raise ValueError("password is required and must be a string")
         # NOTE: Cryptographic hashing (e.g., bcrypt) will be integrated in Part 3.
         self._password = value
@@ -120,8 +127,32 @@ class User(BaseModel):
     # -- Relationship helpers ---------------------------------------------
     def add_place(self, place):
         """Associate a Place owned by this user."""
-        self.places.append(place)
+        from app.models.place import Place
+
+        # The old helper accepted arbitrary objects as places.
+        # Type and owner checks keep the User-Place relationship aligned with the UML.
+        if not isinstance(place, Place):
+            raise TypeError("place must be a Place instance")
+        if place.owner is not self:
+            raise ValueError("place must be owned by this user")
+        # The old relationship helper allowed duplicate place references.
+        # Checking membership preserves a single relationship source.
+        if place not in self.places:
+            self.places.append(place)
+            self.save()
 
     def add_review(self, review):
         """Associate a Review written by this user."""
-        self.reviews.append(review)
+        from app.models.review import Review
+
+        # The old helper accepted arbitrary objects as reviews.
+        # Type and author checks keep the User-Review relationship aligned with the UML.
+        if not isinstance(review, Review):
+            raise TypeError("review must be a Review instance")
+        if review.user is not self:
+            raise ValueError("review must be authored by this user")
+        # The old relationship helper allowed duplicate review references.
+        # Checking membership keeps user-review relationships consistent.
+        if review not in self.reviews:
+            self.reviews.append(review)
+            self.save()

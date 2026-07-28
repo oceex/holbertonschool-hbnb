@@ -31,9 +31,20 @@ class BaseModel:
                 ignored, and the 'id' and 'created_at' attributes are
                 protected from being overwritten.
         """
+        if not isinstance(data, dict):
+            raise TypeError("update data must be a dictionary")
+
         protected = {"id", "created_at"}
         for key, value in data.items():
             if key in protected:
+                continue
+            # Private backing fields could bypass property validation directly.
+            # Ignoring underscore-prefixed keys forces updates through setters.
+            if key.startswith("_"):
+                continue
+            # The old update path could set relationship/id-like fields freely.
+            # This keeps protected relationship ownership fields under facade control.
+            if key in {"owner", "user", "place", "reviews", "places"}:
                 continue
             if hasattr(self, key):
                 setattr(self, key, value)

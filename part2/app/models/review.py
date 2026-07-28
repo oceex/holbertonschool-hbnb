@@ -38,7 +38,12 @@ class Review(BaseModel):
 
     @text.setter
     def text(self, value):
-        if not value or not isinstance(value, str):
+        if not isinstance(value, str):
+            raise ValueError("text is required and must be a string")
+        # The old validation accepted whitespace-only review text.
+        # Trimming before storage keeps reviews meaningful and valid.
+        value = value.strip()
+        if not value:
             raise ValueError("text is required and must be a string")
         self._text = value
 
@@ -48,6 +53,8 @@ class Review(BaseModel):
 
     @rating.setter
     def rating(self, value):
+        # bool is a subclass of int, so True/False used to satisfy numeric checks.
+        # Rejecting booleans keeps ratings in the explicit 1..5 integer domain.
         if not isinstance(value, int) or isinstance(value, bool):
             raise ValueError("rating must be an integer")
         if not (1 <= value <= 5):

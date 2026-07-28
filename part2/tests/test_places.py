@@ -5,6 +5,10 @@ import json
 import unittest
 import uuid
 from run import app
+# The test used Place and some_user without defining either dependency.
+# Importing the models lets the logic test exercise Place.add_review directly.
+from app.models.place import Place
+from app.models.user import User
 
 
 class TestPlaceEndpoints(unittest.TestCase):
@@ -170,6 +174,9 @@ class TestPlaceEndpoints(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_add_review_rejects_non_review(self):
+        # The old test referenced an undefined some_user variable.
+        # Creating a valid owner isolates the assertion to invalid review input.
+        some_user = User("Test", "Owner", f"{uuid.uuid4()}@test.com", "secret")
         place = Place("Cabin", "desc", 100, 45.0, -122.0, some_user)
         with self.assertRaises(TypeError):
             place.add_review("not a review")

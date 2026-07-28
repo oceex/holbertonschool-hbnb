@@ -51,10 +51,16 @@ class InMemoryRepository(Repository):
         self._storage = {}
 
     def add(self, obj):
+        # The old repository silently overwrote objects with the same id.
+        # Rejecting duplicates keeps ids unique and exposes bad insertions early.
+        if obj.id in self._storage:
+            raise ValueError(f"object with id '{obj.id}' already exists")
         self._storage[obj.id] = obj
         return obj
 
     def get(self, obj_id):
+        # Missing ids should be handled cleanly without leaking KeyError.
+        # dict.get returns None, matching the repository contract.
         return self._storage.get(obj_id)
 
     def get_all(self):
@@ -62,11 +68,16 @@ class InMemoryRepository(Repository):
 
     def update(self, obj_id, data):
         obj = self.get(obj_id)
-        if obj:
-            obj.update(data)
+        # The previous logic was correct for found objects but implicit for missing ones.
+        # Returning None clearly communicates that no update occurred.
+        if not obj:
+            return None
+        obj.update(data)
         return obj
 
     def delete(self, obj_id):
+        # The old delete behavior already avoided KeyError; keep it explicit.
+        # Returning a boolean lets the facade distinguish missing objects.
         if obj_id in self._storage:
             del self._storage[obj_id]
             return True

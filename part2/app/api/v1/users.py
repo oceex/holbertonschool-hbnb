@@ -16,6 +16,9 @@ user_model = api.model("User", {
     "last_name": fields.String(required=True, description="Last name",
                                 max_length=50),
     "email": fields.String(required=True, description="Email address"),
+    # The API schema omitted password, so Flask-RESTx dropped it before the facade.
+    # Declaring it keeps current endpoints aligned with the required User model.
+    "password": fields.String(required=True, description="User password"),
     "is_admin": fields.Boolean(description="Administrator flag",
                                 default=False),
 })
