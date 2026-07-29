@@ -4,11 +4,13 @@
 from flask import Flask
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
+from flask_jwt_extended import JWTManager  # Import JWTManager
 
 from config import Config
 
 db = SQLAlchemy(session_options={"expire_on_commit": False})
 bcrypt = Bcrypt()
+jwt = JWTManager()  # Initialize JWTManager
 
 
 def create_app(config_class=Config):
@@ -27,6 +29,7 @@ def create_app(config_class=Config):
 
     db.init_app(app)
     bcrypt.init_app(app)
+    jwt.init_app(app)  # Initialize JWT with the app
 
     # Repositories use the first factory application only when legacy callers
     # invoke the Facade outside a Flask context. Requests still use their
