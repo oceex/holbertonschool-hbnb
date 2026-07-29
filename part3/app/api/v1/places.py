@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 """Place API resources and serialization schemas."""
 from flask_restx import Namespace, Resource, fields
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.services import facade
 
 api = Namespace('places', description='Place operations')
@@ -23,7 +24,7 @@ review_model = api.model('PlaceReview', {
     'text': fields.String(description='Review text'),
     'rating': fields.Integer(description='Rating, 1 to 5'),
     'user_id': fields.String(attribute=lambda review: review.user.id,
-                             description='ID of the review author')
+                               description='ID of the review author')
 })
 
 place_input_model = api.model('PlaceInput', {
@@ -62,7 +63,7 @@ place_detail_model = api.model('PlaceDetail', {
     'longitude': fields.Float(description='Longitude of the place'),
     'owner': fields.Nested(user_model, description='Owner details'),
     'amenities': fields.List(fields.Nested(amenity_model),
-                             description='List of amenities'),
+                               description='List of amenities'),
     'reviews': fields.List(fields.Nested(review_model),
                            description='List of reviews')
 })
@@ -72,7 +73,7 @@ place_update_model = api.model('PlaceUpdate', {
     'description': fields.String(description='Description of the place'),
     'price': fields.Float(description='Price per night'),
     'amenities': fields.List(fields.String,
-                             description="List of amenity IDs")
+                               description="List of amenity IDs")
 })
 
 message_model = api.model('Message', {
@@ -118,19 +119,32 @@ class PlaceResource(Resource):
 
     @api.expect(place_update_model, validate=True)
     @api.response(200, 'Place updated successfully', message_model)
+    @api.response(401, 'Missing or invalid token')
+    @api.response(403, 'Unauthorized action')
     @api.response(404, 'Place not found')
     @api.response(400, 'Invalid input data')
+    @jwt_required()
     def put(self, place_id):
-        """Update a place's information."""
+        """Update a place's information with ownership verification."""
+        current_user_id = get_jwt_identity()
+        claims = get_jwt()
+        is_admin = claims.get('is_admin', False)
+
         place = facade.get_place(place_id)
         if not place:
             api.abort(404, 'Place not found')
+
+        # Check if the current user is the owner or an admin
+        owner_id = place.owner_id if hasattr(place, 'owner_id') else place.owner.id
+        if owner_id != current_user_id and not is_admin:
+            api.abort(403, 'Unauthorized action: you can only update your own places')
 
         try:
             facade.update_place(place_id, api.payload)
             return {"message": "Place updated successfully"}, 200
         except ValueError as e:
             api.abort(400, str(e))
+
 
 @api.route('/<string:place_id>/reviews')
 class PlaceReviewList(Resource):
