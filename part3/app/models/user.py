@@ -1,9 +1,10 @@
 #!/usr/bin/python3
-"""User model and validation rules."""
+"""Mapped User model, validation rules, and password handling."""
 import re
 
-from flask_bcrypt import check_password_hash, generate_password_hash
+from sqlalchemy.orm import validates
 
+from app import bcrypt, db
 from app.models.base_model import BaseModel
 
 EMAIL_REGEX = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
@@ -12,8 +13,23 @@ EMAIL_REGEX = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 class User(BaseModel):
     """Represent a user who can own places and write reviews."""
 
+    __tablename__ = "users"
+
+    first_name = db.Column(db.String(50), nullable=False)
+    last_name = db.Column(db.String(50), nullable=False)
+    email = db.Column(db.String(120), nullable=False, unique=True)
+    _password = db.Column("password", db.String(128), nullable=False)
+    is_admin = db.Column(db.Boolean, default=False, nullable=False)
+
+    places = db.relationship(
+        "Place", back_populates="owner", cascade="all, delete-orphan"
+    )
+    reviews = db.relationship(
+        "Review", back_populates="user", cascade="all, delete-orphan"
+    )
+
     def __init__(self, first_name, last_name, email, password, is_admin=False):
-        """Initialize a validated user and empty relationship collections."""
+        """Initialize a validated user and hash its plaintext password once."""
         super().__init__()
         self.first_name = first_name
         self.last_name = last_name
@@ -21,68 +37,36 @@ class User(BaseModel):
         self.password = password
         self.is_admin = is_admin
 
-        self.places = []
-        self.reviews = []
-
-    @property
-    def first_name(self):
-        """str: The user's first name."""
-        return self._first_name
-
-    @first_name.setter
-    def first_name(self, value):
+    @validates("first_name", "last_name")
+    def validate_name(self, key, value):
+        """Validate and normalize a user's name."""
         if not isinstance(value, str):
-            raise ValueError("first_name is required and must be a string")
+            raise ValueError(f"{key} is required and must be a string")
         value = value.strip()
         if not value:
-            raise ValueError("first_name is required and must be a string")
+            raise ValueError(f"{key} is required and must be a string")
         if len(value) > 50:
-            raise ValueError("first_name must be at most 50 characters")
-        self._first_name = value
+            raise ValueError(f"{key} must be at most 50 characters")
+        return value
 
-    @property
-    def last_name(self):
-        """str: The user's last name."""
-        return self._last_name
-
-    @last_name.setter
-    def last_name(self, value):
-        if not isinstance(value, str):
-            raise ValueError("last_name is required and must be a string")
-        value = value.strip()
-        if not value:
-            raise ValueError("last_name is required and must be a string")
-        if len(value) > 50:
-            raise ValueError("last_name must be at most 50 characters")
-        self._last_name = value
-
-    @property
-    def email(self):
-        """str: The normalized email address."""
-        return self._email
-
-    @email.setter
-    def email(self, value):
+    @validates("email")
+    def validate_email(self, key, value):
+        """Validate and normalize an email address."""
         if not isinstance(value, str):
             raise ValueError("email is required and must be a string")
-        # Repository-level uniqueness checks rely on the normalized value.
         value = value.strip()
         if not value:
             raise ValueError("email is required and must be a string")
         if not EMAIL_REGEX.match(value):
             raise ValueError("email must be a valid email address")
-        self._email = value
+        return value
 
-    @property
-    def is_admin(self):
-        """bool: Whether the user has administrative privileges."""
-        return self._is_admin
-
-    @is_admin.setter
-    def is_admin(self, value):
+    @validates("is_admin")
+    def validate_is_admin(self, key, value):
+        """Require an explicit boolean administrative flag."""
         if not isinstance(value, bool):
             raise ValueError("is_admin must be a boolean")
-        self._is_admin = value
+        return value
 
     @property
     def password(self):
@@ -95,19 +79,18 @@ class User(BaseModel):
 
     def hash_password(self, password):
         """Validate, hash, and store a plaintext password."""
-        if not isinstance(password, str):
+        if not isinstance(password, str) or not password.strip():
             raise ValueError("password is required and must be a string")
-        if not password.strip():
-            raise ValueError("password is required and must be a string")
-        self._password = generate_password_hash(password).decode("utf-8")
+        self._password = bcrypt.generate_password_hash(password).decode("utf-8")
 
     def verify_password(self, password):
         """Return whether a plaintext password matches the stored hash."""
-        return check_password_hash(self._password, password)
+        return bcrypt.check_password_hash(self._password, password)
 
     def to_dict(self):
-        """Return a dictionary without password credentials."""
+        """Return user data without password credentials."""
         data = super().to_dict()
+        data.pop("password", None)
         data.pop("_password", None)
         return data
 

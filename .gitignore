@@ -1,5 +1,13 @@
 __pycache__/
 *.pyc
 venv/
+.venv/
+env/
 .DS_Store
 *.swp
+instance/
+*.db
+*.sqlite
+*.sqlite3
+.env
+.pytest_cache/

@@ -1,71 +1,69 @@
 #!/usr/bin/python3
-"""Review model and validation rules."""
+"""Mapped Review model, relationships, and validation rules."""
+from sqlalchemy.orm import validates
+
+from app import db
 from app.models.base_model import BaseModel
-from app.models.place import Place
-from app.models.user import User
 
 
 class Review(BaseModel):
-    """Represents a review left by a user for a place."""
+    """Represent a review left by a user for a place."""
+
+    __tablename__ = "reviews"
+
+    text = db.Column(db.String(1000), nullable=False)
+    rating = db.Column(db.Integer, nullable=False)
+    place_id = db.Column(
+        db.String(36), db.ForeignKey("places.id"), nullable=False
+    )
+    user_id = db.Column(
+        db.String(36), db.ForeignKey("users.id"), nullable=False
+    )
+
+    place = db.relationship("Place", back_populates="reviews")
+    user = db.relationship("User", back_populates="reviews")
 
     def __init__(self, text, rating, place, user):
-        """Initialize a review and synchronize its place and author."""
+        """Initialize a validated review and synchronize relationships."""
         super().__init__()
         self.text = text
         self.rating = rating
         self.place = place
         self.user = user
 
-        # Keep both relationship collections synchronized.
-        self.place.add_review(self)
-        self.user.add_review(self)
-
-    @property
-    def text(self):
-        """str: The normalized review text."""
-        return self._text
-
-    @text.setter
-    def text(self, value):
+    @validates("text")
+    def validate_text(self, key, value):
+        """Validate and normalize review text."""
         if not isinstance(value, str):
             raise ValueError("text is required and must be a string")
         value = value.strip()
         if not value:
             raise ValueError("text is required and must be a string")
-        self._text = value
+        return value
 
-    @property
-    def rating(self):
-        """int: The rating from 1 through 5."""
-        return self._rating
-
-    @rating.setter
-    def rating(self, value):
-        # bool is an int subclass but is not a meaningful rating.
+    @validates("rating")
+    def validate_rating(self, key, value):
+        """Require an integer rating from one through five."""
         if not isinstance(value, int) or isinstance(value, bool):
             raise ValueError("rating must be an integer")
-        if not (1 <= value <= 5):
+        if not 1 <= value <= 5:
             raise ValueError("rating must be between 1 and 5")
-        self._rating = value
+        return value
 
-    @property
-    def place(self):
-        """Place: The reviewed place."""
-        return self._place
+    @validates("place")
+    def validate_place(self, key, value):
+        """Require a mapped Place relationship."""
+        from app.models.place import Place
 
-    @place.setter
-    def place(self, value):
         if not isinstance(value, Place):
             raise ValueError("place must be a valid Place instance")
-        self._place = value
+        return value
 
-    @property
-    def user(self):
-        """User: The review author."""
-        return self._user
+    @validates("user")
+    def validate_user(self, key, value):
+        """Require a mapped User relationship."""
+        from app.models.user import User
 
-    @user.setter
-    def user(self, value):
         if not isinstance(value, User):
             raise ValueError("user must be a valid User instance")
-        self._user = value
+        return value

@@ -1,6 +1,6 @@
 # HBnB - Holberton BnB
 
-A modular, layered web application implementing the core business logic and API for an AirBnB-style platform. This part of the project focuses on setting up the project structure, business logic classes, and API endpoints using the **Facade design pattern**, with an in-memory persistence layer that will later be replaced by a database-backed solution.
+A modular, layered web application implementing the core business logic and API for an AirBnB-style platform. This part uses the **Facade design pattern** with SQLAlchemy-backed persistence.
 
 ## Project Overview
 
@@ -8,7 +8,7 @@ The HBnB application is organized into three main layers:
 
 - **Presentation Layer** (`app/api/`) — Exposes the RESTful API endpoints (via Flask-RESTx) that clients use to interact with the application. Endpoints are versioned (`v1/`) and cover users, places, reviews, and amenities.
 - **Business Logic Layer** (`app/models/`) — Contains the core domain classes (`User`, `Place`, `Review`, `Amenity`) that define the entities and rules of the application.
-- **Persistence Layer** (`app/persistence/`) — Handles storage and retrieval of objects. Currently implemented as an in-memory repository; will be replaced with a SQLAlchemy-backed database repository in a later part of the project.
+- **Persistence Layer** (`app/persistence/`) — Handles storage and retrieval through SQLAlchemy repositories.
 
 Communication between these layers is managed through the **Facade pattern**, implemented in `app/services/facade.py`. The `HBnBFacade` class acts as a single point of contact between the API layer and the underlying business logic and persistence layers, keeping the codebase decoupled and easier to maintain.
 
@@ -37,7 +37,7 @@ hbnb/
 │   │   ├── facade.py        # HBnBFacade class
 │   ├── persistence/
 │       ├── __init__.py
-│       ├── repository.py    # Repository interface + in-memory implementation
+│       ├── repository.py    # Repository interface + SQLAlchemy implementation
 ├── run.py                   # Application entry point
 ├── config.py                # Environment/application configuration
 ├── requirements.txt         # Python dependencies
@@ -52,7 +52,7 @@ hbnb/
 | `app/api/v1/` | Version 1 of the REST API endpoints |
 | `app/models/` | Business logic entities (User, Place, Review, Amenity) |
 | `app/services/` | Facade pattern implementation — mediates between API and persistence |
-| `app/persistence/` | Storage layer — currently an in-memory repository, later a database repository |
+| `app/persistence/` | SQLAlchemy-backed storage layer |
 | `run.py` | Entry point used to launch the Flask application |
 | `config.py` | Application configuration and environment settings |
 | `requirements.txt` | List of required Python packages |
@@ -60,7 +60,7 @@ hbnb/
 ## Design Patterns
 
 - **Facade Pattern** — `HBnBFacade` provides a simplified, unified interface to the business logic and persistence layers, so the API layer never has to interact with repositories directly.
-- **Repository Pattern** — The `Repository` abstract base class defines a consistent storage interface (`add`, `get`, `get_all`, `update`, `delete`, `get_by_attribute`). The `InMemoryRepository` is the current implementation and will later be swapped for a SQLAlchemy-based repository without changing the rest of the codebase.
+- **Repository Pattern** — The `Repository` contract is implemented by `SQLAlchemyRepository` for mapped persistence.
 
 ## Installation
 
@@ -96,10 +96,12 @@ The application will run in debug mode. At this stage, the API documentation (Sw
 - Python 3.x
 - Flask
 - Flask-RESTx
+- Flask-Bcrypt
+- Flask-SQLAlchemy
 
 ## Status
 
-This part of the project establishes the foundational project structure, the Facade pattern, and the in-memory repository. Business logic validation, API endpoint implementation, and full CRUD operations will be added in subsequent parts. The in-memory persistence layer will eventually be replaced with a database-backed implementation using SQLAlchemy.
+This part establishes the application factory, mapped domain models, SQLAlchemy repositories, business validation, and CRUD API behavior.
 
 ## Author
 

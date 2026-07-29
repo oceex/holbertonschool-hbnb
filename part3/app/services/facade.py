@@ -4,18 +4,21 @@ from app.models.user import User
 from app.models.place import Place
 from app.models.review import Review
 from app.models.amenity import Amenity
-from app.persistence.repository import InMemoryRepository
+from app.services.repositories.amenity_repository import AmenityRepository
+from app.services.repositories.place_repository import PlaceRepository
+from app.services.repositories.review_repository import ReviewRepository
+from app.services.repositories.user_repository import UserRepository
 
 
 class HBnBFacade:
     """Coordinate domain validation, relationships, and repositories."""
 
     def __init__(self):
-        """Initialize independent repositories for each domain entity."""
-        self.user_repo = InMemoryRepository()
-        self.place_repo = InMemoryRepository()
-        self.review_repo = InMemoryRepository()
-        self.amenity_repo = InMemoryRepository()
+        """Initialize one SQLAlchemy repository per mapped entity type."""
+        self.user_repo = UserRepository()
+        self.place_repo = PlaceRepository()
+        self.review_repo = ReviewRepository()
+        self.amenity_repo = AmenityRepository()
 
     def create_user(self, user_data):
         """Create a user, enforcing repository-scoped email uniqueness."""
@@ -146,16 +149,11 @@ class HBnBFacade:
                 if amenity not in resolved_amenities:
                     resolved_amenities.append(amenity)
 
-        updated_place = self.place_repo.update(place_id, data)
-
         if resolved_amenities is not None:
-            # Apply relationships only after scalar validation succeeds.
-            place.amenities = []
-            for amenity in resolved_amenities:
-                place.add_amenity(amenity)
-            place.save()
+            # The repository commits this relationship change with scalar data.
+            place.amenities = resolved_amenities
 
-        return updated_place
+        return self.place_repo.update(place_id, data)
 
     def create_review(self, review_data):
         """Create and persist a review.
@@ -173,10 +171,13 @@ class HBnBFacade:
             raise ValueError(
                 f"user with id '{review_data.get('user_id')}' not found")
 
-        for existing_review in place.reviews:
-            if existing_review.user.id == user.id:
-                raise ValueError(
-                    f"User '{user.id}' has already reviewed place '{place.id}'")
+        existing_review = self.review_repo.get_review_by_place_and_user(
+            place.id,
+            user.id,
+        )
+        if existing_review:
+            raise ValueError(
+                f"User '{user.id}' has already reviewed place '{place.id}'")
 
         review = Review(
             text=review_data.get("text"),
@@ -199,7 +200,7 @@ class HBnBFacade:
         place = self.get_place(place_id)
         if not place:
             raise ValueError(f"place with id '{place_id}' not found")
-        return place.reviews
+        return self.review_repo.get_reviews_by_place(place_id)
 
     def update_review(self, review_id, review_data):
         """Update a review, or return ``None`` when not found."""
@@ -209,17 +210,9 @@ class HBnBFacade:
         return self.review_repo.update(review_id, review_data)
 
     def delete_review(self, review_id):
-        """Delete a review and unlink it from its place and author."""
+        """Delete a review and let mapped relationships synchronize."""
         review = self.get_review(review_id)
         if not review:
             return False
-
-        # Relationship changes must refresh the related models' timestamps.
-        if review in review.place.reviews:
-            review.place.reviews.remove(review)
-            review.place.save()
-        if review in review.user.reviews:
-            review.user.reviews.remove(review)
-            review.user.save()
 
         return self.review_repo.delete(review_id)
