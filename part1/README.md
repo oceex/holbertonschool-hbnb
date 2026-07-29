@@ -108,7 +108,7 @@ classDiagram
     }
 
     class Review {
-        +String comment
+        +String text
         +Integer rating
         #UUID4 user_id
         #UUID4 place_id

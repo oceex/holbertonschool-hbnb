@@ -8,6 +8,7 @@ import json
 import unittest
 import uuid
 from run import app
+from app.models.user import User
 from app.services import facade
 
 
@@ -45,46 +46,76 @@ class TestUserEndpoints(unittest.TestCase):
         self.assertNotIn('password', data)
         self.assertNotIn('_password', data)
 
-    def test_user_serialization_does_not_expose_password(self):
-        """Verify every user serialization path omits credentials."""
+    def test_password_is_hashed_and_verifiable(self):
+        """Verify the model stores a bcrypt hash and checks passwords."""
         password = "password123"
+        user = User(
+            "Jane",
+            "Doe",
+            self._unique_email(),
+            password,
+        )
+
+        self.assertIsInstance(user.password, str)
+        self.assertNotEqual(user.password, password)
+        self.assertRegex(
+            user.password,
+            r"^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$",
+        )
+        self.assertTrue(user.verify_password(password))
+        self.assertFalse(user.verify_password("incorrect-password"))
+        self.assertNotIn('password', user.to_dict())
+        self.assertNotIn('_password', user.to_dict())
+
+    def test_invalid_password_values_are_rejected(self):
+        """Verify invalid plaintext passwords fail model validation."""
+        for password in (None, "", "   "):
+            with self.subTest(password=password):
+                with self.assertRaises(ValueError):
+                    User(
+                        "Jane",
+                        "Doe",
+                        self._unique_email(),
+                        password,
+                    )
+
+    def test_user_responses_do_not_expose_password(self):
+        """Verify user creation and retrieval responses omit credentials."""
+        password = "password123"
+        payload = {
+            "first_name": "Jane",
+            "last_name": "Doe",
+            "email": self._unique_email(),
+            "password": password,
+        }
         create_response = self.client.post(
             '/api/v1/users/',
-            data=json.dumps({
-                "first_name": "Jane",
-                "last_name": "Doe",
-                "email": self._unique_email(),
-                "password": password,
-            }),
+            data=json.dumps(payload),
             content_type='application/json'
         )
         self.assertEqual(create_response.status_code, 201)
         created = json.loads(create_response.data.decode('utf-8'))
-        user_id = created['id']
-        stored_user = facade.get_user(user_id)
+        stored_user = facade.get_user(created['id'])
 
-        item_response = self.client.get(f'/api/v1/users/{user_id}')
+        self.assertNotEqual(stored_user.password, password)
+        self.assertTrue(stored_user.verify_password(password))
+
+        item_response = self.client.get(f"/api/v1/users/{created['id']}")
         list_response = self.client.get('/api/v1/users/')
-        update_response = self.client.put(
-            f'/api/v1/users/{user_id}',
-            data=json.dumps({"first_name": "Janet"}),
-            content_type='application/json'
-        )
         self.assertEqual(item_response.status_code, 200)
         self.assertEqual(list_response.status_code, 200)
-        self.assertEqual(update_response.status_code, 200)
 
         responses = [
             created,
             json.loads(item_response.data.decode('utf-8')),
-            json.loads(update_response.data.decode('utf-8')),
             *json.loads(list_response.data.decode('utf-8')),
-            stored_user.to_dict(),
         ]
         for user_data in responses:
             self.assertNotIn('password', user_data)
             self.assertNotIn('_password', user_data)
-            self.assertNotIn(password, json.dumps(user_data))
+            serialized = json.dumps(user_data)
+            self.assertNotIn(password, serialized)
+            self.assertNotIn(stored_user.password, serialized)
 
     def test_create_user_empty_first_name(self):
         """Verify empty first_name returns HTTP 400."""

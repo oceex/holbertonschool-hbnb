@@ -1,9 +1,5 @@
 #!/usr/bin/python3
-"""Services package.
-
-Exposes a single shared HBnBFacade instance so that every API module
-talks to the same in-memory repositories.
-"""
+"""Expose the shared facade used by all API namespaces."""
 from app.services.facade import HBnBFacade
 
 facade = HBnBFacade()

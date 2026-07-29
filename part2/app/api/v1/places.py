@@ -1,17 +1,14 @@
 #!/usr/bin/python3
-"""
-Places API Namespace.
-/api/places
-"""
+"""Place API resources and serialization schemas."""
 from flask_restx import Namespace, Resource, fields
 from app.services import facade
 
 api = Namespace('places', description='Place operations')
 
-# -- Nested Models -------------------------------------------------------------
 amenity_model = api.model('PlaceAmenity', {
     'id': fields.String(description='Amenity ID'),
-    'name': fields.String(description='Name of the amenity')
+    'name': fields.String(description='Name of the amenity'),
+    'description': fields.String(description='Description of the amenity')
 })
 
 user_model = api.model('PlaceUser', {
@@ -21,7 +18,14 @@ user_model = api.model('PlaceUser', {
     'email': fields.String(description='Email of the owner')
 })
 
-# -- Request/Response Models ---------------------------------------------------
+review_model = api.model('PlaceReview', {
+    'id': fields.String(description='Review ID'),
+    'text': fields.String(description='Review text'),
+    'rating': fields.Integer(description='Rating, 1 to 5'),
+    'user_id': fields.String(attribute=lambda review: review.user.id,
+                             description='ID of the review author')
+})
+
 place_input_model = api.model('PlaceInput', {
     'title': fields.String(required=True, description='Title of the place'),
     'description': fields.String(description='Description of the place'),
@@ -53,33 +57,36 @@ place_detail_model = api.model('PlaceDetail', {
     'id': fields.String(description='Place ID'),
     'title': fields.String(description='Title of the place'),
     'description': fields.String(description='Description of the place'),
+    'price': fields.Float(description='Price per night'),
     'latitude': fields.Float(description='Latitude of the place'),
     'longitude': fields.Float(description='Longitude of the place'),
     'owner': fields.Nested(user_model, description='Owner details'),
-    'amenities': fields.List(fields.Nested(amenity_model), description='List of amenities')
+    'amenities': fields.List(fields.Nested(amenity_model),
+                             description='List of amenities'),
+    'reviews': fields.List(fields.Nested(review_model),
+                           description='List of reviews')
 })
 
 place_update_model = api.model('PlaceUpdate', {
     'title': fields.String(description='Title of the place'),
     'description': fields.String(description='Description of the place'),
-    'price': fields.Float(description='Price per night')
+    'price': fields.Float(description='Price per night'),
+    'amenities': fields.List(fields.String,
+                             description="List of amenity IDs")
 })
 
 message_model = api.model('Message', {
     'message': fields.String(description='Status message')
 })
 
-
-# -- API Routes ----------------------------------------------------------------
-
 @api.route('/')
 class PlaceList(Resource):
-    """Resource managing creation and retrieval of place lists."""
+    """Provide collection-level place operations."""
 
     @api.marshal_list_with(place_list_model)
     @api.response(200, 'List of places retrieved successfully')
     def get(self):
-        """Retrieve a list of all places."""
+        """List all places."""
         return facade.get_all_places(), 200
 
     @api.expect(place_input_model, validate=True)
@@ -97,13 +104,13 @@ class PlaceList(Resource):
 
 @api.route('/<string:place_id>')
 class PlaceResource(Resource):
-    """Resource managing operations on an individual place instance."""
+    """Provide operations for an individual place."""
 
     @api.marshal_with(place_detail_model)
     @api.response(200, 'Place details retrieved successfully')
     @api.response(404, 'Place not found')
     def get(self, place_id):
-        """Get place details by ID (Includes owner and amenities)."""
+        """Get place details, including its owner, amenities, and reviews."""
         place = facade.get_place(place_id)
         if not place:
             api.abort(404, 'Place not found')
@@ -127,10 +134,10 @@ class PlaceResource(Resource):
 
 @api.route('/<string:place_id>/reviews')
 class PlaceReviewList(Resource):
-    """Resource for retrieving reviews associated with a specific place."""
+    """Provide reviews associated with a place."""
 
     def get(self, place_id):
-        """Get all reviews for a specific place."""
+        """List reviews for a place."""
         try:
             reviews = facade.get_reviews_by_place(place_id)
             return [{

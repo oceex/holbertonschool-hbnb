@@ -1,15 +1,11 @@
 #!/usr/bin/python3
-"""
-Reviews API namespace:
-/api/v1/reviews/
-"""
+"""Review API resources and serialization schemas."""
 from flask_restx import Namespace, Resource, fields
 
 from app.services import facade
 
 api = Namespace("reviews", description="Review operations")
 
-# -- Request (input) models ----------------------------------------------
 review_model = api.model("Review", {
     "text": fields.String(required=True, description="Review text"),
     "rating": fields.Integer(required=True,
@@ -23,7 +19,6 @@ review_update_model = api.model("ReviewUpdate", {
     "rating": fields.Integer(description="Rating, 1 to 5"),
 })
 
-# -- Response (output) model ----------------------------------------------
 review_response_model = api.model("ReviewResponse", {
     "id": fields.String(readonly=True, description="Review unique id"),
     "text": fields.String(description="Review text"),
@@ -42,6 +37,7 @@ message_model = api.model("Message", {
 
 
 def serialize_review(review):
+    """Return the public API representation of a review."""
     return {
         "id": review.id,
         "text": review.text,
@@ -55,6 +51,8 @@ def serialize_review(review):
 
 @api.route("/")
 class ReviewList(Resource):
+    """Provide collection-level review operations."""
+
     @api.marshal_list_with(review_response_model)
     def get(self):
         """List all reviews."""
@@ -75,12 +73,14 @@ class ReviewList(Resource):
 
 @api.route("/<string:review_id>")
 class ReviewResource(Resource):
+    """Provide operations for an individual review."""
+
     @api.marshal_with(review_response_model)
     @api.response(200, "Review details retrieved successfully",
                   review_response_model)
     @api.response(404, "Review not found")
     def get(self, review_id):
-        """Get a review by id."""
+        """Get a review by ID."""
         review = facade.get_review(review_id)
         if not review:
             api.abort(404, "Review not found")

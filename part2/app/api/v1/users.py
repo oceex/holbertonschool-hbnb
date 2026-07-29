@@ -1,21 +1,18 @@
 #!/usr/bin/python3
-"""
-Users API namespace:
-/api/v1/users/
-"""
+"""User API resources and serialization schemas."""
 from flask_restx import Namespace, Resource, fields
 
 from app.services import facade
 
 api = Namespace("users", description="User operations")
 
-# -- Request (input) models ----------------------------------------------
 user_model = api.model("User", {
     "first_name": fields.String(required=True, description="First name",
                                  max_length=50),
     "last_name": fields.String(required=True, description="Last name",
                                 max_length=50),
     "email": fields.String(required=True, description="Email address"),
+    "password": fields.String(required=True, description="User password"),
     "is_admin": fields.Boolean(description="Administrator flag",
                                 default=False),
 })
@@ -27,7 +24,6 @@ user_update_model = api.model("UserUpdate", {
     "is_admin": fields.Boolean(description="Administrator flag"),
 })
 
-# -- Response (output) model ----------------------------------------------
 user_response_model = api.model("UserResponse", {
     "id": fields.String(readonly=True, description="User unique id"),
     "first_name": fields.String(description="First name"),
@@ -42,6 +38,7 @@ user_response_model = api.model("UserResponse", {
 
 
 def serialize_user(user):
+    """Return the public API representation of a user."""
     return {
         "id": user.id,
         "first_name": user.first_name,
@@ -55,6 +52,8 @@ def serialize_user(user):
 
 @api.route("/")
 class UserList(Resource):
+    """Provide collection-level user operations."""
+
     @api.marshal_list_with(user_response_model)
     def get(self):
         """List all users."""
@@ -78,12 +77,14 @@ class UserList(Resource):
 
 @api.route("/<string:user_id>")
 class UserResource(Resource):
+    """Provide operations for an individual user."""
+
     @api.marshal_with(user_response_model)
     @api.response(200, "User details retrieved successfully",
                   user_response_model)
     @api.response(404, "User not found")
     def get(self, user_id):
-        """Get a user by id."""
+        """Get a user by ID."""
         user = facade.get_user(user_id)
         if not user:
             api.abort(404, "User not found")

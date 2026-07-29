@@ -2,6 +2,8 @@
 """User model and validation rules."""
 import re
 
+from flask_bcrypt import check_password_hash, generate_password_hash
+
 from app.models.base_model import BaseModel
 
 EMAIL_REGEX = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
@@ -84,22 +86,24 @@ class User(BaseModel):
 
     @property
     def password(self):
-        """str: The stored plaintext credential."""
+        """str: The stored bcrypt password hash."""
         return self._password
 
     @password.setter
     def password(self, value):
-        if not isinstance(value, str):
-            raise ValueError("password is required and must be a string")
-        # Validate trimmed content without altering the caller-provided credential.
-        if not value.strip():
-            raise ValueError("password is required and must be a string")
-        # This layer currently stores passwords verbatim; hashing is not implemented.
-        self._password = value
+        self.hash_password(value)
 
-    def verify_password(self, pwd):
-        """Return whether a plaintext password matches the stored credential."""
-        return self._password == pwd
+    def hash_password(self, password):
+        """Validate, hash, and store a plaintext password."""
+        if not isinstance(password, str):
+            raise ValueError("password is required and must be a string")
+        if not password.strip():
+            raise ValueError("password is required and must be a string")
+        self._password = generate_password_hash(password).decode("utf-8")
+
+    def verify_password(self, password):
+        """Return whether a plaintext password matches the stored hash."""
+        return check_password_hash(self._password, password)
 
     def to_dict(self):
         """Return a dictionary without password credentials."""

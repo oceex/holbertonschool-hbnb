@@ -1,11 +1,5 @@
 #!/usr/bin/python3
-"""Initialization module for API version 1.
-
-This module establishes the Flask Blueprint for version 1 of the application API,
-initializes the Flask-RESTx Api object wrapper, and registers all active
-namespaces (Users, Reviews, Amenities, and Places) to expose their endpoints under
-the corresponding unified prefixes.
-"""
+"""Configure and register the version 1 API namespaces."""
 
 from flask import Blueprint
 from flask_restx import Api

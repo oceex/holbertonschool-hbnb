@@ -89,7 +89,26 @@ Start the Flask application with:
 python run.py
 ```
 
-The application will run in debug mode. At this stage, the API documentation (Swagger UI) is available at `/api/v1/`, though functional routes will be added in later parts of the project.
+The application runs in debug mode. Swagger UI is available at
+`/api/v1/doc`.
+
+## Implemented API
+
+The version 1 API provides create, list, retrieve, and update operations for
+Users, Places, and Amenities. Reviews additionally support deletion and can be
+listed by Place. Place details include owner, amenity, and review data.
+
+All endpoints use the service Facade and the in-memory repository. User
+passwords are accepted by the API but are excluded from responses and model
+serialization.
+
+## Running Tests
+
+From the `part2` directory, run:
+
+```bash
+python -m unittest discover -s tests -v
+```
 
 ## Requirements
 
@@ -99,7 +118,10 @@ The application will run in debug mode. At this stage, the API documentation (Sw
 
 ## Status
 
-This part of the project establishes the foundational project structure, the Facade pattern, and the in-memory repository. Business logic validation, API endpoint implementation, and full CRUD operations will be added in subsequent parts. The in-memory persistence layer will eventually be replaced with a database-backed implementation using SQLAlchemy.
+Part 2 contains the completed Flask-RESTX presentation layer, validated domain
+models, Facade, and in-memory persistence implementation. Password hashing,
+JWT authentication, and database integration belong to Part 3 and are not
+implemented here.
 
 ## Author
 
