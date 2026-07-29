@@ -1,20 +1,19 @@
 #!/usr/bin/python3
-"""Unit tests for the Place API Endpoints."""
+"""Tests for place API behavior and model relationship validation."""
 
 import json
 import unittest
 import uuid
 from run import app
-# The test used Place and some_user without defining either dependency.
-# Importing the models lets the logic test exercise Place.add_review directly.
 from app.models.place import Place
 from app.models.user import User
 
 
 class TestPlaceEndpoints(unittest.TestCase):
-    """Test cases for the Place API endpoints and logic rules."""
+    """Exercise place endpoints and relationship rules."""
 
     def setUp(self):
+        """Create a test client and registered owner fixture."""
         app.config['TESTING'] = True
         self.client = app.test_client()
 
@@ -29,6 +28,7 @@ class TestPlaceEndpoints(unittest.TestCase):
         self.owner_id = json.loads(res_user.data.decode('utf-8')).get('id')
 
     def test_create_place_success(self):
+        """Verify successful place creation returns HTTP 201."""
         payload = {
             "title": "Cozy Cabin",
             "price": 150.0,
@@ -43,6 +43,7 @@ class TestPlaceEndpoints(unittest.TestCase):
         self.assertEqual(data['title'], 'Cozy Cabin')
 
     def test_create_place_invalid_latitude(self):
+        """Verify an out-of-range latitude returns HTTP 400."""
         payload = {
             "title": "Invalid Cabin",
             "price": 150.0,
@@ -174,8 +175,7 @@ class TestPlaceEndpoints(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_add_review_rejects_non_review(self):
-        # The old test referenced an undefined some_user variable.
-        # Creating a valid owner isolates the assertion to invalid review input.
+        """Verify place relationships reject non-review objects."""
         some_user = User("Test", "Owner", f"{uuid.uuid4()}@test.com", "secret")
         place = Place("Cabin", "desc", 100, 45.0, -122.0, some_user)
         with self.assertRaises(TypeError):

@@ -1,12 +1,5 @@
 #!/usr/bin/python3
-"""Facade module.
-
-Implements the Facade pattern: a single entry point (HBnBFacade) that
-the Presentation (API) layer talks to, hiding the details of how
-business-logic objects are validated, related to each other, and
-stored. This keeps the API layer thin and keeps persistence details
-out of the models.
-"""
+"""Service facade coordinating domain models and persistence."""
 from app.models.user import User
 from app.models.place import Place
 from app.models.review import Review
@@ -15,25 +8,21 @@ from app.persistence.repository import InMemoryRepository
 
 
 class HBnBFacade:
-    """Single entry point coordinating models and repositories."""
+    """Coordinate domain validation, relationships, and repositories."""
 
     def __init__(self):
+        """Initialize independent repositories for each domain entity."""
         self.user_repo = InMemoryRepository()
         self.place_repo = InMemoryRepository()
         self.review_repo = InMemoryRepository()
         self.amenity_repo = InMemoryRepository()
 
-    # ------------------------------------------------------------------
-    # User
-    # ------------------------------------------------------------------
     def create_user(self, user_data):
-        # Email uniqueness was previously enforced inside User with shared class state.
-        # Checking the repository here keeps uniqueness scoped to this facade instance.
+        """Create a user, enforcing repository-scoped email uniqueness."""
         email = user_data.get("email")
         if isinstance(email, str) and self.get_user_by_email(email.strip()):
             raise ValueError("Email already registered")
-        # Missing or unexpected fields previously escaped as Python TypeError.
-        # Converting them to ValueError keeps facade errors consistent for the API.
+        # Present construction errors through the facade's validation contract.
         try:
             user = User(**user_data)
         except TypeError as exc:
@@ -42,24 +31,24 @@ class HBnBFacade:
         return user
 
     def get_user(self, user_id):
+        """Return a user by ID, or ``None`` when not found."""
         return self.user_repo.get(user_id)
 
     def get_user_by_email(self, email):
-        # Email lookups previously depended on exact untrimmed input.
-        # Normalizing lookup values keeps duplicate checks consistent.
+        """Return the user with a normalized email address, if any."""
         if isinstance(email, str):
             email = email.strip()
         return self.user_repo.get_by_attribute('email', email)
 
     def get_all_users(self):
+        """Return all users."""
         return self.user_repo.get_all()
 
     def update_user(self, user_id, user_data):
+        """Update a user while preserving email uniqueness."""
         user = self.get_user(user_id)
         if not user:
             return None
-        # Updating an email could previously collide with another user.
-        # The facade rejects duplicates before delegating to model validation.
         new_email = user_data.get("email")
         if isinstance(new_email, str) and new_email.strip() != user.email:
             existing = self.get_user_by_email(new_email)
@@ -67,12 +56,8 @@ class HBnBFacade:
                 raise ValueError("Email already registered")
         return self.user_repo.update(user_id, user_data)
 
-    # ------------------------------------------------------------------
-    # Amenity
-    # ------------------------------------------------------------------
     def create_amenity(self, amenity_data):
-        # Amenity now supports the optional Task 1 description field.
-        # Passing it through keeps business objects complete without API changes.
+        """Create an amenity with an optional description."""
         amenity = Amenity(
             name=amenity_data.get("name"),
             description=amenity_data.get("description", "")
@@ -80,40 +65,32 @@ class HBnBFacade:
         return self.amenity_repo.add(amenity)
 
     def get_amenity(self, amenity_id):
+        """Return an amenity by ID, or ``None`` when not found."""
         return self.amenity_repo.get(amenity_id)
 
     def get_all_amenities(self):
+        """Return all amenities."""
         return self.amenity_repo.get_all()
 
     def update_amenity(self, amenity_id, amenity_data):
+        """Update an amenity, or return ``None`` when not found."""
         amenity = self.get_amenity(amenity_id)
         if not amenity:
             return None
         return self.amenity_repo.update(amenity_id, amenity_data)
 
-    # ------------------------------------------------------------------
-    # Place
-    # ------------------------------------------------------------------
-
     def create_place(self, place_data):
-        """Create and persist a new Place instance.
+        """Create and persist a place.
 
-        Args:
-            place_data (dict): Dictionary containing place attributes.
-
-        Returns:
-            Place: The newly created Place instance.
-
-        Raises:
-            ValueError: If the owner does not exist or validation fails.
+        All amenity IDs are resolved before the owner relationship is mutated.
+        Invalid owner or amenity IDs raise ``ValueError``.
         """
         owner_id = place_data.get("owner_id")
         owner = self.get_user(owner_id)
         if not owner:
             raise ValueError(f"User with id '{owner_id}' not found.")
 
-        # The old flow created and linked the Place before validating amenities.
-        # Resolving amenities first prevents stale owner.places entries on failure.
+        # Resolve all dependencies first to avoid partial relationship updates.
         resolved_amenities = []
         for amenity_id in place_data.get("amenities", []):
             amenity = self.get_amenity(amenity_id)
@@ -137,27 +114,29 @@ class HBnBFacade:
         return self.place_repo.add(place)
 
     def get_place(self, place_id):
-        """Retrieve a Place instance by its unique identifier."""
+        """Return a place by ID, or ``None`` when not found."""
         return self.place_repo.get(place_id)
 
     def get_all_places(self):
-        """Retrieve all persisted Place instances."""
+        """Return all places."""
         return self.place_repo.get_all()
 
     def update_place(self, place_id, place_data):
+        """Update a place and optionally replace its amenities.
+
+        Amenity IDs are validated before the place is mutated. The input mapping
+        is copied so callers do not observe internal key removal.
+        """
         place = self.get_place(place_id)
         if not place:
             return None
 
-        # The old update mutated the caller's dictionary with pop().
-        # Copying keeps facade calls side-effect free for API/tests.
         data = place_data.copy()
         amenity_ids = data.pop("amenities", None)
 
         resolved_amenities = None
         if amenity_ids is not None:
-            # The old update silently skipped missing amenities.
-            # Resolve every id before mutating the place so failures leave it unchanged.
+            # Resolve the complete replacement before mutating the place.
             resolved_amenities = []
             for amenity_id in amenity_ids:
                 amenity = self.get_amenity(amenity_id)
@@ -170,8 +149,7 @@ class HBnBFacade:
         updated_place = self.place_repo.update(place_id, data)
 
         if resolved_amenities is not None:
-            # The old update changed amenities before scalar validation completed.
-            # Applying relationships after a successful update avoids partial updates.
+            # Apply relationships only after scalar validation succeeds.
             place.amenities = []
             for amenity in resolved_amenities:
                 place.add_amenity(amenity)
@@ -179,21 +157,11 @@ class HBnBFacade:
 
         return updated_place
 
-    # ------------------------------------------------------------------
-    # Review
-    # ------------------------------------------------------------------
     def create_review(self, review_data):
-        """Create a new Review instance, enforcing relationship constraint and preventing duplicate spam.
+        """Create and persist a review.
 
-        Args:
-            review_data (dict): Payload containing rating, text, place_id, and user_id.
-
-        Returns:
-            Review: The persisted Review entity instance.
-
-        Raises:
-            ValueError: If the place_id or user_id does not correlate to an existing entity,
-                        or if the user has already submitted a review for the specified place.
+        The place and user must exist, and a user may review each place only
+        once. Violations raise ``ValueError``.
         """
         place = self.get_place(review_data.get("place_id"))
         if not place:
@@ -205,7 +173,6 @@ class HBnBFacade:
             raise ValueError(
                 f"user with id '{review_data.get('user_id')}' not found")
 
-        # Business Rule: Prevent duplicate reviews (Spam Prevention)
         for existing_review in place.reviews:
             if existing_review.user.id == user.id:
                 raise ValueError(
@@ -220,30 +187,34 @@ class HBnBFacade:
         return self.review_repo.add(review)
 
     def get_review(self, review_id):
+        """Return a review by ID, or ``None`` when not found."""
         return self.review_repo.get(review_id)
 
     def get_all_reviews(self):
+        """Return all reviews."""
         return self.review_repo.get_all()
 
     def get_reviews_by_place(self, place_id):
+        """Return reviews for a place, raising ``ValueError`` if it is absent."""
         place = self.get_place(place_id)
         if not place:
             raise ValueError(f"place with id '{place_id}' not found")
         return place.reviews
 
     def update_review(self, review_id, review_data):
+        """Update a review, or return ``None`` when not found."""
         review = self.get_review(review_id)
         if not review:
             return None
         return self.review_repo.update(review_id, review_data)
 
     def delete_review(self, review_id):
+        """Delete a review and unlink it from its place and author."""
         review = self.get_review(review_id)
         if not review:
             return False
 
-        # The old delete removed links but did not refresh related timestamps.
-        # Saving affected objects prevents stale relationship metadata.
+        # Relationship changes must refresh the related models' timestamps.
         if review in review.place.reviews:
             review.place.reviews.remove(review)
             review.place.save()

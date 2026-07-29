@@ -1,8 +1,7 @@
 #!/usr/bin/python3
-"""Unit tests for the Amenity API Endpoints.
+"""Tests for amenity API behavior.
 
-Verifies the correct operation of POST, GET, and PUT endpoints for Amenity management
-using Flask's build-in test client.
+The suite covers creation, retrieval, updates, and input validation.
 """
 
 import json
@@ -11,10 +10,10 @@ from run import app
 
 
 class TestAmenityEndpoints(unittest.TestCase):
-    """Test cases for the Amenity API endpoints."""
+    """Exercise amenity endpoints and validation rules."""
 
     def setUp(self):
-        """Configure test client and set application config to testing mode."""
+        """Create a Flask test client."""
         app.config['TESTING'] = True
         self.client = app.test_client()
 

@@ -1,8 +1,7 @@
 #!/usr/bin/python3
-"""Unit tests for the User API Endpoints.
+"""Tests for user API behavior.
 
-Verifies POST, GET, and PUT behavior for User management, including
-validation rules for first_name, last_name, and email.
+The suite covers creation, retrieval, updates, and input validation.
 """
 
 import json
@@ -12,17 +11,17 @@ from run import app
 
 
 class TestUserEndpoints(unittest.TestCase):
-    """Test cases for the User API endpoints and validation rules."""
+    """Exercise user endpoints and validation rules."""
 
     def setUp(self):
-        """Configure test client and set application config to testing mode."""
+        """Create a Flask test client."""
         app.config['TESTING'] = True
         self.client = app.test_client()
 
     def _unique_email(self):
+        """Return an email address unique to the current test."""
         return f"user_{uuid.uuid4()}@test.com"
 
-    # -- Successful creation ---------------------------------------------
     def test_create_user_success(self):
         """Verify successful creation of a user returns HTTP 201."""
         payload = {
@@ -43,7 +42,6 @@ class TestUserEndpoints(unittest.TestCase):
         self.assertEqual(data['last_name'], 'Doe')
         self.assertFalse(data['is_admin'])
 
-    # -- Required field validation ----------------------------------------
     def test_create_user_empty_first_name(self):
         """Verify empty first_name returns HTTP 400."""
         payload = {
@@ -126,7 +124,6 @@ class TestUserEndpoints(unittest.TestCase):
         )
         self.assertEqual(second.status_code, 400)
 
-    # -- Retrieval ----------------------------------------------------------
     def test_get_all_users(self):
         """Verify retrieving all users returns HTTP 200 and a list."""
         response = self.client.get('/api/v1/users/')
@@ -159,7 +156,6 @@ class TestUserEndpoints(unittest.TestCase):
         response = self.client.get('/api/v1/users/non-existent-id')
         self.assertEqual(response.status_code, 404)
 
-    # -- Update ---------------------------------------------------------------
     def test_update_user_success(self):
         """Verify updating a user's first_name returns HTTP 200."""
         payload = {

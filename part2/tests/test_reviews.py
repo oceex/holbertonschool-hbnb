@@ -1,9 +1,7 @@
 #!/usr/bin/python3
-"""Unit tests for the Review API Endpoints.
+"""Tests for review API behavior.
 
-Verifies POST, GET, PUT, and DELETE behavior for Review management,
-including validation of text, rating bounds, and foreign-key references
-to Place and User.
+The suite covers lifecycle operations, validation, and entity references.
 """
 
 import json
@@ -13,10 +11,10 @@ from run import app
 
 
 class TestReviewEndpoints(unittest.TestCase):
-    """Test cases for the Review API endpoints and validation rules."""
+    """Exercise review endpoints and validation rules."""
 
     def setUp(self):
-        """Configure the test client and create a User + Place fixture."""
+        """Create a test client with a user and place fixture."""
         app.config['TESTING'] = True
         self.client = app.test_client()
 
@@ -47,7 +45,6 @@ class TestReviewEndpoints(unittest.TestCase):
         )
         self.place_id = json.loads(place_res.data.decode('utf-8'))['id']
 
-    # -- Successful creation ---------------------------------------------
     def test_create_review_success(self):
         """Verify successful creation of a review returns HTTP 201."""
         payload = {
@@ -67,7 +64,6 @@ class TestReviewEndpoints(unittest.TestCase):
         self.assertEqual(data['text'], 'Great place to stay!')
         self.assertEqual(data['rating'], 5)
 
-    # -- Validation rules --------------------------------------------------
     def test_create_review_empty_text(self):
         """Verify an empty text field returns HTTP 400."""
         payload = {
@@ -166,7 +162,6 @@ class TestReviewEndpoints(unittest.TestCase):
         )
         self.assertEqual(second.status_code, 400)
 
-    # -- Retrieval ----------------------------------------------------------
     def test_get_all_reviews(self):
         """Verify retrieving all reviews returns HTTP 200 and a list."""
         response = self.client.get('/api/v1/reviews/')
@@ -198,7 +193,6 @@ class TestReviewEndpoints(unittest.TestCase):
         self.assertIsInstance(data, list)
         self.assertGreaterEqual(len(data), 1)
 
-    # -- Update / Delete ------------------------------------------------------
     def test_update_review_success(self):
         """Verify updating a review's text/rating returns HTTP 200."""
         payload = {
@@ -266,7 +260,6 @@ class TestReviewEndpoints(unittest.TestCase):
         response = self.client.delete(f'/api/v1/reviews/{review_id}')
         self.assertEqual(response.status_code, 200)
 
-        # Confirm the review no longer exists
         follow_up = self.client.get(f'/api/v1/reviews/{review_id}')
         self.assertEqual(follow_up.status_code, 404)
 

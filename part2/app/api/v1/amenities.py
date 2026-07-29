@@ -1,7 +1,5 @@
 #!/usr/bin/python3
-"""Amenities API Namespace.
-/api/amenities
-"""
+"""Amenity API resources and serialization schemas."""
 from flask_restx import Namespace, Resource, fields
 from app.services import facade
 
@@ -25,12 +23,12 @@ message_model = api.model('Message', {
 
 @api.route('/')
 class AmenityList(Resource):
-    """Resource managing creation and retrieval of lists of amenities."""
+    """Provide collection-level amenity operations."""
 
     @api.marshal_list_with(amenity_response_model)
     @api.response(200, 'List of amenities retrieved successfully')
     def get(self):
-        """Retrieve a list of all amenities."""
+        """List all amenities."""
         return facade.get_all_amenities(), 200
 
     @api.expect(amenity_model, validate=True)
@@ -38,7 +36,7 @@ class AmenityList(Resource):
     @api.response(201, 'Amenity successfully created')
     @api.response(400, 'Invalid input data')
     def post(self):
-        """Register a new amenity in the system."""
+        """Create an amenity."""
         try:
             amenity = facade.create_amenity(api.payload)
             return amenity, 201
@@ -48,13 +46,13 @@ class AmenityList(Resource):
 
 @api.route('/<string:amenity_id>')
 class AmenityResource(Resource):
-    """Resource managing operations on an individual amenity instance."""
+    """Provide operations for an individual amenity."""
 
     @api.marshal_with(amenity_response_model)
     @api.response(200, 'Amenity details retrieved successfully')
     @api.response(404, 'Amenity not found')
     def get(self, amenity_id):
-        """Get details of a specific amenity by its ID."""
+        """Get an amenity by ID."""
         amenity = facade.get_amenity(amenity_id)
         if not amenity:
             api.abort(404, 'Amenity not found')
@@ -65,7 +63,7 @@ class AmenityResource(Resource):
     @api.response(404, 'Amenity not found')
     @api.response(400, 'Invalid input data')
     def put(self, amenity_id):
-        """Update an existing amenity's information by ID."""
+        """Update an amenity."""
         amenity = facade.get_amenity(amenity_id)
         if not amenity:
             api.abort(404, 'Amenity not found')

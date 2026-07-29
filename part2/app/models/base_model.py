@@ -1,16 +1,11 @@
 #!/usr/bin/python3
-"""BaseModel module.
-
-Defines the BaseModel class, which provides common attributes
-(id, created_at, updated_at) and common behavior (save, update, to_dict)
-shared by all business logic entities (User, Place, Review, Amenity).
-"""
+"""Common identity and timestamp behavior for domain models."""
 import uuid
 from datetime import datetime
 
 
 class BaseModel:
-    """Base class that all business logic entities inherit from."""
+    """Provide identity, timestamps, and controlled attribute updates."""
 
     def __init__(self):
         """Initialize a new instance with a unique id and timestamps."""
@@ -19,17 +14,14 @@ class BaseModel:
         self.updated_at = datetime.now()
 
     def save(self):
-        """Update the updated_at timestamp whenever the object is modified."""
+        """Refresh the modification timestamp."""
         self.updated_at = datetime.now()
 
     def update(self, data):
-        """Update the attributes of the object from a dictionary.
+        """Update mutable attributes from a dictionary.
 
-        Args:
-            data (dict): Dictionary of attribute names/values to update.
-                Keys that do not correspond to an existing attribute are
-                ignored, and the 'id' and 'created_at' attributes are
-                protected from being overwritten.
+        Unknown, private, identity, and relationship attributes are ignored so
+        that validation and relationship management cannot be bypassed.
         """
         if not isinstance(data, dict):
             raise TypeError("update data must be a dictionary")
@@ -38,12 +30,10 @@ class BaseModel:
         for key, value in data.items():
             if key in protected:
                 continue
-            # Private backing fields could bypass property validation directly.
-            # Ignoring underscore-prefixed keys forces updates through setters.
+            # Backing fields would bypass property validation.
             if key.startswith("_"):
                 continue
-            # The old update path could set relationship/id-like fields freely.
-            # This keeps protected relationship ownership fields under facade control.
+            # Relationship changes are coordinated by the facade and model helpers.
             if key in {"owner", "user", "place", "reviews", "places"}:
                 continue
             if hasattr(self, key):
