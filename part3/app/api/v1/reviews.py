@@ -70,19 +70,16 @@ class ReviewList(Resource):
         if not place:
             api.abort(404, "Place not found")
 
-        # Prevent owners from reviewing their own places 🚫
         owner_id = place.owner_id if hasattr(place, 'owner_id') else place.owner.id
         if owner_id == current_user_id:
             api.abort(400, "You cannot review your own place")
 
-        # Prevent duplicate reviews from the same user for the same place 🚫
         existing_reviews = facade.get_reviews_by_place(place_id)
         for review in existing_reviews:
             r_user_id = review.user.id if hasattr(review, 'user') and review.user else review.user_id
             if r_user_id == current_user_id:
                 api.abort(400, "You have already reviewed this place")
 
-        # Ensure user_id comes from the authenticated token 🔑
         data["user_id"] = current_user_id
 
         try:
@@ -123,7 +120,7 @@ class ReviewResource(Resource):
 
         r_user_id = review.user.id if hasattr(review, 'user') and review.user else review.user_id
         if r_user_id != current_user_id:
-            api.abort(403, "Unauthorized action: you can only update your own reviews")
+            api.abort(403, "Unauthorized action")
 
         try:
             updated = facade.update_review(review_id, api.payload)
@@ -146,7 +143,7 @@ class ReviewResource(Resource):
 
         r_user_id = review.user.id if hasattr(review, 'user') and review.user else review.user_id
         if r_user_id != current_user_id:
-            api.abort(403, "Unauthorized action: you can only delete your own reviews")
+            api.abort(403, "Unauthorized action")
 
         facade.delete_review(review_id)
         return {"message": "Review deleted successfully"}, 200
