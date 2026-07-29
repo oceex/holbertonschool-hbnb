@@ -50,8 +50,12 @@ class SQLAlchemyRepository(Repository):
     def update(self, obj_id, data):
         obj = self.get(obj_id)
         if obj:
+            protected = {"id", "created_at"}
             for key, value in data.items():
+                if key in protected:
+                    continue
                 setattr(obj, key, value)
+            obj.save()
             db.session.commit()
         return obj
 

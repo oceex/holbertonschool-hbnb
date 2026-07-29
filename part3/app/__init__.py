@@ -38,4 +38,7 @@ def create_app(config_class=None):
     from app.api.v1 import blueprint as api_v1
     app.register_blueprint(api_v1)
 
+    with app.app_context():
+        db.create_all()
+
     return app

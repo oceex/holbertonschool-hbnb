@@ -8,9 +8,6 @@ from sqlalchemy.orm import validates
 from app import db
 from app.models.Base_model import BaseModel
 
-# Association table for the many-to-many relationship between
-# Place and Amenity. This is a plain table (no model class needed)
-# since it carries no extra data of its own beyond the two foreign keys.
 place_amenity = db.Table(
     'place_amenity',
     db.Column('place_id', db.String(36), db.ForeignKey('places.id'), primary_key=True),

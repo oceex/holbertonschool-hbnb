@@ -103,6 +103,9 @@ class UserResource(Resource):
             api.abort(404, "User not found")
 
         data = api.payload
+
+        data.pop("is_admin", None)
+
         new_email = data.get("email")
         if new_email and new_email != user.email:
             existing = facade.get_user_by_email(new_email)
