@@ -8,6 +8,7 @@ import json
 import unittest
 import uuid
 from run import app
+from app.services import facade
 
 
 class TestUserEndpoints(unittest.TestCase):
@@ -41,6 +42,49 @@ class TestUserEndpoints(unittest.TestCase):
         self.assertEqual(data['first_name'], 'Jane')
         self.assertEqual(data['last_name'], 'Doe')
         self.assertFalse(data['is_admin'])
+        self.assertNotIn('password', data)
+        self.assertNotIn('_password', data)
+
+    def test_user_serialization_does_not_expose_password(self):
+        """Verify every user serialization path omits credentials."""
+        password = "password123"
+        create_response = self.client.post(
+            '/api/v1/users/',
+            data=json.dumps({
+                "first_name": "Jane",
+                "last_name": "Doe",
+                "email": self._unique_email(),
+                "password": password,
+            }),
+            content_type='application/json'
+        )
+        self.assertEqual(create_response.status_code, 201)
+        created = json.loads(create_response.data.decode('utf-8'))
+        user_id = created['id']
+        stored_user = facade.get_user(user_id)
+
+        item_response = self.client.get(f'/api/v1/users/{user_id}')
+        list_response = self.client.get('/api/v1/users/')
+        update_response = self.client.put(
+            f'/api/v1/users/{user_id}',
+            data=json.dumps({"first_name": "Janet"}),
+            content_type='application/json'
+        )
+        self.assertEqual(item_response.status_code, 200)
+        self.assertEqual(list_response.status_code, 200)
+        self.assertEqual(update_response.status_code, 200)
+
+        responses = [
+            created,
+            json.loads(item_response.data.decode('utf-8')),
+            json.loads(update_response.data.decode('utf-8')),
+            *json.loads(list_response.data.decode('utf-8')),
+            stored_user.to_dict(),
+        ]
+        for user_data in responses:
+            self.assertNotIn('password', user_data)
+            self.assertNotIn('_password', user_data)
+            self.assertNotIn(password, json.dumps(user_data))
 
     def test_create_user_empty_first_name(self):
         """Verify empty first_name returns HTTP 400."""
@@ -93,6 +137,20 @@ class TestUserEndpoints(unittest.TestCase):
             "first_name": "Jane",
             "last_name": "Doe",
             "password": "password123",
+        }
+        response = self.client.post(
+            '/api/v1/users/',
+            data=json.dumps(payload),
+            content_type='application/json'
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_create_user_missing_password(self):
+        """Verify a missing required password field returns HTTP 400."""
+        payload = {
+            "first_name": "Jane",
+            "last_name": "Doe",
+            "email": self._unique_email(),
         }
         response = self.client.post(
             '/api/v1/users/',

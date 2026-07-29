@@ -101,6 +101,12 @@ class User(BaseModel):
         """Return whether a plaintext password matches the stored credential."""
         return self._password == pwd
 
+    def to_dict(self):
+        """Return a dictionary without password credentials."""
+        data = super().to_dict()
+        data.pop("_password", None)
+        return data
+
     def add_place(self, place):
         """Associate an owned place, preserving relationship integrity."""
         from app.models.place import Place

@@ -6,12 +6,20 @@ from app.services import facade
 api = Namespace('amenities', description='Amenity operations')
 
 amenity_model = api.model('Amenity', {
-    'name': fields.String(required=True, description='Name of the amenity', max_length=50)
+    'name': fields.String(required=True, description='Name of the amenity',
+                          max_length=50),
+    'description': fields.String(description='Description of the amenity')
+})
+
+amenity_update_model = api.model('AmenityUpdate', {
+    'name': fields.String(description='Name of the amenity', max_length=50),
+    'description': fields.String(description='Description of the amenity')
 })
 
 amenity_response_model = api.model('AmenityResponse', {
     'id': fields.String(readonly=True, description='Amenity unique ID'),
     'name': fields.String(description='Name of the amenity'),
+    'description': fields.String(description='Description of the amenity'),
     'created_at': fields.String(readonly=True, description='Creation timestamp'),
     'updated_at': fields.String(readonly=True, description='Last update timestamp')
 })
@@ -58,7 +66,7 @@ class AmenityResource(Resource):
             api.abort(404, 'Amenity not found')
         return amenity, 200
 
-    @api.expect(amenity_model, validate=True)
+    @api.expect(amenity_update_model, validate=True)
     @api.response(200, 'Amenity updated successfully', message_model)
     @api.response(404, 'Amenity not found')
     @api.response(400, 'Invalid input data')

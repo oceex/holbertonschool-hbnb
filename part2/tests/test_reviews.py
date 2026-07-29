@@ -8,6 +8,7 @@ import json
 import unittest
 import uuid
 from run import app
+from app.services import facade
 
 
 class TestReviewEndpoints(unittest.TestCase):
@@ -66,9 +67,29 @@ class TestReviewEndpoints(unittest.TestCase):
 
     def test_create_review_empty_text(self):
         """Verify an empty text field returns HTTP 400."""
+        place = facade.get_place(self.place_id)
+        user = facade.get_user(self.user_id)
+        place_review_count = len(place.reviews)
+        user_review_count = len(user.reviews)
         payload = {
             "text": "",
             "rating": 4,
+            "place_id": self.place_id,
+            "user_id": self.user_id,
+        }
+        response = self.client.post(
+            '/api/v1/reviews/',
+            data=json.dumps(payload),
+            content_type='application/json'
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(len(place.reviews), place_review_count)
+        self.assertEqual(len(user.reviews), user_review_count)
+
+    def test_create_review_missing_rating(self):
+        """Verify a missing required rating returns HTTP 400."""
+        payload = {
+            "text": "Missing rating",
             "place_id": self.place_id,
             "user_id": self.user_id,
         }
@@ -174,15 +195,38 @@ class TestReviewEndpoints(unittest.TestCase):
         response = self.client.get('/api/v1/reviews/non-existent-id')
         self.assertEqual(response.status_code, 404)
 
+    def test_get_review_by_id_success(self):
+        """Verify retrieving an existing review returns its relationships."""
+        create_response = self.client.post(
+            '/api/v1/reviews/',
+            data=json.dumps({
+                "text": "Comfortable stay",
+                "rating": 4,
+                "place_id": self.place_id,
+                "user_id": self.user_id,
+            }),
+            content_type='application/json'
+        )
+        review_id = json.loads(
+            create_response.data.decode('utf-8')
+        )['id']
+
+        response = self.client.get(f'/api/v1/reviews/{review_id}')
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['id'], review_id)
+        self.assertEqual(data['place_id'], self.place_id)
+        self.assertEqual(data['user_id'], self.user_id)
+
     def test_get_reviews_by_place(self):
-        """Verify retrieving reviews for a specific place returns HTTP 200."""
+        """Verify place review endpoints expose the linked review."""
         payload = {
             "text": "Loved it",
             "rating": 5,
             "place_id": self.place_id,
             "user_id": self.user_id,
         }
-        self.client.post(
+        create_response = self.client.post(
             '/api/v1/reviews/',
             data=json.dumps(payload),
             content_type='application/json'
@@ -191,7 +235,19 @@ class TestReviewEndpoints(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
         self.assertIsInstance(data, list)
-        self.assertGreaterEqual(len(data), 1)
+        review_id = json.loads(
+            create_response.data.decode('utf-8')
+        )['id']
+        self.assertEqual([review['id'] for review in data], [review_id])
+
+        place_response = self.client.get(f'/api/v1/places/{self.place_id}')
+        place_data = json.loads(place_response.data.decode('utf-8'))
+        self.assertEqual(place_data['reviews'], [{
+            "id": review_id,
+            "text": "Loved it",
+            "rating": 5,
+            "user_id": self.user_id,
+        }])
 
     def test_update_review_success(self):
         """Verify updating a review's text/rating returns HTTP 200."""
@@ -262,6 +318,15 @@ class TestReviewEndpoints(unittest.TestCase):
 
         follow_up = self.client.get(f'/api/v1/reviews/{review_id}')
         self.assertEqual(follow_up.status_code, 404)
+
+        place_response = self.client.get(
+            f'/api/v1/places/{self.place_id}/reviews'
+        )
+        place_reviews = json.loads(place_response.data.decode('utf-8'))
+        self.assertNotIn(
+            review_id,
+            [review['id'] for review in place_reviews],
+        )
 
     def test_delete_review_not_found(self):
         """Verify deleting a non-existent review returns HTTP 404."""

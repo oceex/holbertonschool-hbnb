@@ -209,10 +209,10 @@ Located in `tests/`, using Python's `unittest` against Flask's test client
 
 | File | Covers |
 | :--- | :--- |
-| `tests/test_users.py` | Create (success/duplicate/invalid email/empty names), get all, get by id (found/404), update (success/404/invalid email) |
-| `tests/test_places.py` | Create (success/empty title/negative price/bad lat/bad long/boundary values/invalid owner), get all, get by id (found/404), update (success/404) |
-| `tests/test_reviews.py` | Create (success/empty text/rating boundaries/invalid place/invalid user/duplicate), get all, get by id (404), get by place, update (success/invalid rating), delete (success/404) |
-| `tests/test_amenities.py` | Create (success/empty name), get all, get by id (404), update |
+| `tests/test_users.py` | Create, list, retrieve, and update behavior; required fields; duplicate and invalid email handling; password non-disclosure |
+| `tests/test_places.py` | Create, list, retrieve, and update behavior; numeric validation; owner and amenity validation; complete related-data responses |
+| `tests/test_reviews.py` | Create, list, retrieve, update, and delete behavior; required fields; relationship validation; Place review responses and deletion cleanup |
+| `tests/test_amenities.py` | Create, list, retrieve, and update behavior; required names; description creation, retrieval, listing, and update |
 
 Run the whole suite with:
 ```bash
@@ -223,6 +223,14 @@ python3 -m pytest tests/ -v
 or with plain `unittest`:
 ```bash
 python3 -m unittest discover -s tests -v
+```
+
+Latest executed result:
+
+```text
+Ran 53 tests in 0.127s
+
+OK
 ```
 
 **Note:** one existing test file, `Test_places.py`, was renamed to
@@ -266,10 +274,19 @@ python3 -m unittest discover -s tests -v
    covering required-field validation, boundary conditions, foreign-key
    checks, and 404 handling.
 
+4. **User model serialization exposed `_password`** - added regression
+   coverage confirming API responses and `User.to_dict()` omit password data.
+5. **Amenity descriptions were omitted by API schemas** - added request,
+   response, and description-only update coverage.
+6. **Place details omitted required related data** - added coverage for
+   price, owner data, amenity descriptions, and reviews.
+7. **Unused duplicate `models.py`** - confirmed the root-level module was
+   not imported and removed it.
+8. **Invalid reviews left partial relationships** - moved field validation
+   ahead of User and Place linking and added regression coverage.
+
 ## 8. Conclusion
 
-All four entity models now enforce their documented validation rules at the
-model layer, and those rules are exercised end-to-end through the API by an
-automated test suite covering success paths, required-field violations,
-boundary values, and not-found cases. Manual cURL testing and the Swagger UI
-were used to independently confirm the same behavior.
+The complete Part 2 suite passes with 53 tests. Coverage includes the required
+entity operations, validation, relationship handling, password
+non-disclosure, and related data in Place responses.

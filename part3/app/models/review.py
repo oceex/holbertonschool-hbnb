@@ -11,10 +11,10 @@ class Review(BaseModel):
     def __init__(self, text, rating, place, user):
         """Initialize a review and synchronize its place and author."""
         super().__init__()
-        self.place = place
-        self.user = user
         self.text = text
         self.rating = rating
+        self.place = place
+        self.user = user
 
         # Keep both relationship collections synchronized.
         self.place.add_review(self)
