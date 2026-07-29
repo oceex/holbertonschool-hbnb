@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 """User API resources and serialization schemas."""
 from flask_restx import Namespace, Resource, fields
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from app.services import facade
 
@@ -20,7 +21,6 @@ user_model = api.model("User", {
 user_update_model = api.model("UserUpdate", {
     "first_name": fields.String(description="First name", max_length=50),
     "last_name": fields.String(description="Last name", max_length=50),
-    "email": fields.String(description="Email address"),
     "is_admin": fields.Boolean(description="Administrator flag"),
 })
 
@@ -93,20 +93,28 @@ class UserResource(Resource):
     @api.expect(user_update_model, validate=True)
     @api.marshal_with(user_response_model)
     @api.response(200, "User successfully updated", user_response_model)
+    @api.response(401, "Missing or invalid token")
+    @api.response(403, "Unauthorized action")
     @api.response(404, "User not found")
     @api.response(400, "Invalid input data")
+    @jwt_required()
     def put(self, user_id):
-        """Update a user."""
+        """Update a user's information with authorization checks."""
+        current_user_id = get_jwt_identity()
+        
+        # Check if the authenticated user matches the requested user ID
+        if current_user_id != user_id:
+            api.abort(403, "Unauthorized action")
+
+        data = api.payload
+        
+        # Prevent modifying email and password
+        if "email" in data or "password" in data:
+            api.abort(400, "You cannot modify email or password")
+
         user = facade.get_user(user_id)
         if not user:
             api.abort(404, "User not found")
-
-        data = api.payload
-        new_email = data.get("email")
-        if new_email and new_email != user.email:
-            existing = facade.get_user_by_email(new_email)
-            if existing and existing.id != user_id:
-                api.abort(400, "Email already registered")
 
         try:
             updated = facade.update_user(user_id, data)
