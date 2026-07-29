@@ -134,10 +134,9 @@ class PlaceResource(Resource):
         if not place:
             api.abort(404, 'Place not found')
 
-        # Check if the current user is the owner or an admin
         owner_id = place.owner_id if hasattr(place, 'owner_id') else place.owner.id
         if owner_id != current_user_id and not is_admin:
-            api.abort(403, 'Unauthorized action: you can only update your own places')
+            api.abort(403, 'Unauthorized action')
 
         try:
             facade.update_place(place_id, api.payload)
