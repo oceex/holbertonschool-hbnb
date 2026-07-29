@@ -33,7 +33,6 @@ place_input_model = api.model('PlaceInput', {
     'price': fields.Float(required=True, description='Price per night'),
     'latitude': fields.Float(required=True, description='Latitude of the place'),
     'longitude': fields.Float(required=True, description='Longitude of the place'),
-    'owner_id': fields.String(required=True, description='ID of the owner'),
     'amenities': fields.List(fields.String, description="List of amenities ID's")
 })
 
@@ -94,10 +93,18 @@ class PlaceList(Resource):
     @api.marshal_with(place_creation_response, code=201)
     @api.response(201, 'Place successfully created')
     @api.response(400, 'Invalid input data')
+    @api.response(401, 'Missing or invalid token')
+    @jwt_required()
     def post(self):
-        """Register a new place."""
+        """Register a new place with automatic owner assignment."""
+        current_user_id = get_jwt_identity()
+        data = api.payload
+        
+        # Set owner_id automatically from the authenticated user token
+        data['owner_id'] = current_user_id
+
         try:
-            place = facade.create_place(api.payload)
+            place = facade.create_place(data)
             return place, 201
         except ValueError as e:
             api.abort(400, str(e))
