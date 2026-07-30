@@ -1,8 +1,6 @@
 #!/usr/bin/python3
 """User API resources and serialization schemas."""
 from flask_restx import Namespace, Resource, fields
-from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
-
 from app.services import facade
 
 api = Namespace("users", description="User operations")
@@ -89,28 +87,15 @@ class UserResource(Resource):
     @api.expect(user_update_model, validate=True)
     @api.marshal_with(user_response_model)
     @api.response(200, "User successfully updated", user_response_model)
-    @api.response(401, "Missing or invalid token")
-    @api.response(403, "Unauthorized action")
     @api.response(404, "User not found")
     @api.response(400, "Invalid input data")
-    @jwt_required()
     def put(self, user_id):
-        """Update a user's information (Owner or Admin)."""
-        current_user_id = get_jwt_identity()
-        claims = get_jwt()
-        is_admin = claims.get('is_admin', False)
-
-        if current_user_id != user_id and not is_admin:
-            api.abort(403, "Unauthorized action")
-
+        """Update a user's information."""
         user = facade.get_user(user_id)
         if not user:
             api.abort(404, "User not found")
 
         data = api.payload
-
-        if not is_admin and ("email" in data or "password" in data):
-            api.abort(400, "You cannot modify email or password")
 
         if "email" in data:
             existing_user = facade.get_user_by_email(data["email"])
