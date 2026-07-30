@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 """Place API resources and serialization schemas."""
 from flask_restx import Namespace, Resource, fields
-from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.services import facade
 
 api = Namespace('places', description='Place operations')
@@ -24,7 +23,7 @@ review_model = api.model('PlaceReview', {
     'text': fields.String(description='Review text'),
     'rating': fields.Integer(description='Rating, 1 to 5'),
     'user_id': fields.String(attribute=lambda review: review.user.id,
-                               description='ID of the review author')
+                             description='ID of the review author')
 })
 
 place_input_model = api.model('PlaceInput', {
@@ -33,6 +32,7 @@ place_input_model = api.model('PlaceInput', {
     'price': fields.Float(required=True, description='Price per night'),
     'latitude': fields.Float(required=True, description='Latitude of the place'),
     'longitude': fields.Float(required=True, description='Longitude of the place'),
+    'owner_id': fields.String(required=True, description='ID of the owner'),
     'amenities': fields.List(fields.String, description="List of amenities ID's")
 })
 
@@ -62,7 +62,7 @@ place_detail_model = api.model('PlaceDetail', {
     'longitude': fields.Float(description='Longitude of the place'),
     'owner': fields.Nested(user_model, description='Owner details'),
     'amenities': fields.List(fields.Nested(amenity_model),
-                               description='List of amenities'),
+                             description='List of amenities'),
     'reviews': fields.List(fields.Nested(review_model),
                            description='List of reviews')
 })
@@ -72,7 +72,7 @@ place_update_model = api.model('PlaceUpdate', {
     'description': fields.String(description='Description of the place'),
     'price': fields.Float(description='Price per night'),
     'amenities': fields.List(fields.String,
-                               description="List of amenity IDs")
+                             description="List of amenity IDs")
 })
 
 message_model = api.model('Message', {
@@ -93,16 +93,9 @@ class PlaceList(Resource):
     @api.marshal_with(place_creation_response, code=201)
     @api.response(201, 'Place successfully created')
     @api.response(400, 'Invalid input data')
-    @api.response(401, 'Missing or invalid token')
-    @jwt_required()
     def post(self):
-        """Register a new place with automatic owner assignment."""
-        current_user_id = get_jwt_identity()
+        """Register a new place."""
         data = api.payload
-        
-        # Set owner_id automatically from the authenticated user token
-        data['owner_id'] = current_user_id
-
         try:
             place = facade.create_place(data)
             return place, 201
@@ -118,7 +111,7 @@ class PlaceResource(Resource):
     @api.response(200, 'Place details retrieved successfully')
     @api.response(404, 'Place not found')
     def get(self, place_id):
-        """Get place details, including its owner, amenities, and reviews."""
+        """Get place details."""
         place = facade.get_place(place_id)
         if not place:
             api.abort(404, 'Place not found')
@@ -126,24 +119,13 @@ class PlaceResource(Resource):
 
     @api.expect(place_update_model, validate=True)
     @api.response(200, 'Place updated successfully', message_model)
-    @api.response(401, 'Missing or invalid token')
-    @api.response(403, 'Unauthorized action')
     @api.response(404, 'Place not found')
     @api.response(400, 'Invalid input data')
-    @jwt_required()
     def put(self, place_id):
-        """Update a place's information with ownership verification."""
-        current_user_id = get_jwt_identity()
-        claims = get_jwt()
-        is_admin = claims.get('is_admin', False)
-
+        """Update a place's information."""
         place = facade.get_place(place_id)
         if not place:
             api.abort(404, 'Place not found')
-
-        owner_id = place.owner_id if hasattr(place, 'owner_id') else place.owner.id
-        if owner_id != current_user_id and not is_admin:
-            api.abort(403, 'Unauthorized action')
 
         try:
             facade.update_place(place_id, api.payload)
