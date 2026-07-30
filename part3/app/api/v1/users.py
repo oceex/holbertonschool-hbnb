@@ -60,15 +60,8 @@ class UserList(Resource):
     @api.marshal_with(user_response_model, code=201)
     @api.response(201, "User successfully created", user_response_model)
     @api.response(400, "Invalid input data")
-    @api.response(401, "Missing or invalid token")
-    @api.response(403, "Admin privileges required")
-    @jwt_required()
     def post(self):
-        """Create a new user (Admin only)."""
-        claims = get_jwt()
-        if not claims.get('is_admin', False):
-            api.abort(403, "Admin privileges required")
-
+        """Create a new user."""
         data = api.payload
         if facade.get_user_by_email(data.get("email")):
             api.abort(400, "Email already registered")
