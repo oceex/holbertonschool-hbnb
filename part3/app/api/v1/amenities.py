@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 """Amenity API resources and serialization schemas."""
 from flask_restx import Namespace, Resource, fields
-from flask_jwt_extended import jwt_required, get_jwt
 from app.services import facade
 
 api = Namespace('amenities', description='Amenity operations')
@@ -67,18 +66,12 @@ class AmenityResource(Resource):
             api.abort(404, 'Amenity not found')
         return amenity, 200
 
-    @jwt_required()
     @api.expect(amenity_update_model, validate=True)
     @api.response(200, 'Amenity updated successfully', message_model)
     @api.response(404, 'Amenity not found')
     @api.response(400, 'Invalid input data')
-    @api.response(403, 'Admin privileges required')
     def put(self, amenity_id):
-        """Update an amenity (Admin only)."""
-        current_user = get_jwt()
-        if not current_user.get('is_admin', False):
-            api.abort(403, 'Admin privileges required')
-
+        """Update an amenity."""
         amenity = facade.get_amenity(amenity_id)
         if not amenity:
             api.abort(404, 'Amenity not found')
