@@ -8,25 +8,20 @@ from run import app
 from app.models.place import Place
 from app.models.user import User
 from app.services import facade
+from tests.auth_helpers import make_admin, make_user
 
 
 class TestPlaceEndpoints(unittest.TestCase):
     """Exercise place endpoints and relationship rules."""
 
     def setUp(self):
-        """Create a test client and registered owner fixture."""
+        """Create a test client, an admin, and a registered owner fixture."""
         app.config['TESTING'] = True
         self.client = app.test_client()
 
-        unique_email = f"owner_{uuid.uuid4()}@test.com"
-        user_payload = {
-            "first_name": "Test",
-            "last_name": "Owner",
-            "email": unique_email,
-            "password": "password123"
-        }
-        res_user = self.client.post('/api/v1/users/', data=json.dumps(user_payload), content_type='application/json')
-        self.owner_id = json.loads(res_user.data.decode('utf-8')).get('id')
+        self.admin, self.admin_headers = make_admin(self.client)
+        owner, self.owner_headers = make_user(self.client, self.admin_headers)
+        self.owner_id = owner['id']
 
     def test_create_place_success(self):
         """Verify successful place creation returns HTTP 201."""
@@ -37,11 +32,28 @@ class TestPlaceEndpoints(unittest.TestCase):
             "longitude": -90.0,
             "owner_id": self.owner_id
         }
-        response = self.client.post('/api/v1/places/', data=json.dumps(payload), content_type='application/json')
-        
+        response = self.client.post(
+            '/api/v1/places/', data=json.dumps(payload),
+            content_type='application/json', headers=self.owner_headers,
+        )
+
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['title'], 'Cozy Cabin')
+
+    def test_create_place_requires_auth(self):
+        """Verify creating a place without a token returns HTTP 401."""
+        payload = {
+            "title": "Cozy Cabin",
+            "price": 150.0,
+            "latitude": 45.0,
+            "longitude": -90.0,
+        }
+        response = self.client.post(
+            '/api/v1/places/', data=json.dumps(payload),
+            content_type='application/json',
+        )
+        self.assertEqual(response.status_code, 401)
 
     def test_create_place_invalid_latitude(self):
         """Verify an out-of-range latitude returns HTTP 400."""
@@ -52,7 +64,10 @@ class TestPlaceEndpoints(unittest.TestCase):
             "longitude": -90.0,
             "owner_id": self.owner_id
         }
-        response = self.client.post('/api/v1/places/', data=json.dumps(payload), content_type='application/json')
+        response = self.client.post(
+            '/api/v1/places/', data=json.dumps(payload),
+            content_type='application/json', headers=self.owner_headers,
+        )
         self.assertEqual(response.status_code, 400)
 
     def test_create_place_invalid_longitude(self):
@@ -64,7 +79,10 @@ class TestPlaceEndpoints(unittest.TestCase):
             "longitude": 200.0,
             "owner_id": self.owner_id
         }
-        response = self.client.post('/api/v1/places/', data=json.dumps(payload), content_type='application/json')
+        response = self.client.post(
+            '/api/v1/places/', data=json.dumps(payload),
+            content_type='application/json', headers=self.owner_headers,
+        )
         self.assertEqual(response.status_code, 400)
 
     def test_create_place_boundary_latitude_longitude(self):
@@ -76,7 +94,10 @@ class TestPlaceEndpoints(unittest.TestCase):
             "longitude": -180.0,
             "owner_id": self.owner_id
         }
-        response = self.client.post('/api/v1/places/', data=json.dumps(payload), content_type='application/json')
+        response = self.client.post(
+            '/api/v1/places/', data=json.dumps(payload),
+            content_type='application/json', headers=self.owner_headers,
+        )
         self.assertEqual(response.status_code, 201)
 
     def test_create_place_empty_title(self):
@@ -88,7 +109,10 @@ class TestPlaceEndpoints(unittest.TestCase):
             "longitude": -90.0,
             "owner_id": self.owner_id
         }
-        response = self.client.post('/api/v1/places/', data=json.dumps(payload), content_type='application/json')
+        response = self.client.post(
+            '/api/v1/places/', data=json.dumps(payload),
+            content_type='application/json', headers=self.owner_headers,
+        )
         self.assertEqual(response.status_code, 400)
 
     def test_create_place_negative_price(self):
@@ -100,20 +124,30 @@ class TestPlaceEndpoints(unittest.TestCase):
             "longitude": -90.0,
             "owner_id": self.owner_id
         }
-        response = self.client.post('/api/v1/places/', data=json.dumps(payload), content_type='application/json')
+        response = self.client.post(
+            '/api/v1/places/', data=json.dumps(payload),
+            content_type='application/json', headers=self.owner_headers,
+        )
         self.assertEqual(response.status_code, 400)
 
     def test_create_place_invalid_owner(self):
-        """Verify a non-existent owner_id returns HTTP 400."""
-        payload = {
-            "title": "Orphan Cabin",
-            "price": 150.0,
-            "latitude": 45.0,
-            "longitude": -90.0,
-            "owner_id": "non-existent-owner-id"
-        }
-        response = self.client.post('/api/v1/places/', data=json.dumps(payload), content_type='application/json')
-        self.assertEqual(response.status_code, 400)
+        """Verify the facade rejects place creation for a non-existent owner.
+
+        This can no longer be triggered through the API: POST /places/
+        always takes the owner from the caller's JWT identity, never from
+        client input, so a client-supplied owner_id is silently ignored.
+        The rule still exists as a facade-level guarantee, so it's tested
+        there directly.
+        """
+        with app.app_context():
+            with self.assertRaises(ValueError):
+                facade.create_place({
+                    "title": "Orphan Cabin",
+                    "price": 150.0,
+                    "latitude": 45.0,
+                    "longitude": -90.0,
+                    "owner_id": "non-existent-owner-id",
+                })
 
     def test_create_place_missing_title(self):
         """Verify a missing required title returns HTTP 400."""
@@ -126,7 +160,8 @@ class TestPlaceEndpoints(unittest.TestCase):
         response = self.client.post(
             '/api/v1/places/',
             data=json.dumps(payload),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.owner_headers,
         )
         self.assertEqual(response.status_code, 400)
 
@@ -143,7 +178,8 @@ class TestPlaceEndpoints(unittest.TestCase):
         response = self.client.post(
             '/api/v1/places/',
             data=json.dumps(payload),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.owner_headers,
         )
         self.assertEqual(response.status_code, 400)
 
@@ -162,7 +198,8 @@ class TestPlaceEndpoints(unittest.TestCase):
                 "name": "Wi-Fi",
                 "description": "High-speed wireless internet",
             }),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.admin_headers,
         )
         amenity_id = json.loads(
             amenity_response.data.decode('utf-8')
@@ -176,7 +213,10 @@ class TestPlaceEndpoints(unittest.TestCase):
             "owner_id": self.owner_id,
             "amenities": [amenity_id],
         }
-        create_response = self.client.post('/api/v1/places/', data=json.dumps(payload), content_type='application/json')
+        create_response = self.client.post(
+            '/api/v1/places/', data=json.dumps(payload),
+            content_type='application/json', headers=self.owner_headers,
+        )
         place_id = json.loads(create_response.data.decode('utf-8'))['id']
 
         response = self.client.get(f'/api/v1/places/{place_id}')
@@ -207,7 +247,7 @@ class TestPlaceEndpoints(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_update_place_success(self):
-        """Verify updating a place's title returns HTTP 200."""
+        """Verify the owner updating a place's title returns HTTP 200."""
         payload = {
             "title": "Cozy Cabin",
             "price": 150.0,
@@ -215,16 +255,43 @@ class TestPlaceEndpoints(unittest.TestCase):
             "longitude": -90.0,
             "owner_id": self.owner_id
         }
-        create_response = self.client.post('/api/v1/places/', data=json.dumps(payload), content_type='application/json')
+        create_response = self.client.post(
+            '/api/v1/places/', data=json.dumps(payload),
+            content_type='application/json', headers=self.owner_headers,
+        )
         place_id = json.loads(create_response.data.decode('utf-8'))['id']
 
         update_payload = {"title": "Renovated Cabin"}
         response = self.client.put(
             f'/api/v1/places/{place_id}',
             data=json.dumps(update_payload),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.owner_headers,
         )
         self.assertEqual(response.status_code, 200)
+
+    def test_update_place_forbidden_for_non_owner(self):
+        """Verify a non-owner, non-admin user cannot update someone else's place."""
+        payload = {
+            "title": "Cozy Cabin",
+            "price": 150.0,
+            "latitude": 45.0,
+            "longitude": -90.0,
+        }
+        create_response = self.client.post(
+            '/api/v1/places/', data=json.dumps(payload),
+            content_type='application/json', headers=self.owner_headers,
+        )
+        place_id = json.loads(create_response.data.decode('utf-8'))['id']
+
+        _, other_headers = make_user(self.client, self.admin_headers)
+        response = self.client.put(
+            f'/api/v1/places/{place_id}',
+            data=json.dumps({"title": "Hijacked Cabin"}),
+            content_type='application/json',
+            headers=other_headers,
+        )
+        self.assertEqual(response.status_code, 403)
 
     def test_update_place_amenities(self):
         """Verify a place's amenity relationships can be replaced."""
@@ -237,7 +304,8 @@ class TestPlaceEndpoints(unittest.TestCase):
                 "longitude": -90.0,
                 "owner_id": self.owner_id,
             }),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.owner_headers,
         )
         place_id = json.loads(create_response.data.decode('utf-8'))['id']
         amenity_response = self.client.post(
@@ -246,7 +314,8 @@ class TestPlaceEndpoints(unittest.TestCase):
                 "name": "Parking",
                 "description": "Covered parking",
             }),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.admin_headers,
         )
         amenity_id = json.loads(
             amenity_response.data.decode('utf-8')
@@ -255,7 +324,8 @@ class TestPlaceEndpoints(unittest.TestCase):
         response = self.client.put(
             f'/api/v1/places/{place_id}',
             data=json.dumps({"amenities": [amenity_id]}),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.owner_headers,
         )
         self.assertEqual(response.status_code, 200)
 
@@ -272,7 +342,8 @@ class TestPlaceEndpoints(unittest.TestCase):
         response = self.client.put(
             '/api/v1/places/non-existent-id',
             data=json.dumps(update_payload),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.owner_headers,
         )
         self.assertEqual(response.status_code, 404)
 

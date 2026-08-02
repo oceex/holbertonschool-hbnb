@@ -9,40 +9,42 @@ import unittest
 import uuid
 from run import app
 from app.services import facade
+from tests.auth_helpers import make_admin, make_user
 
 
 class TestReviewEndpoints(unittest.TestCase):
     """Exercise review endpoints and validation rules."""
 
     def setUp(self):
-        """Create a test client with a user and place fixture."""
+        """Create a test client with a place owner, a reviewer, and a place.
+
+        The owner and the reviewer must be two different users: the API
+        forbids a user from reviewing their own place, so self.user_id
+        below refers to the *reviewer*, not the place owner.
+        """
         app.config['TESTING'] = True
         self.client = app.test_client()
 
-        user_payload = {
-            "first_name": "Test",
-            "last_name": "Reviewer",
-            "email": f"reviewer_{uuid.uuid4()}@test.com",
-            "password": "password123",
-        }
-        user_res = self.client.post(
-            '/api/v1/users/',
-            data=json.dumps(user_payload),
-            content_type='application/json'
-        )
-        self.user_id = json.loads(user_res.data.decode('utf-8'))['id']
+        self.admin, self.admin_headers = make_admin(self.client)
+
+        owner, self.owner_headers = make_user(self.client, self.admin_headers)
+        self.owner_id = owner['id']
+
+        reviewer, self.reviewer_headers = make_user(self.client, self.admin_headers)
+        self.user_id = reviewer['id']
 
         place_payload = {
             "title": "Test Place",
             "price": 100.0,
             "latitude": 10.0,
             "longitude": 10.0,
-            "owner_id": self.user_id,
+            "owner_id": self.owner_id,
         }
         place_res = self.client.post(
             '/api/v1/places/',
             data=json.dumps(place_payload),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.owner_headers,
         )
         self.place_id = json.loads(place_res.data.decode('utf-8'))['id']
 
@@ -57,13 +59,43 @@ class TestReviewEndpoints(unittest.TestCase):
         response = self.client.post(
             '/api/v1/reviews/',
             data=json.dumps(payload),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.reviewer_headers,
         )
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
         self.assertIn('id', data)
         self.assertEqual(data['text'], 'Great place to stay!')
         self.assertEqual(data['rating'], 5)
+
+    def test_create_review_requires_auth(self):
+        """Verify creating a review without a token returns HTTP 401."""
+        payload = {
+            "text": "Great place to stay!",
+            "rating": 5,
+            "place_id": self.place_id,
+        }
+        response = self.client.post(
+            '/api/v1/reviews/',
+            data=json.dumps(payload),
+            content_type='application/json',
+        )
+        self.assertEqual(response.status_code, 401)
+
+    def test_create_review_rejects_own_place(self):
+        """Verify the place owner cannot review their own place."""
+        payload = {
+            "text": "My own place is great!",
+            "rating": 5,
+            "place_id": self.place_id,
+        }
+        response = self.client.post(
+            '/api/v1/reviews/',
+            data=json.dumps(payload),
+            content_type='application/json',
+            headers=self.owner_headers,
+        )
+        self.assertEqual(response.status_code, 400)
 
     def test_create_review_empty_text(self):
         """Verify an empty text field returns HTTP 400."""
@@ -80,7 +112,8 @@ class TestReviewEndpoints(unittest.TestCase):
         response = self.client.post(
             '/api/v1/reviews/',
             data=json.dumps(payload),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.reviewer_headers,
         )
         self.assertEqual(response.status_code, 400)
         self.assertEqual(len(place.reviews), place_review_count)
@@ -96,7 +129,8 @@ class TestReviewEndpoints(unittest.TestCase):
         response = self.client.post(
             '/api/v1/reviews/',
             data=json.dumps(payload),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.reviewer_headers,
         )
         self.assertEqual(response.status_code, 400)
 
@@ -111,7 +145,8 @@ class TestReviewEndpoints(unittest.TestCase):
         response = self.client.post(
             '/api/v1/reviews/',
             data=json.dumps(payload),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.reviewer_headers,
         )
         self.assertEqual(response.status_code, 400)
 
@@ -126,7 +161,8 @@ class TestReviewEndpoints(unittest.TestCase):
         response = self.client.post(
             '/api/v1/reviews/',
             data=json.dumps(payload),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.reviewer_headers,
         )
         self.assertEqual(response.status_code, 400)
 
@@ -141,24 +177,27 @@ class TestReviewEndpoints(unittest.TestCase):
         response = self.client.post(
             '/api/v1/reviews/',
             data=json.dumps(payload),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.reviewer_headers,
         )
         self.assertEqual(response.status_code, 400)
 
     def test_create_review_invalid_user_id(self):
-        """Verify a non-existent user_id returns HTTP 400."""
-        payload = {
-            "text": "Nice place",
-            "rating": 4,
-            "place_id": self.place_id,
-            "user_id": "non-existent-user-id",
-        }
-        response = self.client.post(
-            '/api/v1/reviews/',
-            data=json.dumps(payload),
-            content_type='application/json'
-        )
-        self.assertEqual(response.status_code, 400)
+        """Verify the facade rejects a review from a non-existent user.
+
+        This can no longer be triggered through the API: POST /reviews/
+        always takes the author from the caller's JWT identity, never from
+        client input. The rule still exists as a facade-level guarantee,
+        so it's tested there directly.
+        """
+        with app.app_context():
+            with self.assertRaises(ValueError):
+                facade.create_review({
+                    "text": "Nice place",
+                    "rating": 4,
+                    "place_id": self.place_id,
+                    "user_id": "non-existent-user-id",
+                })
 
     def test_create_duplicate_review_rejected(self):
         """Verify a user cannot review the same place twice."""
@@ -171,7 +210,8 @@ class TestReviewEndpoints(unittest.TestCase):
         first = self.client.post(
             '/api/v1/reviews/',
             data=json.dumps(payload),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.reviewer_headers,
         )
         self.assertEqual(first.status_code, 201)
 
@@ -179,7 +219,8 @@ class TestReviewEndpoints(unittest.TestCase):
         second = self.client.post(
             '/api/v1/reviews/',
             data=json.dumps(payload),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.reviewer_headers,
         )
         self.assertEqual(second.status_code, 400)
 
@@ -205,7 +246,8 @@ class TestReviewEndpoints(unittest.TestCase):
                 "place_id": self.place_id,
                 "user_id": self.user_id,
             }),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.reviewer_headers,
         )
         review_id = json.loads(
             create_response.data.decode('utf-8')
@@ -229,7 +271,8 @@ class TestReviewEndpoints(unittest.TestCase):
         create_response = self.client.post(
             '/api/v1/reviews/',
             data=json.dumps(payload),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.reviewer_headers,
         )
         response = self.client.get(f'/api/v1/places/{self.place_id}/reviews')
         self.assertEqual(response.status_code, 200)
@@ -250,7 +293,7 @@ class TestReviewEndpoints(unittest.TestCase):
         }])
 
     def test_update_review_success(self):
-        """Verify updating a review's text/rating returns HTTP 200."""
+        """Verify the author updating a review's text/rating returns HTTP 200."""
         payload = {
             "text": "Initial review",
             "rating": 3,
@@ -260,7 +303,8 @@ class TestReviewEndpoints(unittest.TestCase):
         create_response = self.client.post(
             '/api/v1/reviews/',
             data=json.dumps(payload),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.reviewer_headers,
         )
         review_id = json.loads(create_response.data.decode('utf-8'))['id']
 
@@ -268,12 +312,38 @@ class TestReviewEndpoints(unittest.TestCase):
         response = self.client.put(
             f'/api/v1/reviews/{review_id}',
             data=json.dumps(update_payload),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.reviewer_headers,
         )
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['text'], 'Updated review')
         self.assertEqual(data['rating'], 5)
+
+    def test_update_review_forbidden_for_non_author(self):
+        """Verify a non-author, non-admin user cannot update someone else's review."""
+        payload = {
+            "text": "Initial review",
+            "rating": 3,
+            "place_id": self.place_id,
+            "user_id": self.user_id,
+        }
+        create_response = self.client.post(
+            '/api/v1/reviews/',
+            data=json.dumps(payload),
+            content_type='application/json',
+            headers=self.reviewer_headers,
+        )
+        review_id = json.loads(create_response.data.decode('utf-8'))['id']
+
+        _, other_headers = make_user(self.client, self.admin_headers)
+        response = self.client.put(
+            f'/api/v1/reviews/{review_id}',
+            data=json.dumps({"text": "Hijacked review"}),
+            content_type='application/json',
+            headers=other_headers,
+        )
+        self.assertEqual(response.status_code, 403)
 
     def test_update_review_invalid_rating(self):
         """Verify updating a review with an out-of-range rating returns HTTP 400."""
@@ -286,7 +356,8 @@ class TestReviewEndpoints(unittest.TestCase):
         create_response = self.client.post(
             '/api/v1/reviews/',
             data=json.dumps(payload),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.reviewer_headers,
         )
         review_id = json.loads(create_response.data.decode('utf-8'))['id']
 
@@ -294,7 +365,8 @@ class TestReviewEndpoints(unittest.TestCase):
         response = self.client.put(
             f'/api/v1/reviews/{review_id}',
             data=json.dumps(update_payload),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.reviewer_headers,
         )
         self.assertEqual(response.status_code, 400)
 
@@ -309,11 +381,15 @@ class TestReviewEndpoints(unittest.TestCase):
         create_response = self.client.post(
             '/api/v1/reviews/',
             data=json.dumps(payload),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.reviewer_headers,
         )
         review_id = json.loads(create_response.data.decode('utf-8'))['id']
 
-        response = self.client.delete(f'/api/v1/reviews/{review_id}')
+        response = self.client.delete(
+            f'/api/v1/reviews/{review_id}',
+            headers=self.reviewer_headers,
+        )
         self.assertEqual(response.status_code, 200)
 
         follow_up = self.client.get(f'/api/v1/reviews/{review_id}')
@@ -330,7 +406,10 @@ class TestReviewEndpoints(unittest.TestCase):
 
     def test_delete_review_not_found(self):
         """Verify deleting a non-existent review returns HTTP 404."""
-        response = self.client.delete('/api/v1/reviews/non-existent-id')
+        response = self.client.delete(
+            '/api/v1/reviews/non-existent-id',
+            headers=self.reviewer_headers,
+        )
         self.assertEqual(response.status_code, 404)
 
 

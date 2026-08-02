@@ -1,21 +1,24 @@
 #!/usr/bin/python3
 """Tests for amenity API behavior.
 
-The suite covers creation, retrieval, updates, and input validation.
+The suite covers creation, retrieval, updates, input validation, and the
+admin-only authorization rule enforced by the write endpoints.
 """
 
 import json
 import unittest
 from run import app
+from tests.auth_helpers import make_admin, make_user
 
 
 class TestAmenityEndpoints(unittest.TestCase):
     """Exercise amenity endpoints and validation rules."""
 
     def setUp(self):
-        """Create a Flask test client."""
+        """Create a Flask test client and a bootstrap admin."""
         app.config['TESTING'] = True
         self.client = app.test_client()
+        self.admin, self.admin_headers = make_admin(self.client)
 
     def test_create_amenity_success(self):
         """Verify successful creation of an amenity returns HTTP 201."""
@@ -26,7 +29,8 @@ class TestAmenityEndpoints(unittest.TestCase):
         response = self.client.post(
             '/api/v1/amenities/',
             data=json.dumps(payload),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.admin_headers,
         )
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
@@ -34,13 +38,29 @@ class TestAmenityEndpoints(unittest.TestCase):
         self.assertEqual(data['name'], 'Swimming Pool')
         self.assertEqual(data['description'], 'Outdoor heated pool')
 
+    def test_create_amenity_forbidden_for_non_admin(self):
+        """Verify a non-admin user cannot create an amenity."""
+        _, user_headers = make_user(self.client, self.admin_headers)
+        payload = {
+            "name": "Swimming Pool",
+            "description": "Outdoor heated pool",
+        }
+        response = self.client.post(
+            '/api/v1/amenities/',
+            data=json.dumps(payload),
+            content_type='application/json',
+            headers=user_headers,
+        )
+        self.assertEqual(response.status_code, 403)
+
     def test_create_amenity_invalid_input(self):
         """Verify that creating an amenity with invalid payload returns HTTP 400."""
         payload = {"name": ""}
         response = self.client.post(
             '/api/v1/amenities/',
             data=json.dumps(payload),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.admin_headers,
         )
         self.assertEqual(response.status_code, 400)
 
@@ -49,7 +69,8 @@ class TestAmenityEndpoints(unittest.TestCase):
         response = self.client.post(
             '/api/v1/amenities/',
             data=json.dumps({"description": "Missing name"}),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.admin_headers,
         )
         self.assertEqual(response.status_code, 400)
 
@@ -61,7 +82,8 @@ class TestAmenityEndpoints(unittest.TestCase):
                 "name": "Gym",
                 "description": "Open 24 hours",
             }),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.admin_headers,
         )
         amenity_id = json.loads(
             create_response.data.decode('utf-8')
@@ -87,7 +109,8 @@ class TestAmenityEndpoints(unittest.TestCase):
                 "name": "Parking",
                 "description": "Covered parking",
             }),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.admin_headers,
         )
         amenity_id = json.loads(
             create_response.data.decode('utf-8')
@@ -107,7 +130,8 @@ class TestAmenityEndpoints(unittest.TestCase):
         create_response = self.client.post(
             '/api/v1/amenities/',
             data=json.dumps(create_payload),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.admin_headers,
         )
         amenity_id = json.loads(create_response.data.decode('utf-8'))['id']
 
@@ -115,7 +139,8 @@ class TestAmenityEndpoints(unittest.TestCase):
         response = self.client.put(
             f'/api/v1/amenities/{amenity_id}',
             data=json.dumps(update_payload),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.admin_headers,
         )
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
@@ -125,6 +150,25 @@ class TestAmenityEndpoints(unittest.TestCase):
         updated = json.loads(get_response.data.decode('utf-8'))
         self.assertEqual(updated['name'], 'Pool')
         self.assertEqual(updated['description'], 'Indoor heated pool')
+
+    def test_update_amenity_forbidden_for_non_admin(self):
+        """Verify a non-admin user cannot update an amenity."""
+        create_response = self.client.post(
+            '/api/v1/amenities/',
+            data=json.dumps({"name": "Pool", "description": "Outdoor pool"}),
+            content_type='application/json',
+            headers=self.admin_headers,
+        )
+        amenity_id = json.loads(create_response.data.decode('utf-8'))['id']
+
+        _, user_headers = make_user(self.client, self.admin_headers)
+        response = self.client.put(
+            f'/api/v1/amenities/{amenity_id}',
+            data=json.dumps({"description": "Hijacked"}),
+            content_type='application/json',
+            headers=user_headers,
+        )
+        self.assertEqual(response.status_code, 403)
 
 
 if __name__ == '__main__':

@@ -6,7 +6,14 @@ import os
 class Config:
     """Define settings shared by all environments."""
 
-    SECRET_KEY = os.getenv('SECRET_KEY', 'default_secret_key')
+    # Fallback only -- always set a real SECRET_KEY via the environment in
+    # any deployment. This placeholder is deliberately long enough (32+
+    # bytes) to meet HS256's minimum recommended key length, but it is
+    # still a *public, checked-in* value and must never be used in
+    # production.
+    SECRET_KEY = os.getenv(
+        'SECRET_KEY', 'dev-only-insecure-default-key-do-not-use-in-prod'
+    )
     # Flask-JWT-Extended falls back to SECRET_KEY when this is unset; setting
     # it explicitly keeps the JWT signing key independent of Flask's own
     # session/cookie signing key (defense in depth).

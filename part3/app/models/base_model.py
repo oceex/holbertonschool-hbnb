@@ -21,12 +21,12 @@ class BaseModel(db.Model):
     def __init__(self):
         """Initialize a new instance with a unique id and timestamps."""
         self.id = str(uuid.uuid4())
-        self.created_at = datetime.now()
-        self.updated_at = datetime.now()
+        self.created_at = datetime.utcnow()
+        self.updated_at = datetime.utcnow()
 
     def save(self):
         """Refresh the modification timestamp."""
-        self.updated_at = datetime.now()
+        self.updated_at = datetime.utcnow()
 
     def __eq__(self, other):
         """Compare mapped domain objects by concrete type and identity."""

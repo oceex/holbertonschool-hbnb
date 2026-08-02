@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 """Tests for user API behavior.
 
-The suite covers creation, retrieval, updates, and input validation.
+The suite covers creation, retrieval, updates, input validation, and the
+admin/self authorization rules enforced by the endpoints.
 """
 
 import json
@@ -10,15 +11,17 @@ import uuid
 from run import app
 from app.models.user import User
 from app.services import facade
+from tests.auth_helpers import make_admin, make_user
 
 
 class TestUserEndpoints(unittest.TestCase):
-    """Exercise user endpoints and validation rules."""
+    """Exercise user endpoints, validation rules, and authorization."""
 
     def setUp(self):
-        """Create a Flask test client."""
+        """Create a Flask test client and a bootstrap admin."""
         app.config['TESTING'] = True
         self.client = app.test_client()
+        self.admin, self.admin_headers = make_admin(self.client)
 
     def _unique_email(self):
         """Return an email address unique to the current test."""
@@ -35,7 +38,8 @@ class TestUserEndpoints(unittest.TestCase):
         response = self.client.post(
             '/api/v1/users/',
             data=json.dumps(payload),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.admin_headers,
         )
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
@@ -45,6 +49,30 @@ class TestUserEndpoints(unittest.TestCase):
         self.assertFalse(data['is_admin'])
         self.assertNotIn('password', data)
         self.assertNotIn('_password', data)
+
+    def test_create_user_requires_admin(self):
+        """Verify user creation is rejected without a token, and without admin."""
+        payload = {
+            "first_name": "Jane",
+            "last_name": "Doe",
+            "email": self._unique_email(),
+            "password": "password123",
+        }
+        no_token = self.client.post(
+            '/api/v1/users/',
+            data=json.dumps(payload),
+            content_type='application/json',
+        )
+        self.assertEqual(no_token.status_code, 401)
+
+        _, non_admin_headers = make_user(self.client, self.admin_headers)
+        as_non_admin = self.client.post(
+            '/api/v1/users/',
+            data=json.dumps(payload),
+            content_type='application/json',
+            headers=non_admin_headers,
+        )
+        self.assertEqual(as_non_admin.status_code, 403)
 
     def test_password_is_hashed_and_verifiable(self):
         """Verify the model stores a bcrypt hash and checks passwords."""
@@ -91,7 +119,8 @@ class TestUserEndpoints(unittest.TestCase):
         create_response = self.client.post(
             '/api/v1/users/',
             data=json.dumps(payload),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.admin_headers,
         )
         self.assertEqual(create_response.status_code, 201)
         created = json.loads(create_response.data.decode('utf-8'))
@@ -128,7 +157,8 @@ class TestUserEndpoints(unittest.TestCase):
         response = self.client.post(
             '/api/v1/users/',
             data=json.dumps(payload),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.admin_headers,
         )
         self.assertEqual(response.status_code, 400)
 
@@ -143,7 +173,8 @@ class TestUserEndpoints(unittest.TestCase):
         response = self.client.post(
             '/api/v1/users/',
             data=json.dumps(payload),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.admin_headers,
         )
         self.assertEqual(response.status_code, 400)
 
@@ -158,7 +189,8 @@ class TestUserEndpoints(unittest.TestCase):
         response = self.client.post(
             '/api/v1/users/',
             data=json.dumps(payload),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.admin_headers,
         )
         self.assertEqual(response.status_code, 400)
 
@@ -172,7 +204,8 @@ class TestUserEndpoints(unittest.TestCase):
         response = self.client.post(
             '/api/v1/users/',
             data=json.dumps(payload),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.admin_headers,
         )
         self.assertEqual(response.status_code, 400)
 
@@ -186,7 +219,8 @@ class TestUserEndpoints(unittest.TestCase):
         response = self.client.post(
             '/api/v1/users/',
             data=json.dumps(payload),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.admin_headers,
         )
         self.assertEqual(response.status_code, 400)
 
@@ -202,14 +236,16 @@ class TestUserEndpoints(unittest.TestCase):
         first = self.client.post(
             '/api/v1/users/',
             data=json.dumps(payload),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.admin_headers,
         )
         self.assertEqual(first.status_code, 201)
 
         second = self.client.post(
             '/api/v1/users/',
             data=json.dumps(payload),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.admin_headers,
         )
         self.assertEqual(second.status_code, 400)
 
@@ -231,7 +267,8 @@ class TestUserEndpoints(unittest.TestCase):
         create_response = self.client.post(
             '/api/v1/users/',
             data=json.dumps(payload),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.admin_headers,
         )
         user_id = json.loads(create_response.data.decode('utf-8'))['id']
 
@@ -246,25 +283,15 @@ class TestUserEndpoints(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_update_user_success(self):
-        """Verify updating a user's first_name returns HTTP 200."""
-        payload = {
-            "first_name": "Jane",
-            "last_name": "Doe",
-            "email": self._unique_email(),
-            "password": "password123",
-        }
-        create_response = self.client.post(
-            '/api/v1/users/',
-            data=json.dumps(payload),
-            content_type='application/json'
-        )
-        user_id = json.loads(create_response.data.decode('utf-8'))['id']
+        """Verify a user updating their own first_name returns HTTP 200."""
+        user, user_headers = make_user(self.client, self.admin_headers)
 
         update_payload = {"first_name": "Janet"}
         response = self.client.put(
-            f'/api/v1/users/{user_id}',
+            f"/api/v1/users/{user['id']}",
             data=json.dumps(update_payload),
-            content_type='application/json'
+            content_type='application/json',
+            headers=user_headers,
         )
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
@@ -276,30 +303,33 @@ class TestUserEndpoints(unittest.TestCase):
         response = self.client.put(
             '/api/v1/users/non-existent-id',
             data=json.dumps(update_payload),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.admin_headers,
         )
         self.assertEqual(response.status_code, 404)
 
     def test_update_user_invalid_email(self):
-        """Verify updating a user with an invalid email returns HTTP 400."""
-        payload = {
-            "first_name": "Jane",
-            "last_name": "Doe",
-            "email": self._unique_email(),
-            "password": "password123",
-        }
-        create_response = self.client.post(
-            '/api/v1/users/',
-            data=json.dumps(payload),
-            content_type='application/json'
-        )
-        user_id = json.loads(create_response.data.decode('utf-8'))['id']
+        """Verify an admin updating a user with a bad email returns HTTP 400."""
+        user, _ = make_user(self.client, self.admin_headers)
 
         update_payload = {"email": "not-an-email"}
         response = self.client.put(
-            f'/api/v1/users/{user_id}',
+            f"/api/v1/users/{user['id']}",
             data=json.dumps(update_payload),
-            content_type='application/json'
+            content_type='application/json',
+            headers=self.admin_headers,
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_update_user_forbidden_fields_for_non_admin(self):
+        """Verify a non-admin cannot change their own email or is_admin."""
+        user, user_headers = make_user(self.client, self.admin_headers)
+
+        response = self.client.put(
+            f"/api/v1/users/{user['id']}",
+            data=json.dumps({"email": "new_" + user['email']}),
+            content_type='application/json',
+            headers=user_headers,
         )
         self.assertEqual(response.status_code, 400)
 
