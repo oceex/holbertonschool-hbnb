@@ -103,6 +103,104 @@ The application will run in debug mode. At this stage, the API documentation (Sw
 
 This part establishes the application factory, mapped domain models, SQLAlchemy repositories, business validation, and CRUD API behavior.
 
+## Task 9: Raw SQLite Scripts
+
+Task 9 demonstrates database creation and CRUD operations independently of
+SQLAlchemy and `db.create_all()`. The SQLite scripts are located in `sql/`:
+
+- `schema.sql` creates the five Task 9 tables and their constraints.
+- `seed.sql` inserts the fixed administrator and three required Amenities.
+- `crud_test.sql` exercises direct SQL CRUD operations and rolls them back.
+
+The administrator ID is fixed by the assignment. Amenity IDs were generated
+once as UUID4 values, and the CRUD demonstration uses separate fixed UUID4
+values for repeatable testing. New application records must supply their own
+UUID4 identifiers. The administrator password column contains only a bcrypt
+hash generated using Flask-Bcrypt; the plaintext value is not stored in the SQL
+scripts or this documentation.
+
+From the `part3` directory, create and seed a fresh local database with:
+
+```powershell
+Remove-Item -LiteralPath task9_test.db -ErrorAction SilentlyContinue
+python -c "import sqlite3; conn=sqlite3.connect('task9_test.db'); conn.executescript(open('sql/schema.sql', encoding='utf-8').read()); conn.executescript(open('sql/seed.sql', encoding='utf-8').read()); conn.close()"
+```
+
+Inspect the seeded rows without exposing password data:
+
+```powershell
+python -c "import sqlite3; conn=sqlite3.connect('task9_test.db'); print(conn.execute('SELECT id, first_name, last_name, email, is_admin FROM users').fetchall()); print(conn.execute('SELECT id, name FROM amenities ORDER BY name').fetchall()); conn.close()"
+```
+
+Run the rollback-only CRUD demonstration:
+
+```powershell
+python -c "import sqlite3; conn=sqlite3.connect('task9_test.db'); conn.executescript(open('sql/crud_test.sql', encoding='utf-8').read()); conn.close()"
+```
+
+Remove the manual database afterward:
+
+```powershell
+Remove-Item -LiteralPath task9_test.db
+```
+
+Run the focused Task 9 tests and complete Part 3 suite with:
+
+```powershell
+python -m unittest tests.test_sql_scripts -v
+python -m unittest discover -s tests -v
+```
+
+The final regression totals are 53 Part 2 tests and 76 Part 3 tests, for 129
+unique tests overall. The 18 focused Task 9 tests are included in the 76-test
+Part 3 suite and are not counted a second time.
+
+The raw Task 9 schema follows the assignment's explicit SQL definitions. It is
+intentionally not identical to the current ORM mapping, which also defines
+timestamps, shorter strings, an Amenity description, non-null fields, Python-side
+defaults, and ORM relationship cascades.
+
+## Task 10: Database Diagram
+
+Task 10 documents the Task 9 raw SQL schema as an editable Mermaid ER diagram.
+See the [diagram documentation](ER_DIAGRAM.md), the
+[Mermaid source](diagrams/hbnb_er_diagram.mmd), and the exported SVG below.
+GitHub can render the Mermaid source in `ER_DIAGRAM.md` directly.
+
+![HBnB database ER diagram](diagrams/hbnb_er_diagram.svg)
+
+Regenerate and validate the SVG from the repository root with the official
+Mermaid CLI without creating a local JavaScript project:
+
+```powershell
+npx -y @mermaid-js/mermaid-cli -i part3/diagrams/hbnb_er_diagram.mmd -o part3/diagrams/hbnb_er_diagram.svg
+```
+
+On Windows PowerShell, if the execution policy blocks `npx.ps1`, use the
+`npx.cmd` launcher instead:
+
+```powershell
+npx.cmd -y @mermaid-js/mermaid-cli -i part3\diagrams\hbnb_er_diagram.mmd -o part3\diagrams\hbnb_er_diagram.svg
+```
+
+If Mermaid CLI cannot download or locate Chrome, the tested Windows fallback is
+to provide the Chrome executable explicitly and skip its download:
+
+```powershell
+$env:PUPPETEER_SKIP_DOWNLOAD='true'
+$env:PUPPETEER_EXECUTABLE_PATH='C:\Program Files\Google\Chrome\Application\chrome.exe'
+npx.cmd -y @mermaid-js/mermaid-cli -i part3\diagrams\hbnb_er_diagram.mmd -o part3\diagrams\hbnb_er_diagram.svg
+```
+
+The installed Chrome path may differ by system.
+
+If Mermaid CLI is unavailable, copy `part3/diagrams/hbnb_er_diagram.mmd` into
+the official Mermaid Live Editor, validate it there, and export the result to
+`part3/diagrams/hbnb_er_diagram.svg`.
+
+Reservation or Booking would be a future conceptual extension; neither entity
+is part of the implemented Task 9 schema or the authoritative diagram.
+
 ## Author
 
 *Alanoud Aloraydi, Leen Algraawi, Reema Alshahrani.*
