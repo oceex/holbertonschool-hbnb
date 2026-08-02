@@ -155,11 +155,19 @@ class HBnBFacade:
 
         return self.place_repo.update(place_id, data)
 
+    def delete_place(self, place_id):
+        """Delete a place and let mapped relationships synchronize."""
+        place = self.get_place(place_id)
+        if not place:
+            return False
+        return self.place_repo.delete(place_id)
+
     def create_review(self, review_data):
         """Create and persist a review.
 
-        The place and user must exist, and a user may review each place only
-        once. Violations raise ``ValueError``.
+        The place and user must exist, a user may not review their own
+        place, and a user may review each place only once. Violations raise
+        ``ValueError``.
         """
         place = self.get_place(review_data.get("place_id"))
         if not place:
@@ -171,13 +179,15 @@ class HBnBFacade:
             raise ValueError(
                 f"user with id '{review_data.get('user_id')}' not found")
 
+        if place.owner and str(place.owner.id) == str(user.id):
+            raise ValueError("You cannot review your own place")
+
         existing_review = self.review_repo.get_review_by_place_and_user(
             place.id,
             user.id,
         )
         if existing_review:
-            raise ValueError(
-                f"User '{user.id}' has already reviewed place '{place.id}'")
+            raise ValueError("You have already reviewed this place")
 
         review = Review(
             text=review_data.get("text"),
