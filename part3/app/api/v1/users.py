@@ -1,7 +1,15 @@
 #!/usr/bin/python3
 """User API resources and serialization schemas."""
 from flask_restx import Namespace, Resource, fields
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
+
 from app.services import facade
+
+
+def current_user_is_admin():
+    """Return whether the caller's JWT carries an is_admin=True claim."""
+    return get_jwt().get("is_admin", False)
+
 
 api = Namespace("users", description="User operations")
 
@@ -54,17 +62,19 @@ class UserList(Resource):
         """List all users."""
         return [serialize_user(u) for u in facade.get_all_users()]
 
+    @jwt_required()
     @api.expect(user_model, validate=True)
     @api.marshal_with(user_response_model, code=201)
     @api.response(201, "User successfully created", user_response_model)
     @api.response(400, "Invalid input data")
+    @api.response(403, "Admin privileges required")
     def post(self):
-        """Create a new user."""
-        data = api.payload
-        if facade.get_user_by_email(data.get("email")):
-            api.abort(400, "Email already registered")
+        """Create a new user (admin only)."""
+        if not current_user_is_admin():
+            api.abort(403, "Admin privileges required")
+
         try:
-            user = facade.create_user(data)
+            user = facade.create_user(api.payload)
         except ValueError as e:
             api.abort(400, str(e))
         return serialize_user(user), 201
@@ -84,23 +94,37 @@ class UserResource(Resource):
             api.abort(404, "User not found")
         return serialize_user(user), 200
 
+    @jwt_required()
     @api.expect(user_update_model, validate=True)
     @api.marshal_with(user_response_model)
     @api.response(200, "User successfully updated", user_response_model)
+    @api.response(403, "Not authorized to modify this user")
     @api.response(404, "User not found")
     @api.response(400, "Invalid input data")
     def put(self, user_id):
-        """Update a user's information."""
+        """Update a user's information.
+
+        A regular user may update only their own first/last name. Only an
+        admin may change email, password, or is_admin -- and may do so for
+        any user, not just themselves.
+        """
         user = facade.get_user(user_id)
         if not user:
             api.abort(404, "User not found")
 
-        data = api.payload
+        is_self = get_jwt_identity() == user_id
+        is_admin = current_user_is_admin()
 
-        if "email" in data:
-            existing_user = facade.get_user_by_email(data["email"])
-            if existing_user and existing_user.id != user_id:
-                api.abort(400, "Email already in use")
+        if not is_self and not is_admin:
+            api.abort(403, "Unauthorized action")
+
+        data = api.payload or {}
+
+        if not is_admin:
+            if "email" in data or "password" in data:
+                api.abort(400, "You cannot modify email or password")
+            if "is_admin" in data:
+                api.abort(400, "You cannot modify is_admin")
 
         try:
             updated = facade.update_user(user_id, data)
