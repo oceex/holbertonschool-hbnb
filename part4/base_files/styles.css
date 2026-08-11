@@ -1,0 +1,525 @@
+/* ==================================================================
+   hbnb — stylesheet
+   Palette: warm off-white surface, charcoal ink, coral primary,
+   deep teal secondary. Display face Fraunces / body face Inter.
+   ================================================================== */
+
+:root {
+  --color-bg: #f6f4f1;
+  --color-surface: #ffffff;
+  --color-ink: #23262b;
+  --color-ink-muted: #6b6f76;
+  --color-border: #ddd;
+  --color-primary: #ff5a5f;
+  --color-primary-dark: #e14b50;
+  --color-secondary: #1d7874;
+  --color-secondary-dark: #145f5c;
+
+  --radius-card: 10px;
+  --shadow-card: 0 1px 2px rgba(35, 38, 43, 0.04), 0 8px 20px -12px rgba(35, 38, 43, 0.18);
+
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'Inter', Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-body);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-ink);
+  line-height: 1.5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--color-ink);
+}
+
+a {
+  color: var(--color-secondary);
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+main {
+  flex: 1;
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+/* ------------------------------------------------------------------
+   Header / navigation
+   ------------------------------------------------------------------ */
+.site-header {
+  background-color: var(--color-ink);
+  padding: 0.9rem 1.5rem;
+}
+
+.header-inner {
+  max-width: 1080px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+}
+
+.logo {
+  height: 32px;
+  width: auto;
+  display: block;
+}
+
+.site-header nav {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.site-header nav a {
+  color: #f4f2ef;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.site-header nav a:not(.login-button):hover {
+  color: var(--color-primary);
+}
+
+.login-button {
+  background-color: var(--color-primary);
+  color: #fff !important;
+  padding: 0.5rem 1.1rem;
+  border-radius: 999px;
+  font-weight: 600 !important;
+  transition: background-color 0.15s ease;
+}
+
+.login-button:hover {
+  background-color: var(--color-primary-dark);
+}
+
+/* ------------------------------------------------------------------
+   Footer
+   ------------------------------------------------------------------ */
+.site-footer {
+  background-color: var(--color-ink);
+  color: #cfcdc9;
+  text-align: center;
+  padding: 1.5rem;
+  font-size: 0.85rem;
+}
+
+/* ------------------------------------------------------------------
+   Buttons (shared)
+   ------------------------------------------------------------------ */
+.primary-button,
+.details-button {
+  display: inline-block;
+  background-color: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 0.65rem 1.3rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.primary-button:hover,
+.details-button:hover {
+  background-color: var(--color-primary-dark);
+  transform: translateY(-1px);
+}
+
+/* ------------------------------------------------------------------
+   Index page — intro, filter, place grid
+   ------------------------------------------------------------------ */
+.page-intro {
+  margin-bottom: 1.5rem;
+}
+
+.page-intro h1 {
+  font-size: 2rem;
+  margin-bottom: 0.35rem;
+}
+
+.page-intro p {
+  color: var(--color-ink-muted);
+}
+
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  padding: 0.9rem 1.1rem;
+  margin-bottom: 0.5rem;
+  width: fit-content;
+}
+
+.filter-bar label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.filter-bar select,
+.add-review select,
+.auth-form select {
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 0.45rem 0.7rem;
+  font-size: 0.95rem;
+  background-color: #fff;
+  color: var(--color-ink);
+}
+
+.places-grid {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.place-card {
+  /* Fixed parameters from spec */
+  margin: 20px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-card);
+  flex: 1 1 260px;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.place-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px -12px rgba(35, 38, 43, 0.28);
+}
+
+.place-card h3 {
+  font-size: 1.15rem;
+}
+
+.place-card-city {
+  color: var(--color-ink-muted);
+  font-size: 0.88rem;
+}
+
+.price-pill {
+  align-self: flex-start;
+  background-color: rgba(29, 120, 116, 0.1);
+  color: var(--color-secondary-dark);
+  border-radius: 999px;
+  padding: 0.25rem 0.7rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.price-pill span {
+  font-family: var(--font-display);
+  font-size: 1rem;
+}
+
+.price-pill.large {
+  font-size: 1rem;
+  padding: 0.35rem 0.9rem;
+}
+
+.price-pill.large span {
+  font-size: 1.3rem;
+}
+
+.place-card .details-button {
+  margin-top: 0.5rem;
+  align-self: flex-start;
+}
+
+.empty-state {
+  color: var(--color-ink-muted);
+  padding: 1rem 0;
+}
+
+/* ------------------------------------------------------------------
+   Place details page
+   ------------------------------------------------------------------ */
+.back-link {
+  display: inline-block;
+  margin-bottom: 1.25rem;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.place-details {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: 1.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.place-details h1 {
+  font-size: 1.85rem;
+  margin-bottom: 0.25rem;
+}
+
+.place-location {
+  color: var(--color-ink-muted);
+  margin-bottom: 0.15rem;
+}
+
+.host-line {
+  margin-bottom: 0.9rem;
+}
+
+.place-description {
+  margin: 1rem 0 1.4rem;
+  max-width: 60ch;
+  color: var(--color-ink);
+}
+
+.place-info h2 {
+  font-size: 1.1rem;
+  margin-bottom: 0.75rem;
+}
+
+.amenities-list {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.amenities-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.92rem;
+  color: var(--color-ink);
+}
+
+.amenity-icon {
+  width: 22px;
+  height: 22px;
+  opacity: 0.75;
+}
+
+/* ------------------------------------------------------------------
+   Reviews
+   ------------------------------------------------------------------ */
+.reviews-section {
+  margin-bottom: 1.5rem;
+}
+
+.reviews-section h2 {
+  font-size: 1.3rem;
+  margin-bottom: 0.75rem;
+}
+
+.reviews-list {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.review-card {
+  /* Fixed parameters from spec */
+  margin: 20px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-card);
+  flex: 1 1 260px;
+  max-width: 320px;
+}
+
+.review-comment {
+  margin-bottom: 0.6rem;
+}
+
+.review-meta {
+  font-size: 0.85rem;
+  color: var(--color-ink-muted);
+}
+
+.review-user {
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.review-rating {
+  color: var(--color-primary);
+  letter-spacing: 1px;
+}
+
+/* ------------------------------------------------------------------
+   Add review — inline (place.html) & standalone (add_review.html)
+   ------------------------------------------------------------------ */
+.add-review-section .login-prompt {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  padding: 1.25rem;
+  color: var(--color-ink-muted);
+}
+
+.add-review.form,
+.auth-form {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: 1.5rem;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.add-review.form h2,
+.auth-form h1 {
+  margin-bottom: 0.5rem;
+}
+
+.reviewing-place {
+  color: var(--color-ink-muted);
+  margin-bottom: 0.75rem;
+}
+
+.add-review.form label,
+.auth-form label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-top: 0.6rem;
+}
+
+.add-review.form textarea,
+.auth-form input {
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.95rem;
+  color: var(--color-ink);
+  background-color: #fff;
+  resize: vertical;
+}
+
+.add-review.form button,
+.auth-form button {
+  margin-top: 1rem;
+  align-self: flex-start;
+}
+
+.or-divider {
+  margin-top: 0.85rem;
+  font-size: 0.85rem;
+  color: var(--color-ink-muted);
+}
+
+.form-error {
+  background-color: #fdecea;
+  color: #b3261e;
+  border-radius: 6px;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.form-success {
+  background-color: #e7f4ef;
+  color: var(--color-secondary-dark);
+  border-radius: 6px;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+/* ------------------------------------------------------------------
+   Auth section (login page)
+   ------------------------------------------------------------------ */
+.auth-section {
+  display: flex;
+  justify-content: center;
+  padding-top: 1.5rem;
+}
+
+.auth-form h1 {
+  font-size: 1.6rem;
+}
+
+.auth-subtitle {
+  color: var(--color-ink-muted);
+  font-size: 0.92rem;
+  margin-bottom: 0.5rem;
+}
+
+/* ------------------------------------------------------------------
+   Responsive
+   ------------------------------------------------------------------ */
+@media (max-width: 600px) {
+  .header-inner {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .site-header nav {
+    gap: 1rem;
+  }
+
+  .place-card,
+  .review-card {
+    max-width: 100%;
+    flex: 1 1 100%;
+  }
+
+  .place-details {
+    padding: 1.25rem;
+  }
+
+  .add-review.form,
+  .auth-form {
+    max-width: 100%;
+  }
+}

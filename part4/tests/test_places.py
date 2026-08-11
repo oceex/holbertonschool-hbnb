@@ -1,0 +1,359 @@
+#!/usr/bin/python3
+"""Tests for place API behavior and model relationship validation."""
+
+import json
+import unittest
+import uuid
+from run import app
+from app.models.place import Place
+from app.models.user import User
+from app.services import facade
+from tests.auth_helpers import make_admin, make_user
+
+
+class TestPlaceEndpoints(unittest.TestCase):
+    """Exercise place endpoints and relationship rules."""
+
+    def setUp(self):
+        """Create a test client, an admin, and a registered owner fixture."""
+        app.config['TESTING'] = True
+        self.client = app.test_client()
+
+        self.admin, self.admin_headers = make_admin(self.client)
+        owner, self.owner_headers = make_user(self.client, self.admin_headers)
+        self.owner_id = owner['id']
+
+    def test_create_place_success(self):
+        """Verify successful place creation returns HTTP 201."""
+        payload = {
+            "title": "Cozy Cabin",
+            "price": 150.0,
+            "latitude": 45.0,
+            "longitude": -90.0,
+            "owner_id": self.owner_id
+        }
+        response = self.client.post(
+            '/api/v1/places/', data=json.dumps(payload),
+            content_type='application/json', headers=self.owner_headers,
+        )
+
+        self.assertEqual(response.status_code, 201)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['title'], 'Cozy Cabin')
+
+    def test_create_place_requires_auth(self):
+        """Verify creating a place without a token returns HTTP 401."""
+        payload = {
+            "title": "Cozy Cabin",
+            "price": 150.0,
+            "latitude": 45.0,
+            "longitude": -90.0,
+        }
+        response = self.client.post(
+            '/api/v1/places/', data=json.dumps(payload),
+            content_type='application/json',
+        )
+        self.assertEqual(response.status_code, 401)
+
+    def test_create_place_invalid_latitude(self):
+        """Verify an out-of-range latitude returns HTTP 400."""
+        payload = {
+            "title": "Invalid Cabin",
+            "price": 150.0,
+            "latitude": 100.0,
+            "longitude": -90.0,
+            "owner_id": self.owner_id
+        }
+        response = self.client.post(
+            '/api/v1/places/', data=json.dumps(payload),
+            content_type='application/json', headers=self.owner_headers,
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_create_place_invalid_longitude(self):
+        """Verify a longitude outside -180/180 returns HTTP 400 (boundary test)."""
+        payload = {
+            "title": "Invalid Cabin",
+            "price": 150.0,
+            "latitude": 45.0,
+            "longitude": 200.0,
+            "owner_id": self.owner_id
+        }
+        response = self.client.post(
+            '/api/v1/places/', data=json.dumps(payload),
+            content_type='application/json', headers=self.owner_headers,
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_create_place_boundary_latitude_longitude(self):
+        """Verify exact boundary values (-90/90, -180/180) are accepted."""
+        payload = {
+            "title": "Edge of the World Cabin",
+            "price": 99.0,
+            "latitude": 90.0,
+            "longitude": -180.0,
+            "owner_id": self.owner_id
+        }
+        response = self.client.post(
+            '/api/v1/places/', data=json.dumps(payload),
+            content_type='application/json', headers=self.owner_headers,
+        )
+        self.assertEqual(response.status_code, 201)
+
+    def test_create_place_empty_title(self):
+        """Verify an empty title returns HTTP 400."""
+        payload = {
+            "title": "",
+            "price": 150.0,
+            "latitude": 45.0,
+            "longitude": -90.0,
+            "owner_id": self.owner_id
+        }
+        response = self.client.post(
+            '/api/v1/places/', data=json.dumps(payload),
+            content_type='application/json', headers=self.owner_headers,
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_create_place_negative_price(self):
+        """Verify a negative price returns HTTP 400."""
+        payload = {
+            "title": "Cheap Cabin",
+            "price": -10.0,
+            "latitude": 45.0,
+            "longitude": -90.0,
+            "owner_id": self.owner_id
+        }
+        response = self.client.post(
+            '/api/v1/places/', data=json.dumps(payload),
+            content_type='application/json', headers=self.owner_headers,
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_create_place_invalid_owner(self):
+        """Verify the facade rejects place creation for a non-existent owner.
+
+        This can no longer be triggered through the API: POST /places/
+        always takes the owner from the caller's JWT identity, never from
+        client input, so a client-supplied owner_id is silently ignored.
+        The rule still exists as a facade-level guarantee, so it's tested
+        there directly.
+        """
+        with app.app_context():
+            with self.assertRaises(ValueError):
+                facade.create_place({
+                    "title": "Orphan Cabin",
+                    "price": 150.0,
+                    "latitude": 45.0,
+                    "longitude": -90.0,
+                    "owner_id": "non-existent-owner-id",
+                })
+
+    def test_create_place_missing_title(self):
+        """Verify a missing required title returns HTTP 400."""
+        payload = {
+            "price": 150.0,
+            "latitude": 45.0,
+            "longitude": -90.0,
+            "owner_id": self.owner_id,
+        }
+        response = self.client.post(
+            '/api/v1/places/',
+            data=json.dumps(payload),
+            content_type='application/json',
+            headers=self.owner_headers,
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_create_place_invalid_amenity(self):
+        """Verify a non-existent amenity ID returns HTTP 400."""
+        payload = {
+            "title": "Cabin",
+            "price": 150.0,
+            "latitude": 45.0,
+            "longitude": -90.0,
+            "owner_id": self.owner_id,
+            "amenities": ["non-existent-amenity-id"],
+        }
+        response = self.client.post(
+            '/api/v1/places/',
+            data=json.dumps(payload),
+            content_type='application/json',
+            headers=self.owner_headers,
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_get_all_places(self):
+        """Verify retrieving all places returns HTTP 200 and a list."""
+        response = self.client.get('/api/v1/places/')
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertIsInstance(data, list)
+
+    def test_get_place_by_id_success(self):
+        """Verify place details include required fields and relationships."""
+        amenity_response = self.client.post(
+            '/api/v1/amenities/',
+            data=json.dumps({
+                "name": "Wi-Fi",
+                "description": "High-speed wireless internet",
+            }),
+            content_type='application/json',
+            headers=self.admin_headers,
+        )
+        amenity_id = json.loads(
+            amenity_response.data.decode('utf-8')
+        )['id']
+        payload = {
+            "title": "Cozy Cabin",
+            "description": "A quiet mountain cabin",
+            "price": 150.0,
+            "latitude": 45.0,
+            "longitude": -90.0,
+            "owner_id": self.owner_id,
+            "amenities": [amenity_id],
+        }
+        create_response = self.client.post(
+            '/api/v1/places/', data=json.dumps(payload),
+            content_type='application/json', headers=self.owner_headers,
+        )
+        place_id = json.loads(create_response.data.decode('utf-8'))['id']
+
+        response = self.client.get(f'/api/v1/places/{place_id}')
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['id'], place_id)
+        self.assertEqual(data['description'], 'A quiet mountain cabin')
+        self.assertEqual(data['price'], 150.0)
+        self.assertEqual(data['latitude'], 45.0)
+        self.assertEqual(data['longitude'], -90.0)
+        self.assertEqual(data['owner']['id'], self.owner_id)
+        self.assertEqual(data['amenities'], [{
+            "id": amenity_id,
+            "name": "Wi-Fi",
+            "description": "High-speed wireless internet",
+        }])
+        self.assertEqual(data['reviews'], [])
+
+        place = facade.get_place(place_id)
+        owner = facade.get_user(self.owner_id)
+        amenity = facade.get_amenity(amenity_id)
+        self.assertIn(place, owner.places)
+        self.assertIn(amenity, place.amenities)
+
+    def test_get_place_by_id_not_found(self):
+        """Verify requesting a non-existent place ID returns HTTP 404."""
+        response = self.client.get('/api/v1/places/non-existent-id')
+        self.assertEqual(response.status_code, 404)
+
+    def test_update_place_success(self):
+        """Verify the owner updating a place's title returns HTTP 200."""
+        payload = {
+            "title": "Cozy Cabin",
+            "price": 150.0,
+            "latitude": 45.0,
+            "longitude": -90.0,
+            "owner_id": self.owner_id
+        }
+        create_response = self.client.post(
+            '/api/v1/places/', data=json.dumps(payload),
+            content_type='application/json', headers=self.owner_headers,
+        )
+        place_id = json.loads(create_response.data.decode('utf-8'))['id']
+
+        update_payload = {"title": "Renovated Cabin"}
+        response = self.client.put(
+            f'/api/v1/places/{place_id}',
+            data=json.dumps(update_payload),
+            content_type='application/json',
+            headers=self.owner_headers,
+        )
+        self.assertEqual(response.status_code, 200)
+
+    def test_update_place_forbidden_for_non_owner(self):
+        """Verify a non-owner, non-admin user cannot update someone else's place."""
+        payload = {
+            "title": "Cozy Cabin",
+            "price": 150.0,
+            "latitude": 45.0,
+            "longitude": -90.0,
+        }
+        create_response = self.client.post(
+            '/api/v1/places/', data=json.dumps(payload),
+            content_type='application/json', headers=self.owner_headers,
+        )
+        place_id = json.loads(create_response.data.decode('utf-8'))['id']
+
+        _, other_headers = make_user(self.client, self.admin_headers)
+        response = self.client.put(
+            f'/api/v1/places/{place_id}',
+            data=json.dumps({"title": "Hijacked Cabin"}),
+            content_type='application/json',
+            headers=other_headers,
+        )
+        self.assertEqual(response.status_code, 403)
+
+    def test_update_place_amenities(self):
+        """Verify a place's amenity relationships can be replaced."""
+        create_response = self.client.post(
+            '/api/v1/places/',
+            data=json.dumps({
+                "title": "Cozy Cabin",
+                "price": 150.0,
+                "latitude": 45.0,
+                "longitude": -90.0,
+                "owner_id": self.owner_id,
+            }),
+            content_type='application/json',
+            headers=self.owner_headers,
+        )
+        place_id = json.loads(create_response.data.decode('utf-8'))['id']
+        amenity_response = self.client.post(
+            '/api/v1/amenities/',
+            data=json.dumps({
+                "name": "Parking",
+                "description": "Covered parking",
+            }),
+            content_type='application/json',
+            headers=self.admin_headers,
+        )
+        amenity_id = json.loads(
+            amenity_response.data.decode('utf-8')
+        )['id']
+
+        response = self.client.put(
+            f'/api/v1/places/{place_id}',
+            data=json.dumps({"amenities": [amenity_id]}),
+            content_type='application/json',
+            headers=self.owner_headers,
+        )
+        self.assertEqual(response.status_code, 200)
+
+        detail_response = self.client.get(f'/api/v1/places/{place_id}')
+        detail = json.loads(detail_response.data.decode('utf-8'))
+        self.assertEqual(
+            [amenity['id'] for amenity in detail['amenities']],
+            [amenity_id],
+        )
+
+    def test_update_place_not_found(self):
+        """Verify updating a non-existent place returns HTTP 404."""
+        update_payload = {"title": "Ghost Cabin"}
+        response = self.client.put(
+            '/api/v1/places/non-existent-id',
+            data=json.dumps(update_payload),
+            content_type='application/json',
+            headers=self.owner_headers,
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_add_review_rejects_non_review(self):
+        """Verify place relationships reject non-review objects."""
+        some_user = User("Test", "Owner", f"{uuid.uuid4()}@test.com", "secret")
+        place = Place("Cabin", "desc", 100, 45.0, -122.0, some_user)
+        with self.assertRaises(TypeError):
+            place.add_review("not a review")
+
+
+if __name__ == '__main__':
+    unittest.main()

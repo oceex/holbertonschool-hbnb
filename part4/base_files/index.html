@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find a place to stay · hbnb</title>
+    <link rel="icon" type="image/png" href="images/icon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="index.html" class="brand">
+                <img src="images/logo.png" alt="hbnb home" class="logo">
+            </a>
+            <nav>
+                <a href="index.html" aria-current="page">Home</a>
+                <a href="login.html" id="login-link" class="login-button">Login</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="page-intro">
+            <h1>Places to stay</h1>
+            <p>Handpicked homes, curated by hosts who know their city best.</p>
+        </section>
+
+        <section id="filter" class="filter-bar">
+            <label for="price-filter">Max Price</label>
+            <select id="price-filter">
+                <!-- Options will be populated dynamically -->
+            </select>
+        </section>
+
+        <section id="places-list" class="places-grid" aria-live="polite">
+            <!-- List of places will be populated dynamically -->
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <p>&copy; 2026 hbnb. All rights reserved.</p>
+    </footer>
+    <script src="scripts.js"></script>
+</body>
+</html>

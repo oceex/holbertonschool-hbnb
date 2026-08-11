@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add a Review · hbnb</title>
+    <link rel="icon" type="image/png" href="images/icon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="index.html" class="brand">
+                <img src="images/logo.png" alt="hbnb home" class="logo">
+            </a>
+            <nav>
+                <a href="index.html">Home</a>
+                <a href="login.html" id="login-link" class="login-button">Login</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="auth-section">
+            <form id="review-form" class="add-review form" novalidate>
+                <h1>Add a Review</h1>
+                <p id="reviewing-place" class="reviewing-place"></p>
+                <input type="hidden" id="place-id" name="place-id">
+
+                <p id="review-confirmation" class="form-success" hidden></p>
+
+                <label for="review">Your Review</label>
+                <textarea id="review" name="review" rows="5" placeholder="Share how your stay went..." required></textarea>
+
+                <label for="rating">Rating</label>
+                <select id="rating" name="rating" required>
+                    <!-- Options for rating populated dynamically -->
+                </select>
+
+                <button type="submit" class="primary-button">Submit Review</button>
+            </form>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <p>&copy; 2026 hbnb. All rights reserved.</p>
+    </footer>
+    <script src="scripts.js"></script>
+</body>
+</html>
