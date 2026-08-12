@@ -391,12 +391,33 @@ main {
 }
 
 .amenities-list li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
   font-family: 'IBM Plex Mono', monospace;
   font-size: 0.75rem;
   background: rgba(241, 236, 221, 0.1);
   border: 1px solid rgba(241, 236, 221, 0.3);
   border-radius: 999px;
-  padding: 5px 11px;
+  padding: 5px 12px 5px 5px;
+}
+
+.amenity-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--gold);
+  color: var(--ink);
+}
+
+.amenity-icon img {
+  width: 13px;
+  height: 13px;
+  display: block;
 }
 
 .host-line {

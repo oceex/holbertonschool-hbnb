@@ -6,6 +6,7 @@
   <title>HBnB — Cliffside Cabin</title>
   <link rel="icon" type="image/png" href="images/icon.png">
   <link rel="stylesheet" href="styles.css">
+  <script src="scripts.js" defer></script>
 </head>
 <body>
 
@@ -13,10 +14,9 @@
     <div class="header-inner">
       <div class="brand">
           <a href="index.html" ><img src="images/logo.png" alt="HBnB logo" class="logo"></a>
-          <span class="brand-name">HBnB</span>
       </div>
       <nav class="main-nav" aria-label="Primary">
-        <a href="login.html" class="login-button">Log in</a>
+        <a href="login.html" class="login-button" id="login-link">Log in</a>
       </nav>
     </div>
   </header>
@@ -48,9 +48,9 @@
           <dt>Amenities</dt>
           <dd>
             <ul class="amenities-list">
-              <li><img src="images/icon_bath.png" width="19px" height="19px">Private Bath</li>
-              <li><img src="images/icon_wifi.png" width="19px" height="19px">Free WiFi</li>
-              <li><img src="images/icon_bed.png" width="23px" height="23px">2 Beds</li>
+              <li><span class="amenity-icon"><img src="images/icon_bath.svg" alt="" width="16" height="16"></span>Private Bath</li>
+              <li><span class="amenity-icon"><img src="images/icon_wifi.svg" alt="" width="16" height="16"></span>Free WiFi</li>
+              <li><span class="amenity-icon"><img src="images/icon_bed.svg" alt="" width="16" height="16"></span>2 Beds</li>
             </ul>
           </dd>
         </dl>
@@ -86,7 +86,7 @@
         </li>
       </ul>
 
-      <div class="add-review-cta">
+      <div class="add-review-cta" id="add-review-cta">
         <a href="add_review.html" class="details-button">Add a review</a>
       </div>
     </section>
