@@ -1,50 +1,105 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Place Details · hbnb</title>
-    <link rel="icon" type="image/png" href="images/icon.png">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HBnB — Cliffside Cabin</title>
+  <link rel="icon" type="image/png" href="images/icon.png">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header class="site-header">
-        <div class="header-inner">
-            <a href="index.html" class="brand">
-                <img src="images/logo.png" alt="hbnb home" class="logo">
-            </a>
-            <nav>
-                <a href="index.html">Home</a>
-                <a href="login.html" id="login-link" class="login-button">Login</a>
-            </nav>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand">
+          <a href="index.html" ><img src="images/logo.png" alt="HBnB logo" class="logo"></a>
+          <span class="brand-name">HBnB</span>
+      </div>
+      <nav class="main-nav" aria-label="Primary">
+        <a href="login.html" class="login-button">Log in</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="place-details" id="place-details">
+      <div class="place-main">
+        <p class="eyebrow">Big Sur, California</p>
+        <h1>Cliffside Cabin</h1>
+        <p>A one-room cabin perched above the Pacific, built from reclaimed redwood and warmed by a wood stove. Fall asleep to the surf, wake up to fog burning off the cliffs. Ten minutes from the nearest trailhead, no cell signal, and a stack of field guides on the shelf.</p>
+        <p>Two can sleep comfortably; a third can take the window nook with the extra bedding provided. Check-in is self-service with a lockbox code sent the morning of arrival.</p>
+      </div>
+
+      <aside class="place-info">
+        <p class="price-tag">$120 <small>/ night</small></p>
+
+        <div class="host-line">
+          <span class="host-avatar">M</span>
+          <span>Hosted by Marisol</span>
         </div>
-    </header>
 
-    <main>
-        <a href="index.html" class="back-link">&larr; Back to all places</a>
+        <dl>
+          <dt>Location</dt>
+          <dd>Big Sur, California — 36.2704° N, 121.8081° W</dd>
 
-        <section id="place-details" class="place-details">
-            <!-- Place details will be populated dynamically -->
-        </section>
+          <dt>Sleeps</dt>
+          <dd>2–3 guests</dd>
 
-        <section id="reviews" class="reviews-section">
-            <h2>Reviews</h2>
-            <div id="reviews-list" class="reviews-list">
-                <!-- Reviews will be populated dynamically -->
-            </div>
-        </section>
+          <dt>Amenities</dt>
+          <dd>
+            <ul class="amenities-list">
+              <li><img src="images/icon_bath.png" width="19px" height="19px">Private Bath</li>
+              <li><img src="images/icon_wifi.png" width="19px" height="19px">Free WiFi</li>
+              <li><img src="images/icon_bed.png" width="23px" height="23px">2 Beds</li>
+            </ul>
+          </dd>
+        </dl>
+      </aside>
+    </section>
 
-        <section id="add-review" class="add-review-section">
-            <!-- Add-review form or login prompt populated dynamically -->
-        </section>
-    </main>
+    <section class="reviews" id="reviews" aria-labelledby="reviews-heading">
+      <h2 id="reviews-heading">What guests said</h2>
 
-    <footer class="site-footer">
-        <p>&copy; 2026 hbnb. All rights reserved.</p>
-    </footer>
-    <script src="scripts.js"></script>
+      <ul class="reviews-list">
+        <li class="review-card">
+          <div class="review-head">
+            <span class="reviewer">Priya N.</span>
+            <span class="rating">★★★★★ 5/5</span>
+          </div>
+          <p>Woke up to fog rolling under the deck and coffee on the stove — exactly the reset I needed. Marisol's directions for the last unpaved mile were spot on.</p>
+        </li>
+
+        <li class="review-card">
+          <div class="review-head">
+            <span class="reviewer">Tom R.</span>
+            <span class="rating">★★★★☆ 4/5</span>
+          </div>
+          <p>No signal is the whole point, but bring a paper map for the trailhead — we missed a turn on the way in. Cabin itself was spotless and warm.</p>
+        </li>
+
+        <li class="review-card">
+          <div class="review-head">
+            <span class="reviewer">Elena K.</span>
+            <span class="rating">★★★★★ 5/5</span>
+          </div>
+          <p>Second stay this year. The window nook is my favorite reading spot on the whole coast.</p>
+        </li>
+      </ul>
+
+      <div class="add-review-cta">
+        <a href="add_review.html" class="details-button">Add a review</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <p>&copy; 2026 HBnB. All rights reserved.</p>
+      <nav aria-label="Footer">
+        <a href="index.html">Places</a>
+      </nav>
+    </div>
+  </footer>
+
 </body>
 </html>

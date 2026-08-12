@@ -1,32 +1,27 @@
-/* ==================================================================
-   hbnb — stylesheet
-   Palette: warm off-white surface, charcoal ink, coral primary,
-   deep teal secondary. Display face Fraunces / body face Inter.
-   ================================================================== */
+/* =========================================================
+   HBnB — stylesheet
+   Design language: a travel journal of postcards & ticket stubs.
+   ========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,900&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap');
 
 :root {
-  --color-bg: #f6f4f1;
-  --color-surface: #ffffff;
-  --color-ink: #23262b;
-  --color-ink-muted: #6b6f76;
-  --color-border: #ddd;
-  --color-primary: #ff5a5f;
-  --color-primary-dark: #e14b50;
-  --color-secondary: #1d7874;
-  --color-secondary-dark: #145f5c;
+  --ink: #16302B;         /* deep pine ink — header, footer, dark surfaces */
+  --paper: #F1ECDD;       /* warm parchment — page background */
+  --surface: #FBF8F0;     /* card surface, lighter than paper */
+  --gold: #E3AE4D;        /* stamp / accent */
+  --teal: #4C7A75;        /* secondary accent, links */
+  --clay: #B5562E;        /* rating / alert accent */
+  --text: #22302B;        /* body ink */
+  --text-muted: #5B6B62;  /* secondary ink */
+  --line: #ddd;           /* fixed card border color per spec */
 
-  --radius-card: 10px;
-  --shadow-card: 0 1px 2px rgba(35, 38, 43, 0.04), 0 8px 20px -12px rgba(35, 38, 43, 0.18);
-
-  --font-display: 'Fraunces', Georgia, serif;
-  --font-body: 'Inter', Arial, sans-serif;
+  --radius-lg: 18px;
+  --shadow-card: 0 1px 2px rgba(22, 48, 43, 0.06);
 }
 
 * {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  font-family: var(--font-body);
 }
 
 html {
@@ -34,492 +29,610 @@ html {
 }
 
 body {
-  background-color: var(--color-bg);
-  color: var(--color-ink);
-  line-height: 1.5;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+  margin: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: var(--paper);
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(22, 48, 43, 0.05) 1px, transparent 0);
+  background-size: 22px 22px;
+  color: var(--text);
+  line-height: 1.55;
 }
 
 h1, h2, h3 {
-  font-family: var(--font-display);
-  font-weight: 600;
-  line-height: 1.2;
-  color: var(--color-ink);
+  font-family: 'Fraunces', Georgia, serif;
+  color: var(--ink);
+  margin: 0 0 0.4em 0;
+  letter-spacing: -0.01em;
 }
+
+h1 { font-size: 2.6rem; font-weight: 900; }
+h2 { font-size: 1.6rem; font-weight: 600; }
+h3 { font-size: 1.15rem; font-weight: 600; }
+
+p { margin: 0 0 1em 0; }
 
 a {
-  color: var(--color-secondary);
+  color: var(--teal);
+  text-decoration: none;
 }
 
-a:focus-visible,
-button:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible {
-  outline: 3px solid var(--color-primary);
+a:hover, a:focus-visible {
+  text-decoration: underline;
+}
+
+:focus-visible {
+  outline: 3px solid var(--gold);
   outline-offset: 2px;
 }
 
-main {
-  flex: 1;
-  width: 100%;
-  max-width: 1080px;
-  margin: 0 auto;
-  padding: 2rem 1.5rem 4rem;
+.eyebrow {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--teal);
 }
 
-/* ------------------------------------------------------------------
-   Header / navigation
-   ------------------------------------------------------------------ */
+/* ---------------------------------------------------------
+   Header / navigation — styled like a ticket stub
+   --------------------------------------------------------- */
+
 .site-header {
-  background-color: var(--color-ink);
-  padding: 0.9rem 1.5rem;
+  background: var(--ink);
+  color: #EFE9DA;
+  border-bottom: 4px dashed rgba(241, 236, 221, 0.25);
 }
 
 .header-inner {
-  max-width: 1080px;
+  max-width: 1100px;
   margin: 0 auto;
+  padding: 16px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.brand {
-  display: inline-flex;
-  align-items: center;
+  gap: 24px;
 }
 
 .logo {
-  height: 32px;
+  height: 40px;
   width: auto;
   display: block;
+  filter: brightness(0) invert(1);
 }
 
-.site-header nav {
+.brand {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 12px;
 }
 
-.site-header nav a {
-  color: #f4f2ef;
+.brand-name {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #EFE9DA;
+}
+
+.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.main-nav ul {
+  list-style: none;
+  display: flex;
+  gap: 24px;
+  margin: 0;
+  padding: 0;
+  font-size: 0.92rem;
+}
+
+.main-nav a {
+  color: #D8D2C0;
+}
+
+.main-nav a:hover,
+.main-nav a:focus-visible {
+  color: var(--gold);
   text-decoration: none;
-  font-weight: 500;
-  font-size: 0.95rem;
-}
-
-.site-header nav a:not(.login-button):hover {
-  color: var(--color-primary);
 }
 
 .login-button {
-  background-color: var(--color-primary);
-  color: #fff !important;
-  padding: 0.5rem 1.1rem;
-  border-radius: 999px;
-  font-weight: 600 !important;
-  transition: background-color 0.15s ease;
-}
-
-.login-button:hover {
-  background-color: var(--color-primary-dark);
-}
-
-/* ------------------------------------------------------------------
-   Footer
-   ------------------------------------------------------------------ */
-.site-footer {
-  background-color: var(--color-ink);
-  color: #cfcdc9;
-  text-align: center;
-  padding: 1.5rem;
-  font-size: 0.85rem;
-}
-
-/* ------------------------------------------------------------------
-   Buttons (shared)
-   ------------------------------------------------------------------ */
-.primary-button,
-.details-button {
-  display: inline-block;
-  background-color: var(--color-primary);
-  color: #fff;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--gold);
   border: none;
   border-radius: 999px;
-  padding: 0.65rem 1.3rem;
-  font-weight: 600;
-  font-size: 0.95rem;
-  text-decoration: none;
-  text-align: center;
+  padding: 10px 18px;
   cursor: pointer;
-  transition: background-color 0.15s ease, transform 0.1s ease;
+  white-space: nowrap;
 }
 
-.primary-button:hover,
-.details-button:hover {
-  background-color: var(--color-primary-dark);
-  transform: translateY(-1px);
+.login-button:hover,
+.login-button:focus-visible {
+  background: #EFC06E;
+  text-decoration: none;
 }
 
-/* ------------------------------------------------------------------
-   Index page — intro, filter, place grid
-   ------------------------------------------------------------------ */
-.page-intro {
-  margin-bottom: 1.5rem;
+/* ---------------------------------------------------------
+   Layout shells
+   --------------------------------------------------------- */
+
+main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px 64px;
 }
 
-.page-intro h1 {
-  font-size: 2rem;
-  margin-bottom: 0.35rem;
+.hero {
+  padding: 56px 0 36px;
+  border-bottom: 1px dashed #C9C0A8;
+  margin-bottom: 36px;
 }
 
-.page-intro p {
-  color: var(--color-ink-muted);
+.hero h1 {
+  max-width: 16ch;
 }
+
+.hero p {
+  max-width: 52ch;
+  color: var(--text-muted);
+  font-size: 1.05rem;
+}
+
+/* ---------------------------------------------------------
+   Filter bar
+   --------------------------------------------------------- */
 
 .filter-bar {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-card);
-  padding: 0.9rem 1.1rem;
-  margin-bottom: 0.5rem;
-  width: fit-content;
+  gap: 12px;
+  margin-bottom: 28px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.85rem;
 }
 
 .filter-bar label {
-  font-weight: 600;
-  font-size: 0.9rem;
+  color: var(--text-muted);
 }
 
-.filter-bar select,
-.add-review select,
-.auth-form select {
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-  padding: 0.45rem 0.7rem;
-  font-size: 0.95rem;
-  background-color: #fff;
-  color: var(--color-ink);
+.filter-bar select {
+  font-family: inherit;
+  font-size: 0.85rem;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid #C9C0A8;
+  background: var(--surface);
+  color: var(--text);
 }
 
-.places-grid {
-  display: flex;
-  flex-wrap: wrap;
+/* ---------------------------------------------------------
+   Place cards — "postcards" with a stamp corner
+   Fixed parameters (per spec): margin 20px, padding 10px,
+   border 1px solid #ddd, border-radius 10px.
+   --------------------------------------------------------- */
+
+.places-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  padding: 0;
+  margin: -20px;
 }
 
 .place-card {
-  /* Fixed parameters from spec */
+  position: relative;
+  list-style: none;
   margin: 20px;
   padding: 10px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--line);
   border-radius: 10px;
-
-  background-color: var(--color-surface);
+  background: var(--surface);
   box-shadow: var(--shadow-card);
-  flex: 1 1 260px;
-  max-width: 320px;
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  gap: 10px;
+  overflow: hidden;
 }
 
-.place-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 24px -12px rgba(35, 38, 43, 0.28);
+.place-photo {
+  height: 130px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, var(--teal), var(--ink));
+  display: flex;
+  align-items: flex-end;
+  padding: 10px;
+}
+
+.place-photo span {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.85);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .place-card h3 {
-  font-size: 1.15rem;
+  margin: 0;
 }
 
-.place-card-city {
-  color: var(--color-ink-muted);
-  font-size: 0.88rem;
+.place-card .location {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin: -6px 0 0;
 }
 
-.price-pill {
-  align-self: flex-start;
-  background-color: rgba(29, 120, 116, 0.1);
-  color: var(--color-secondary-dark);
-  border-radius: 999px;
-  padding: 0.25rem 0.7rem;
-  font-size: 0.85rem;
+.place-card .price-stamp {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: var(--gold);
+  color: var(--ink);
+  font-family: 'IBM Plex Mono', monospace;
   font-weight: 600;
+  font-size: 0.78rem;
+  padding: 6px 9px;
+  border-radius: 3px;
+  transform: rotate(4deg);
+  box-shadow: 0 1px 0 rgba(0,0,0,0.15);
 }
 
-.price-pill span {
-  font-family: var(--font-display);
-  font-size: 1rem;
+.place-card .price-stamp::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border: 1px dashed rgba(22, 48, 43, 0.45);
+  border-radius: 2px;
+  pointer-events: none;
 }
 
-.price-pill.large {
-  font-size: 1rem;
-  padding: 0.35rem 0.9rem;
-}
-
-.price-pill.large span {
-  font-size: 1.3rem;
-}
-
-.place-card .details-button {
-  margin-top: 0.5rem;
+.details-button {
   align-self: flex-start;
+  margin-top: auto;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  padding: 8px 14px;
+  cursor: pointer;
 }
 
-.empty-state {
-  color: var(--color-ink-muted);
-  padding: 1rem 0;
-}
-
-/* ------------------------------------------------------------------
-   Place details page
-   ------------------------------------------------------------------ */
-.back-link {
-  display: inline-block;
-  margin-bottom: 1.25rem;
+.details-button:hover,
+.details-button:focus-visible {
+  background: var(--ink);
+  color: var(--surface);
   text-decoration: none;
-  font-size: 0.9rem;
-  font-weight: 500;
 }
+
+/* ---------------------------------------------------------
+   Place details — boarding-pass style layout
+   --------------------------------------------------------- */
 
 .place-details {
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-card);
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 0;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
-  padding: 1.75rem;
-  margin-bottom: 1.5rem;
+  overflow: hidden;
+  margin-bottom: 48px;
 }
 
-.place-details h1 {
-  font-size: 1.85rem;
-  margin-bottom: 0.25rem;
+.place-main {
+  padding: 32px;
 }
 
-.place-location {
-  color: var(--color-ink-muted);
-  margin-bottom: 0.15rem;
-}
-
-.host-line {
-  margin-bottom: 0.9rem;
-}
-
-.place-description {
-  margin: 1rem 0 1.4rem;
-  max-width: 60ch;
-  color: var(--color-ink);
+.place-info {
+  padding: 32px;
+  background: var(--ink);
+  color: #EFE9DA;
+  border-left: 4px dashed rgba(241, 236, 221, 0.25);
 }
 
 .place-info h2 {
-  font-size: 1.1rem;
-  margin-bottom: 0.75rem;
+  color: #EFE9DA;
+  font-size: 1.2rem;
+}
+
+.place-info .price-tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--gold);
+  margin-bottom: 4px;
+}
+
+.place-info .price-tag small {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #D8D2C0;
+}
+
+.place-info dl {
+  margin: 20px 0;
+  font-size: 0.9rem;
+}
+
+.place-info dt {
+  font-family: 'IBM Plex Mono', monospace;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: #A9C2BC;
+  margin-top: 14px;
+}
+
+.place-info dd {
+  margin: 4px 0 0;
+  color: #EFE9DA;
 }
 
 .amenities-list {
   list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
   display: flex;
   flex-wrap: wrap;
-  gap: 1.5rem;
+  gap: 8px;
 }
 
 .amenities-list li {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.75rem;
+  background: rgba(241, 236, 221, 0.1);
+  border: 1px solid rgba(241, 236, 221, 0.3);
+  border-radius: 999px;
+  padding: 5px 11px;
+}
+
+.host-line {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.92rem;
-  color: var(--color-ink);
+  gap: 10px;
+  margin-bottom: 4px;
 }
 
-.amenity-icon {
-  width: 22px;
-  height: 22px;
-  opacity: 0.75;
+.host-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--gold);
+  color: var(--ink);
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
 }
 
-/* ------------------------------------------------------------------
+/* ---------------------------------------------------------
    Reviews
-   ------------------------------------------------------------------ */
-.reviews-section {
-  margin-bottom: 1.5rem;
-}
+   --------------------------------------------------------- */
 
-.reviews-section h2 {
-  font-size: 1.3rem;
-  margin-bottom: 0.75rem;
+.reviews h2 {
+  margin-bottom: 18px;
 }
 
 .reviews-list {
-  display: flex;
-  flex-wrap: wrap;
+  list-style: none;
+  padding: 0;
+  margin: 0 -20px;
 }
 
 .review-card {
-  /* Fixed parameters from spec */
   margin: 20px;
   padding: 10px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--line);
   border-radius: 10px;
-
-  background-color: var(--color-surface);
+  background: var(--surface);
   box-shadow: var(--shadow-card);
-  flex: 1 1 260px;
-  max-width: 320px;
 }
 
-.review-comment {
-  margin-bottom: 0.6rem;
-}
-
-.review-meta {
-  font-size: 0.85rem;
-  color: var(--color-ink-muted);
-}
-
-.review-user {
-  font-weight: 600;
-  color: var(--color-ink);
-}
-
-.review-rating {
-  color: var(--color-primary);
-  letter-spacing: 1px;
-}
-
-/* ------------------------------------------------------------------
-   Add review — inline (place.html) & standalone (add_review.html)
-   ------------------------------------------------------------------ */
-.add-review-section .login-prompt {
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-card);
-  padding: 1.25rem;
-  color: var(--color-ink-muted);
-}
-
-.add-review.form,
-.auth-form {
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-card);
-  box-shadow: var(--shadow-card);
-  padding: 1.5rem;
-  max-width: 480px;
+.review-card .review-head {
   display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
 }
 
-.add-review.form h2,
-.auth-form h1 {
-  margin-bottom: 0.5rem;
-}
-
-.reviewing-place {
-  color: var(--color-ink-muted);
-  margin-bottom: 0.75rem;
-}
-
-.add-review.form label,
-.auth-form label {
+.review-card .reviewer {
   font-weight: 600;
-  font-size: 0.9rem;
-  margin-top: 0.6rem;
+  font-size: 0.92rem;
 }
 
-.add-review.form textarea,
-.auth-form input {
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-  padding: 0.6rem 0.75rem;
+.review-card .rating {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.78rem;
+  color: var(--clay);
+  letter-spacing: 0.05em;
+}
+
+.review-card p {
+  margin: 0;
+  color: var(--text);
   font-size: 0.95rem;
-  color: var(--color-ink);
-  background-color: #fff;
+}
+
+.add-review-cta {
+  margin-top: 28px;
+  display: flex;
+  justify-content: center;
+}
+
+.add-review-cta .details-button {
+  padding: 12px 22px;
+}
+
+/* ---------------------------------------------------------
+   Forms — login / add review
+   --------------------------------------------------------- */
+
+.form-shell {
+  max-width: 460px;
+  margin: 0 auto;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 40px;
+}
+
+.form-shell h1 {
+  font-size: 1.8rem;
+}
+
+.form-shell .eyebrow {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.form label {
+  display: block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin: 18px 0 6px;
+}
+
+.form input,
+.form textarea,
+.form select {
+  width: 100%;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  padding: 11px 13px;
+  border: 1px solid #C9C0A8;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--text);
+}
+
+.form textarea {
+  min-height: 130px;
   resize: vertical;
 }
 
-.add-review.form button,
-.auth-form button {
-  margin-top: 1rem;
-  align-self: flex-start;
+.form input:focus-visible,
+.form textarea:focus-visible,
+.form select:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 1px;
 }
 
-.or-divider {
-  margin-top: 0.85rem;
+.form-submit {
+  margin-top: 26px;
+  width: 100%;
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 600;
   font-size: 0.85rem;
-  color: var(--color-ink-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: var(--ink);
+  color: #EFE9DA;
+  border: none;
+  border-radius: 999px;
+  padding: 13px;
+  cursor: pointer;
 }
 
-.form-error {
-  background-color: #fdecea;
-  color: #b3261e;
-  border-radius: 6px;
-  padding: 0.6rem 0.75rem;
-  font-size: 0.9rem;
-  margin-top: 0.5rem;
+.form-submit:hover,
+.form-submit:focus-visible {
+  background: #204339;
 }
 
-.form-success {
-  background-color: #e7f4ef;
-  color: var(--color-secondary-dark);
-  border-radius: 6px;
-  padding: 0.6rem 0.75rem;
-  font-size: 0.9rem;
-  margin-top: 0.5rem;
+.form-note {
+  margin-top: 16px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-align: center;
 }
 
-/* ------------------------------------------------------------------
-   Auth section (login page)
-   ------------------------------------------------------------------ */
-.auth-section {
+.place-context {
+  max-width: 460px;
+  margin: 0 auto 20px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.place-context strong {
+  color: var(--ink);
+}
+
+/* ---------------------------------------------------------
+   Footer
+   --------------------------------------------------------- */
+
+.site-footer {
+  background: var(--ink);
+  color: #B8C2BB;
+  border-top: 4px dashed rgba(241, 236, 221, 0.25);
+  margin-top: 64px;
+}
+
+.footer-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 26px 24px;
   display: flex;
-  justify-content: center;
-  padding-top: 1.5rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 0.82rem;
 }
 
-.auth-form h1 {
-  font-size: 1.6rem;
+.footer-inner a {
+  color: #D8D2C0;
 }
 
-.auth-subtitle {
-  color: var(--color-ink-muted);
-  font-size: 0.92rem;
-  margin-bottom: 0.5rem;
-}
-
-/* ------------------------------------------------------------------
+/* ---------------------------------------------------------
    Responsive
-   ------------------------------------------------------------------ */
-@media (max-width: 600px) {
+   --------------------------------------------------------- */
+
+@media (max-width: 760px) {
   .header-inner {
-    justify-content: center;
-    text-align: center;
+    flex-wrap: wrap;
   }
 
-  .site-header nav {
-    gap: 1rem;
-  }
-
-  .place-card,
-  .review-card {
-    max-width: 100%;
-    flex: 1 1 100%;
+  .main-nav {
+    order: 3;
+    width: 100%;
+    justify-content: space-between;
   }
 
   .place-details {
-    padding: 1.25rem;
+    grid-template-columns: 1fr;
   }
 
-  .add-review.form,
-  .auth-form {
-    max-width: 100%;
+  .place-info {
+    border-left: none;
+    border-top: 4px dashed rgba(241, 236, 221, 0.25);
+  }
+
+  .form-shell {
+    padding: 28px 22px;
+  }
+
+  .footer-inner {
+    flex-direction: column;
+    text-align: center;
   }
 }

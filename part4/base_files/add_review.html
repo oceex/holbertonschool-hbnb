@@ -1,53 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add a Review · hbnb</title>
-    <link rel="icon" type="image/png" href="images/icon.png">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HBnB — Add a review</title>
+  <link rel="icon" type="image/png" href="images/icon.png">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header class="site-header">
-        <div class="header-inner">
-            <a href="index.html" class="brand">
-                <img src="images/logo.png" alt="hbnb home" class="logo">
-            </a>
-            <nav>
-                <a href="index.html">Home</a>
-                <a href="login.html" id="login-link" class="login-button">Login</a>
-            </nav>
-        </div>
-    </header>
 
-    <main>
-        <section class="auth-section">
-            <form id="review-form" class="add-review form" novalidate>
-                <h1>Add a Review</h1>
-                <p id="reviewing-place" class="reviewing-place"></p>
-                <input type="hidden" id="place-id" name="place-id">
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand">
+          <a href="index.html" ><img src="images/logo.png" alt="HBnB logo" class="logo"></a>
+        <span class="brand-name">HBnB</span>
+      </div>
+      <nav class="main-nav" aria-label="Primary">
+        <a href="login.html" class="login-button">Log in</a>
+      </nav>
+    </div>
+  </header>
 
-                <p id="review-confirmation" class="form-success" hidden></p>
+  <main>
+    <p class="place-context">Reviewing <strong>Cliffside Cabin</strong>, Big Sur, California — <a href="place.html">back to place</a></p>
 
-                <label for="review">Your Review</label>
-                <textarea id="review" name="review" rows="5" placeholder="Share how your stay went..." required></textarea>
+    <section class="form-shell">
+      <span class="eyebrow">Leave a review</span>
+      <h1>Tell future guests how it went</h1>
+      <p>Only guests who have signed in can post a review.</p>
 
-                <label for="rating">Rating</label>
-                <select id="rating" name="rating" required>
-                    <!-- Options for rating populated dynamically -->
-                </select>
+      <form class="add-review form" action="#" method="post">
+        <label for="rating">Rating</label>
+        <select id="rating" name="rating" required>
+          <option value="">Choose a rating</option>
+          <option value="5">★★★★★ — Excellent</option>
+          <option value="4">★★★★☆ — Great</option>
+          <option value="3">★★★☆☆ — Good</option>
+          <option value="2">★★☆☆☆ — Fair</option>
+          <option value="1">★☆☆☆☆ — Poor</option>
+        </select>
 
-                <button type="submit" class="primary-button">Submit Review</button>
-            </form>
-        </section>
-    </main>
+        <label for="comment">Your review</label>
+        <textarea id="comment" name="comment" placeholder="What was the place like? What should the next guest know?" required></textarea>
 
-    <footer class="site-footer">
-        <p>&copy; 2026 hbnb. All rights reserved.</p>
-    </footer>
-    <script src="scripts.js"></script>
+        <button type="submit" class="form-submit">Submit review</button>
+      </form>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <p>&copy; 2026 HBnB. All rights reserved.</p>
+      <nav aria-label="Footer">
+        <a href="index.html">Places</a>
+      </nav>
+    </div>
+  </footer>
+
 </body>
 </html>

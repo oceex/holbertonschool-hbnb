@@ -1,49 +1,104 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Find a place to stay · hbnb</title>
-    <link rel="icon" type="image/png" href="images/icon.png">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HBnB — Places worth the trip</title>
+  <link rel="icon" type="image/png" href="images/icon.png">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header class="site-header">
-        <div class="header-inner">
-            <a href="index.html" class="brand">
-                <img src="images/logo.png" alt="hbnb home" class="logo">
-            </a>
-            <nav>
-                <a href="index.html" aria-current="page">Home</a>
-                <a href="login.html" id="login-link" class="login-button">Login</a>
-            </nav>
-        </div>
-    </header>
 
-    <main>
-        <section class="page-intro">
-            <h1>Places to stay</h1>
-            <p>Handpicked homes, curated by hosts who know their city best.</p>
-        </section>
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand">
+          <a href="index.html" ><img src="images/logo.png" alt="HBnB logo" class="logo"></a>
+          <span class="brand-name">HBnB</span>
+      </div>
+      <nav class="main-nav" aria-label="Primary">
+        <a href="login.html" class="login-button">Log in</a>
+      </nav>
+    </div>
+  </header>
 
-        <section id="filter" class="filter-bar">
-            <label for="price-filter">Max Price</label>
-            <select id="price-filter">
-                <!-- Options will be populated dynamically -->
-            </select>
-        </section>
+  <main>
+    <section class="hero">
+      <p class="eyebrow">Stays worth writing home about</p>
+      <h1>Every place here earned its postcard.</h1>
+      <p>Cabins, lofts and coastal hideaways, picked for the view and vouched for by the people who stayed. Browse the list below and find the one worth the trip.</p>
+    </section>
 
-        <section id="places-list" class="places-grid" aria-live="polite">
-            <!-- List of places will be populated dynamically -->
-        </section>
-    </main>
+    <form class="filter-bar" action="#" method="get">
+      <label for="price-filter">Max price / night</label>
+      <select id="price-filter" name="price-filter">
+        <option value="all">All prices</option>
+        <option value="50">Up to $50</option>
+        <option value="100">Up to $100</option>
+        <option value="200">Up to $200</option>
+      </select>
+    </form>
 
-    <footer class="site-footer">
-        <p>&copy; 2026 hbnb. All rights reserved.</p>
-    </footer>
-    <script src="scripts.js"></script>
+    <ul class="places-list" id="places-list">
+
+      <li class="place-card">
+        <span class="price-stamp">$120<br>/night</span>
+        <div class="place-photo"><span>Big Sur, California</span></div>
+        <h3>Cliffside Cabin</h3>
+        <p class="location">Big Sur, California</p>
+        <a href="place.html" class="details-button">View details</a>
+      </li>
+
+      <li class="place-card">
+        <span class="price-stamp">$65<br>/night</span>
+        <div class="place-photo"><span>Porto, Portugal</span></div>
+        <h3>Riverside Loft</h3>
+        <p class="location">Porto, Portugal</p>
+        <a href="place.html" class="details-button">View details</a>
+      </li>
+
+      <li class="place-card">
+        <span class="price-stamp">$210<br>/night</span>
+        <div class="place-photo"><span>Reykjavík, Iceland</span></div>
+        <h3>Glasshouse Under the Lights</h3>
+        <p class="location">Reykjavík, Iceland</p>
+        <a href="place.html" class="details-button">View details</a>
+      </li>
+
+      <li class="place-card">
+        <span class="price-stamp">$40<br>/night</span>
+        <div class="place-photo"><span>Ubud, Bali</span></div>
+        <h3>Rice Terrace Bungalow</h3>
+        <p class="location">Ubud, Bali</p>
+        <a href="place.html" class="details-button">View details</a>
+      </li>
+
+      <li class="place-card">
+        <span class="price-stamp">$95<br>/night</span>
+        <div class="place-photo"><span>Marrakech, Morocco</span></div>
+        <h3>Courtyard Riad</h3>
+        <p class="location">Marrakech, Morocco</p>
+        <a href="place.html" class="details-button">View details</a>
+      </li>
+
+      <li class="place-card">
+        <span class="price-stamp">$150<br>/night</span>
+        <div class="place-photo"><span>Queenstown, New Zealand</span></div>
+        <h3>Lakeside A-Frame</h3>
+        <p class="location">Queenstown, New Zealand</p>
+        <a href="place.html" class="details-button">View details</a>
+      </li>
+
+    </ul>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <p>&copy; 2026 HBnB. All rights reserved.</p>
+      <nav aria-label="Footer">
+        <a href="index.html">Places</a>
+      </nav>
+    </div>
+  </footer>
+
 </body>
 </html>

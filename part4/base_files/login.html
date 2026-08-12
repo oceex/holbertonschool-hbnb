@@ -1,50 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login · hbnb</title>
-    <link rel="icon" type="image/png" href="images/icon.png">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HBnB — Log in</title>
+  <link rel="icon" type="image/png" href="images/icon.png">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header class="site-header">
-        <div class="header-inner">
-            <a href="index.html" class="brand">
-                <img src="images/logo.png" alt="hbnb home" class="logo">
-            </a>
-            <nav>
-                <a href="index.html">Home</a>
-                <a href="login.html" id="login-link" class="login-button">Login</a>
-            </nav>
-        </div>
-    </header>
 
-    <main>
-        <section class="auth-section">
-            <form id="login-form" class="auth-form" novalidate>
-                <h1>Welcome back</h1>
-                <p class="auth-subtitle">Log in to book stays and leave reviews.</p>
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand">
+          <a href="index.html" ><img src="images/logo.png" alt="HBnB logo" class="logo"></a>
+          <span class="brand-name">HBnB</span>
+      </div>
+      <nav class="main-nav" aria-label="Primary">
+        <a href="login.html" class="login-button">Log in</a>
+      </nav>
+    </div>
+  </header>
 
-                <p id="login-error" class="form-error" hidden></p>
+  <main>
+    <section class="form-shell">
+      <span class="eyebrow">Welcome back</span>
+      <h1>Log in to HBnB</h1>
+      <p>Sign in to leave a review or book your next stay.</p>
 
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email" placeholder="you@example.com" required>
+      <form class="form" action="#" method="post">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" placeholder="you@example.com" required>
 
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" placeholder="••••••••" required>
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="••••••••" required>
 
-                <button type="submit" class="primary-button">Login</button>
-            </form>
-        </section>
-    </main>
+        <button type="submit" class="form-submit">Log in</button>
+      </form>
 
-    <footer class="site-footer">
-        <p>&copy; 2026 hbnb. All rights reserved.</p>
-    </footer>
-    <script src="scripts.js"></script>
+      <p class="form-note">New here? Ask your host for an invite.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <p>&copy; 2026 HBnB. All rights reserved.</p>
+      <nav aria-label="Footer">
+        <a href="index.html">Places</a>
+      </nav>
+    </div>
+  </footer>
+
 </body>
 </html>
