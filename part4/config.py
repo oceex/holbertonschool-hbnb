@@ -40,8 +40,13 @@ class TestingConfig(Config):
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
 
 
+class ProductionConfig(Config):
+    """Disable development diagnostics for a real deployment."""
+
+
 config = {
     "development": DevelopmentConfig,
     "testing": TestingConfig,
+    "production": ProductionConfig,
     "default": DevelopmentConfig,
 }

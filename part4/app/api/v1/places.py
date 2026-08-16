@@ -43,6 +43,8 @@ place_input_model = api.model('PlaceInput', {
     'price': fields.Float(required=True, description='Price per night'),
     'latitude': fields.Float(required=True, description='Latitude of the place'),
     'longitude': fields.Float(required=True, description='Longitude of the place'),
+    'image_url': fields.String(description='Cover image URL for the place'),
+    'location': fields.String(description='Short location label for the place'),
     'amenities': fields.List(fields.String, description="List of amenities ID's")
 })
 
@@ -53,14 +55,20 @@ place_creation_response = api.model('PlaceCreationResponse', {
     'price': fields.Float(description='Price per night'),
     'latitude': fields.Float(description='Latitude of the place'),
     'longitude': fields.Float(description='Longitude of the place'),
+    'image_url': fields.String(description='Cover image URL for the place'),
+    'location': fields.String(description='Short location label for the place'),
     'owner_id': fields.String(attribute=lambda x: x.owner.id, description='ID of the owner')
 })
 
 place_list_model = api.model('PlaceList', {
     'id': fields.String(description='Place ID'),
     'title': fields.String(description='Title of the place'),
+    'description': fields.String(description='Description of the place'),
+    'price': fields.Float(description='Price per night'),
     'latitude': fields.Float(description='Latitude of the place'),
-    'longitude': fields.Float(description='Longitude of the place')
+    'longitude': fields.Float(description='Longitude of the place'),
+    'image_url': fields.String(description='Cover image URL for the place'),
+    'location': fields.String(description='Short location label for the place')
 })
 
 place_detail_model = api.model('PlaceDetail', {
@@ -70,6 +78,8 @@ place_detail_model = api.model('PlaceDetail', {
     'price': fields.Float(description='Price per night'),
     'latitude': fields.Float(description='Latitude of the place'),
     'longitude': fields.Float(description='Longitude of the place'),
+    'image_url': fields.String(description='Cover image URL for the place'),
+    'location': fields.String(description='Short location label for the place'),
     'owner': fields.Nested(user_model, description='Owner details'),
     'amenities': fields.List(fields.Nested(amenity_model),
                              description='List of amenities'),
@@ -81,6 +91,8 @@ place_update_model = api.model('PlaceUpdate', {
     'title': fields.String(description='Title of the place'),
     'description': fields.String(description='Description of the place'),
     'price': fields.Float(description='Price per night'),
+    'image_url': fields.String(description='Cover image URL for the place'),
+    'location': fields.String(description='Short location label for the place'),
     'amenities': fields.List(fields.String,
                              description="List of amenity IDs")
 })

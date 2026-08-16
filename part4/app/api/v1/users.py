@@ -57,9 +57,12 @@ def serialize_user(user):
 class UserList(Resource):
     """Provide collection-level user operations."""
 
+    @jwt_required()
     @api.marshal_list_with(user_response_model)
+    @api.response(200, "List of users retrieved successfully")
+    @api.response(401, "Missing or invalid token")
     def get(self):
-        """List all users."""
+        """List all users (authenticated users only)."""
         return [serialize_user(u) for u in facade.get_all_users()]
 
     @jwt_required()
@@ -84,11 +87,13 @@ class UserList(Resource):
 class UserResource(Resource):
     """Provide operations for an individual user."""
 
+    @jwt_required()
     @api.marshal_with(user_response_model)
     @api.response(200, "User details retrieved successfully", user_response_model)
+    @api.response(401, "Missing or invalid token")
     @api.response(404, "User not found")
     def get(self, user_id):
-        """Get a user by ID."""
+        """Get a user by ID (authenticated users only)."""
         user = facade.get_user(user_id)
         if not user:
             api.abort(404, "User not found")

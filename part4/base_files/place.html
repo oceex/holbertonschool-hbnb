@@ -3,44 +3,61 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HBnB — Cliffside Cabin</title>
+  <title>HBnB — Sandstone Retreat, AlUla</title>
+  <meta name="theme-color" content="#16302B">
   <link rel="icon" type="image/png" href="images/icon.png">
   <link rel="stylesheet" href="styles.css">
-  <script src="scripts.js" defer></script>
 </head>
-<body>
+<body class="page-place">
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
 
   <header class="site-header">
     <div class="header-inner">
       <div class="brand">
-          <a href="index.html" ><img src="images/logo.png" alt="HBnB logo" class="logo"></a>
+          <a href="index.html" aria-label="HBnB home"><img src="images/logo.png" alt="HBnB logo" class="logo" width="112" height="44" fetchpriority="high"></a>
       </div>
       <nav class="main-nav" aria-label="Primary">
-        <a href="login.html" class="login-button" id="login-link">Log in</a>
+        <a href="index.html#listings" class="nav-link">Browse stays</a>
+        <a href="#reviews" class="nav-link">Guest notes</a>
+        <a href="login.html" class="login-button has-tip" id="login-link">Log in</a>
       </nav>
     </div>
+    <div class="sadu regional-thread" aria-hidden="true"></div>
   </header>
 
-  <main>
+  <main id="main-content">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <ol>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="index.html">Places</a></li>
+        <li aria-current="page">Sandstone Retreat</li>
+      </ol>
+    </nav>
+
     <section class="place-details" id="place-details">
       <div class="place-main">
-        <p class="eyebrow">Big Sur, California</p>
-        <h1>Cliffside Cabin</h1>
-        <p>A one-room cabin perched above the Pacific, built from reclaimed redwood and warmed by a wood stove. Fall asleep to the surf, wake up to fog burning off the cliffs. Ten minutes from the nearest trailhead, no cell signal, and a stack of field guides on the shelf.</p>
-        <p>Two can sleep comfortably; a third can take the window nook with the extra bedding provided. Check-in is self-service with a lockbox code sent the morning of arrival.</p>
+        <p class="eyebrow">AlUla, Saudi Arabia</p>
+        <h1>Sandstone Retreat</h1>
+        <figure class="place-figure">
+          <img src="images/places/alula-sandstone-v2.webp" alt="Sandstone retreat tucked into the canyons of AlUla" width="1536" height="1024" fetchpriority="high">
+          <figcaption>Carved into the AlUla escarpment</figcaption>
+        </figure>
+        <p>A stone-and-clay retreat tucked against the sandstone cliffs of AlUla, minutes from the tombs of Hegra and the old mudbrick town. Wake before dawn for the hot-air balloons, spend the heat of the day in the shaded courtyard, and watch the rock glow copper at sunset.</p>
+        <p>Two can sleep comfortably; a third can take the majlis nook with the extra bedding provided. Check-in is self-service with a lockbox code sent the morning of arrival, and Arabic coffee and dates are waiting on the tray.</p>
       </div>
 
       <aside class="place-info">
-        <p class="price-tag">$120 <small>/ night</small></p>
+        <p class="price-tag">SAR 480 <small>/ night</small></p>
 
         <div class="host-line">
-          <span class="host-avatar">M</span>
-          <span>Hosted by Marisol</span>
+          <span class="host-avatar">N</span>
+          <span>Hosted by Noura</span>
         </div>
 
         <dl>
           <dt>Location</dt>
-          <dd>Big Sur, California — 36.2704° N, 121.8081° W</dd>
+          <dd>AlUla, Saudi Arabia</dd>
 
           <dt>Sleeps</dt>
           <dd>2–3 guests</dd>
@@ -58,31 +75,32 @@
     </section>
 
     <section class="reviews" id="reviews" aria-labelledby="reviews-heading">
-      <h2 id="reviews-heading">What guests said</h2>
+      <h2 id="reviews-heading">Guest field notes</h2>
+      <p class="reviews-intro" id="reviews-summary">Three guests shared what stood out.</p>
 
       <ul class="reviews-list">
         <li class="review-card">
           <div class="review-head">
-            <span class="reviewer">Priya N.</span>
+            <span class="reviewer">Noura A.</span>
             <span class="rating">★★★★★ 5/5</span>
           </div>
-          <p>Woke up to fog rolling under the deck and coffee on the stove — exactly the reset I needed. Marisol's directions for the last unpaved mile were spot on.</p>
+          <p>Watched the balloons lift over Hegra with coffee in hand — exactly the reset I needed. Noura's directions for the last stretch of desert track were spot on.</p>
         </li>
 
         <li class="review-card">
           <div class="review-head">
-            <span class="reviewer">Tom R.</span>
+            <span class="reviewer">Faisal M.</span>
             <span class="rating">★★★★☆ 4/5</span>
           </div>
-          <p>No signal is the whole point, but bring a paper map for the trailhead — we missed a turn on the way in. Cabin itself was spotless and warm.</p>
+          <p>The courtyard is the whole point in the afternoon heat — bring a hat for the walk to the tombs. The retreat itself was spotless and cool inside.</p>
         </li>
 
         <li class="review-card">
           <div class="review-head">
-            <span class="reviewer">Elena K.</span>
+            <span class="reviewer">Reem S.</span>
             <span class="rating">★★★★★ 5/5</span>
           </div>
-          <p>Second stay this year. The window nook is my favorite reading spot on the whole coast.</p>
+          <p>Second stay this year. The majlis nook at sunset, with the rock going copper, is my favourite spot in the whole Kingdom.</p>
         </li>
       </ul>
 
@@ -93,13 +111,15 @@
   </main>
 
   <footer class="site-footer">
+    <div class="sadu regional-thread" aria-hidden="true"></div>
     <div class="footer-inner">
-      <p>&copy; 2026 HBnB. All rights reserved.</p>
-      <nav aria-label="Footer">
-        <a href="index.html">Places</a>
-      </nav>
+      <div class="footer-brand"><p class="footer-mark">HBnB</p><p class="footer-tag">A closer look at places shaped by their setting.</p></div>
+      <nav class="footer-nav" aria-label="Footer"><a href="index.html#listings">Browse stays</a><a href="#reviews">Guest notes</a></nav>
+      <p class="footer-legal">&copy; 2026 HBnB. All rights reserved.</p>
     </div>
   </footer>
 
+  <script src="scripts.js" defer></script>
+  <script src="atlas.js" defer></script>
 </body>
 </html>

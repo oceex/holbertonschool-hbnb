@@ -3,9 +3,19 @@
 
 from flask_restx import Namespace, Resource, fields
 from flask_jwt_extended import create_access_token
+from app import bcrypt
 from app.services import facade
 
 api = Namespace('auth', description='Authentication operations')
+
+# Hashed once at import time and checked on every login where the email
+# isn't found, so a failed login takes the same time either way. Without
+# this, verify_password() (bcrypt, deliberately slow) only runs when the
+# user exists, and the timing difference lets an attacker tell which
+# emails are registered without ever guessing a password.
+_DUMMY_HASH = bcrypt.generate_password_hash(
+    'dummy-password-for-timing-safety'
+).decode('utf-8')
 
 # Model for input validation
 login_model = api.model('Login', {
@@ -26,9 +36,18 @@ class Login(Resource):
 
         # Step 1: Retrieve the user based on the provided email
         user = facade.get_user_by_email(credentials.get('email'))
+        password = credentials.get('password', '')
 
-        # Step 2: Check if the user exists and the password is correct
-        if not user or not user.verify_password(credentials.get('password')):
+        # Step 2: Check if the user exists and the password is correct.
+        # Always run a bcrypt check, even for an unknown email, so this
+        # takes the same time in both cases (see _DUMMY_HASH above).
+        if user:
+            password_ok = user.verify_password(password)
+        else:
+            bcrypt.check_password_hash(_DUMMY_HASH, password)
+            password_ok = False
+
+        if not user or not password_ok:
             return {'error': 'Invalid credentials'}, 401
 
         # Step 3: Create a JWT token with the user's id and is_admin flag

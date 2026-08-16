@@ -4,50 +4,73 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>HBnB — Log in</title>
+  <meta name="theme-color" content="#16302B">
   <link rel="icon" type="image/png" href="images/icon.png">
   <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body class="page-login page-form">
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
 
   <header class="site-header">
     <div class="header-inner">
       <div class="brand">
-          <a href="index.html" ><img src="images/logo.png" alt="HBnB logo" class="logo"></a>
+          <a href="index.html" aria-label="HBnB home"><img src="images/logo.png" alt="HBnB logo" class="logo" width="112" height="44" fetchpriority="high"></a>
       </div>
       <nav class="main-nav" aria-label="Primary">
-        <a href="login.html" class="login-button">Log in</a>
+        <a href="index.html#listings" class="nav-link">Browse stays</a>
+        <a href="index.html#how" class="nav-link">How it works</a>
+        <a href="login.html" class="login-button has-tip" id="login-link">Log in</a>
       </nav>
     </div>
+    <div class="sadu regional-thread" aria-hidden="true"></div>
   </header>
 
-  <main>
-    <section class="form-shell">
-      <span class="eyebrow">Welcome back</span>
-      <h1>Log in to HBnB</h1>
-      <p>Sign in to leave a review or book your next stay.</p>
+  <main id="main-content">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <ol>
+        <li><a href="index.html">Home</a></li>
+        <li aria-current="page">Log in</li>
+      </ol>
+    </nav>
 
-      <form class="form" action="#" method="post">
+    <section class="form-shell form-shell-split">
+      <figure class="form-visual login-visual">
+        <img src="images/places/diriyah-najdi-v2.webp" alt="Najdi courtyard at dusk" width="1536" height="1024" fetchpriority="high">
+        <figcaption>Useful reviews begin with details only a guest would notice.</figcaption>
+      </figure>
+      <div class="form-content">
+      <span class="eyebrow">Member access</span>
+      <h1>Sign in to contribute.</h1>
+      <p>Your account lets you add 1 review to any stay you do not manage. The catalog and guest notes remain open to everyone.</p>
+
+      <form class="form" id="login-form" action="#" method="post">
         <label for="email">Email</label>
-        <input type="email" id="email" name="email" placeholder="you@example.com" required>
+        <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" spellcheck="false" required>
 
         <label for="password">Password</label>
-        <input type="password" id="password" name="password" placeholder="••••••••" required>
+        <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password" required>
 
-        <button type="submit" class="form-submit">Log in</button>
+        <button type="submit" class="form-submit"><span>Sign in</span></button>
+        <p class="form-error" id="login-error" aria-live="polite" hidden></p>
       </form>
 
-      <p class="form-note">New here? Ask your host for an invite.</p>
+      <p class="form-note">Need access? Accounts are issued by the HBnB administrator.</p>
+      <p class="login-hint" id="login-hint"></p>
+      </div>
     </section>
   </main>
 
   <footer class="site-footer">
+    <div class="sadu regional-thread" aria-hidden="true"></div>
     <div class="footer-inner">
-      <p>&copy; 2026 HBnB. All rights reserved.</p>
-      <nav aria-label="Footer">
-        <a href="index.html">Places</a>
-      </nav>
+      <div class="footer-brand"><p class="footer-mark">HBnB</p><p class="footer-tag">Read freely. Sign in only when you have something useful to add.</p></div>
+      <nav class="footer-nav" aria-label="Footer"><a href="index.html#listings">Browse stays</a><a href="index.html#how">How it works</a></nav>
+      <p class="footer-legal">&copy; 2026 HBnB. All rights reserved.</p>
     </div>
   </footer>
 
+  <script src="scripts.js" defer></script>
+  <script src="atlas.js" defer></script>
 </body>
 </html>

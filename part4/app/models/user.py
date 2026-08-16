@@ -81,6 +81,8 @@ class User(BaseModel):
         """Validate, hash, and store a plaintext password."""
         if not isinstance(password, str) or not password.strip():
             raise ValueError("password is required and must be a string")
+        if len(password) < 8:
+            raise ValueError("password must be at least 8 characters long")
         self._password = bcrypt.generate_password_hash(password).decode("utf-8")
 
     def verify_password(self, password):

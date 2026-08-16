@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 """Service facade coordinating domain models and persistence."""
+from sqlalchemy.exc import IntegrityError
+
 from app.models.user import User
 from app.models.place import Place
 from app.models.review import Review
@@ -30,7 +32,14 @@ class HBnBFacade:
             user = User(**user_data)
         except TypeError as exc:
             raise ValueError(str(exc)) from exc
-        self.user_repo.add(user)
+        try:
+            self.user_repo.add(user)
+        except IntegrityError as exc:
+            # Closes the race window between the check above and the
+            # commit: two concurrent signups for the same email can both
+            # pass the check, but the database's unique constraint still
+            # catches the second insert.
+            raise ValueError("Email already registered") from exc
         return user
 
     def get_user(self, user_id):
@@ -108,7 +117,9 @@ class HBnBFacade:
             price=place_data.get("price"),
             latitude=place_data.get("latitude"),
             longitude=place_data.get("longitude"),
-            owner=owner
+            owner=owner,
+            image_url=place_data.get("image_url"),
+            location=place_data.get("location")
         )
 
         for amenity in resolved_amenities:

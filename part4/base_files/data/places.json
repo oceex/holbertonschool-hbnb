@@ -1,0 +1,159 @@
+{
+  "_note": "Demo/test database for HBnB. Places, hosts, amenities and reviews render from here — edit this file (or point it at your API) and the site follows.",
+  "currency": "SAR",
+  "demoUser": { "email": "guest@hbnb.sa", "password": "explore", "name": "Guest" },
+  "amenitiesMaster": ["Free WiFi", "Private Bath", "2 Beds", "Pool", "Parking", "Kitchen", "Fireplace", "Air conditioning", "Majlis"],
+  "places": [
+    {
+      "id": "alula-sandstone",
+      "name": "Sandstone Retreat",
+      "location": "AlUla, Saudi Arabia",
+      "shortLoc": "AlUla",
+      "region": "AlUla",
+      "heritage": { "key": "northwest", "label": "Northwest · sandstone", "motif": "Canyon-cut forms", "note": "Layered sandstone and shaded clay walls shape a quiet courtyard stay." },
+      "coordinates": { "lat": 26.6089, "lng": 37.9216 },
+      "price": 480,
+      "image": "images/places/alula-sandstone-v2.webp",
+      "host": "Noura",
+      "sleeps": "2–3 guests",
+      "stayType": "Canyon courtyard house",
+      "highlight": "Best at first light, when the cliffs shift from rose to copper.",
+      "goodToKnow": "The final approach includes a short unpaved stretch.",
+      "amenities": ["Private Bath", "Free WiFi", "2 Beds", "Air conditioning", "Majlis"],
+      "description": [
+        "A stone-and-clay retreat tucked against the sandstone cliffs of AlUla, minutes from the tombs of Hegra and the old mudbrick town. Wake before dawn for the hot-air balloons, spend the heat of the day in the shaded courtyard, and watch the rock glow copper at sunset.",
+        "Two can sleep comfortably; a third can take the majlis nook with the extra bedding provided. Check-in is self-service with a lockbox code sent the morning of arrival, and Arabic coffee and dates are waiting on the tray."
+      ],
+      "reviews": [
+        { "reviewer": "Noura A.", "rating": 5, "comment": "Watched the balloons lift over Hegra with coffee in hand — exactly the reset I needed. The directions for the last stretch of desert track were spot on." },
+        { "reviewer": "Faisal M.", "rating": 4, "comment": "The courtyard is the whole point in the afternoon heat — bring a hat for the walk to the tombs. The retreat itself was spotless and cool inside." },
+        { "reviewer": "Reem S.", "rating": 5, "comment": "Second stay this year. The majlis nook at sunset, with the rock going copper, is my favourite spot in the whole Kingdom." }
+      ]
+    },
+    {
+      "id": "jeddah-rawshan",
+      "name": "Rawshan Loft",
+      "location": "Al-Balad, Jeddah",
+      "shortLoc": "Al-Balad, Jeddah",
+      "region": "Jeddah",
+      "heritage": { "key": "hejaz", "label": "Hejaz · rawshan", "motif": "Filtered rawshan light", "note": "Carved wooden screens soften the afternoon sun and frame the lanes of Al-Balad." },
+      "coordinates": { "lat": 21.4838, "lng": 39.1860 },
+      "price": 260,
+      "image": "images/places/jeddah-rawshan-v2.webp",
+      "host": "Sara",
+      "sleeps": "2 guests",
+      "stayType": "Restored coral-stone loft",
+      "highlight": "The rawshan turns the late-afternoon sun into moving patterns across the room.",
+      "goodToKnow": "Al-Balad stays lively into the evening, so light sleepers may prefer earplugs.",
+      "amenities": ["Free WiFi", "Private Bath", "Air conditioning", "Kitchen"],
+      "description": [
+        "A restored coral-stone loft in the heart of historic Al-Balad, behind a carved wooden rawshan window that filters the sea breeze. Step out into lanes of spice shops, old mosques and lantern-lit cafés.",
+        "The loft sleeps two under high timber ceilings, with a compact kitchen and a rooftop nook for the call to prayer at dusk. A short walk from the Corniche."
+      ],
+      "reviews": [
+        { "reviewer": "Huda K.", "rating": 5, "comment": "The rawshan makes the whole room glow in the afternoon. Waking up in the middle of old Jeddah is something else." },
+        { "reviewer": "Omar T.", "rating": 4, "comment": "Lovely restoration and unbeatable location. The lanes get lively at night — part of the charm, but pack earplugs." }
+      ]
+    },
+    {
+      "id": "abha-chalet",
+      "name": "Cloud-Top Chalet",
+      "location": "Abha, Asir",
+      "shortLoc": "Abha, Asir",
+      "region": "Asir",
+      "heritage": { "key": "asir", "label": "Asir · Al-Qatt", "motif": "Al-Qatt colour", "note": "A hand-painted geometric panel brings Asir’s vivid domestic art onto the mountain terrace." },
+      "coordinates": { "lat": 18.2164, "lng": 42.5053 },
+      "price": 320,
+      "image": "images/places/abha-chalet-v2.webp",
+      "host": "Yousef",
+      "sleeps": "4 guests",
+      "stayType": "Mountain terrace chalet",
+      "highlight": "Clouds gather below the deck while juniper-covered ridges disappear into the mist.",
+      "goodToKnow": "Mountain roads are winding, and fog can reduce visibility.",
+      "amenities": ["Free WiFi", "Fireplace", "2 Beds", "Parking", "Kitchen"],
+      "description": [
+        "A timber chalet perched in the juniper-forested peaks above Abha, where clouds drift through the valley below by afternoon. Cool year-round, with a stone fireplace for the mountain evenings.",
+        "Sleeps four across two rooms, with a wide deck facing the escarpment. Ten minutes from the cable car and the Tuesday market."
+      ],
+      "reviews": [
+        { "reviewer": "Lama F.", "rating": 5, "comment": "Sat on the deck and watched clouds pour over the ridge. Needed a jacket in July — worth every riyal." },
+        { "reviewer": "Khalid R.", "rating": 4, "comment": "The fireplace is the heart of the place. Road up is winding but fine in any car." }
+      ]
+    },
+    {
+      "id": "ahsa-bungalow",
+      "name": "Palm Farm Bungalow",
+      "location": "Al-Ahsa Oasis",
+      "shortLoc": "Al-Ahsa Oasis",
+      "region": "Al-Ahsa",
+      "heritage": { "key": "eastern", "label": "Eastern oasis · palm", "motif": "Palm-shadow rhythm", "note": "Date palms cast shifting shadows across the veranda and the old irrigation channel." },
+      "coordinates": { "lat": 25.3833, "lng": 49.5833 },
+      "price": 180,
+      "image": "images/places/ahsa-bungalow-v2.webp",
+      "host": "Maha",
+      "sleeps": "3 guests",
+      "stayType": "Oasis farm bungalow",
+      "highlight": "A shaded veranda opens directly onto the date grove and its narrow water channel.",
+      "goodToKnow": "Bring insect repellent for evenings close to the palms.",
+      "amenities": ["Free WiFi", "Private Bath", "Kitchen", "Air conditioning"],
+      "description": [
+        "A quiet bungalow set among the date palms of the Al-Ahsa oasis, the largest in the world. Shade, birdsong and the smell of fresh dates in season, with springs and caves a short drive away.",
+        "Sleeps three, with a shaded veranda for tea and a kitchen stocked with local dates and honey. A gentle, green base in the Eastern Province."
+      ],
+      "reviews": [
+        { "reviewer": "Abdullah N.", "rating": 5, "comment": "Fell asleep to nothing but wind in the palms. The host left a basket of khlas dates that we finished in a day." },
+        { "reviewer": "Sara W.", "rating": 4, "comment": "Peaceful and great value. Bring mosquito spray for the evenings by the palms." }
+      ]
+    },
+    {
+      "id": "diriyah-najdi",
+      "name": "Najdi Mudbrick House",
+      "location": "Diriyah, Riyadh",
+      "shortLoc": "Diriyah, Riyadh",
+      "region": "Riyadh",
+      "heritage": { "key": "najd", "label": "Najd · earth & plaster", "motif": "Najdi plaster openings", "note": "Thick earthen walls, triangular vents and gypsum details shape the sheltered courtyard." },
+      "coordinates": { "lat": 24.7370, "lng": 46.5750 },
+      "price": 540,
+      "image": "images/places/diriyah-najdi-v2.webp",
+      "host": "Turki",
+      "sleeps": "4 guests",
+      "stayType": "Restored mudbrick house",
+      "highlight": "Lantern light settles into the courtyard as the earthen walls release the day’s heat.",
+      "goodToKnow": "The thick walls keep the interior naturally cooler than the courtyard.",
+      "amenities": ["Free WiFi", "Private Bath", "2 Beds", "Majlis", "Parking", "Air conditioning"],
+      "description": [
+        "A restored Najdi mudbrick house beside the mud-walled district of At-Turaif in Diriyah, all thick earthen walls, geometric window slits and a shaded inner courtyard. Cool by day, lantern-lit by night.",
+        "Sleeps four around a traditional majlis, steps from Bujairi Terrace's restaurants and the old capital's walls. The quietest corner of Riyadh's history."
+      ],
+      "reviews": [
+        { "reviewer": "Aisha D.", "rating": 5, "comment": "Staying inside the mud walls, then walking to dinner at Bujairi — you feel the history and the buzz at once." },
+        { "reviewer": "Nawaf H.", "rating": 5, "comment": "The courtyard stays cool even in Riyadh summer. Beautifully restored, generous majlis." }
+      ]
+    },
+    {
+      "id": "farasan-cabin",
+      "name": "Coral Coast Cabin",
+      "location": "Farasan Islands, Jazan",
+      "shortLoc": "Farasan Islands",
+      "region": "Jazan",
+      "heritage": { "key": "south-coast", "label": "Southern coast · coral", "motif": "Coral coast texture", "note": "Weathered timber and coral stone sit beside clear shallows at the edge of the Red Sea." },
+      "coordinates": { "lat": 16.7020, "lng": 42.1170 },
+      "price": 300,
+      "image": "images/places/farasan-cabin-v2.webp",
+      "host": "Salem",
+      "sleeps": "2 guests",
+      "stayType": "Remote shoreline cabin",
+      "highlight": "Step from the porch into clear shallows where the reef begins close to shore.",
+      "goodToKnow": "Bring essential supplies from Jazan; shops on the island are limited.",
+      "amenities": ["Free WiFi", "Private Bath", "2 Beds", "Air conditioning"],
+      "description": [
+        "A simple cabin on the coral shore of the Farasan Islands in the Red Sea, where the water runs turquoise and the reefs start a few steps from the door. Mornings for snorkelling, evenings for the ferry-quiet dark and a sky full of stars.",
+        "Sleeps two, with a shaded porch and kayaks to borrow. Reached by the daily ferry from Jazan — bring what you need, the island is gloriously off-grid."
+      ],
+      "reviews": [
+        { "reviewer": "Dana Q.", "rating": 5, "comment": "Snorkelled straight off the beach at sunrise. The quiet out here is unreal — no signal, no crowds, just reef." },
+        { "reviewer": "Bandar L.", "rating": 4, "comment": "Bring supplies from Jazan before the ferry. Once you're here it's paradise, but the shop is tiny." }
+      ]
+    }
+  ]
+}

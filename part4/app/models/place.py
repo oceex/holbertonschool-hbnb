@@ -32,6 +32,8 @@ class Place(BaseModel):
     price = db.Column(db.Float, nullable=False)
     latitude = db.Column(db.Float, nullable=False)
     longitude = db.Column(db.Float, nullable=False)
+    image_url = db.Column(db.String(500), nullable=True)
+    location = db.Column(db.String(150), nullable=True)
     owner_id = db.Column(
         db.String(36), db.ForeignKey("users.id"), nullable=False
     )
@@ -48,7 +50,8 @@ class Place(BaseModel):
         backref=db.backref("places", lazy=True),
     )
 
-    def __init__(self, title, description, price, latitude, longitude, owner):
+    def __init__(self, title, description, price, latitude, longitude, owner,
+                 image_url=None, location=None):
         """Initialize a validated place and synchronize its relationships."""
         super().__init__()
         self.title = title
@@ -57,6 +60,8 @@ class Place(BaseModel):
         self.latitude = latitude
         self.longitude = longitude
         self.owner = owner
+        self.image_url = image_url
+        self.location = location
 
     @validates("title")
     def validate_title(self, key, value):
@@ -117,6 +122,26 @@ class Place(BaseModel):
         if not -180.0 <= value <= 180.0:
             raise ValueError("Longitude must be between -180.0 and 180.0.")
         return value
+
+    @validates("image_url")
+    def validate_image_url(self, key, value):
+        """Normalize the optional cover image URL."""
+        if value is None:
+            return None
+        if not isinstance(value, str):
+            raise ValueError("image_url must be a string")
+        value = value.strip()
+        return value or None
+
+    @validates("location")
+    def validate_location(self, key, value):
+        """Normalize the optional short location label."""
+        if value is None:
+            return None
+        if not isinstance(value, str):
+            raise ValueError("location must be a string")
+        value = value.strip()
+        return value or None
 
     @validates("owner")
     def validate_owner(self, key, value):
