@@ -23,10 +23,18 @@ This phase covers the foundational software architecture and system design. Key 
 
 *👉 **[Click here to read the full Part 1 Technical Documentation](./part1/README.md)***.
 
-### ➡️ [Part 2: Business Logic and API Endpoints](./part2/hbnb/README.md)
+### ➡️ [Part 2: Business Logic and API Endpoints](./part2/README.md)
 This phase transitions the system from design to active code, focusing on the core business logic and presentation layers. Key implementations include:
 * **Presentation Layer (API):** RESTful API endpoints built with **Flask** and **Flask-RESTx**, utilizing Namespaces for structured routing.
 * **Business Logic Layer:** Core domain models implementing strict attribute validation (e.g., latitude/longitude bounds) and entity relationship handling (Nested Serialization).
 * **Facade Pattern:** A centralized `HBnBFacade` service orchestrating secure interactions between the layers.
 
-*👉 **[Click here to explore the Part 2 Codebase](./part2/hbnb/README.md)***.
+*👉 **[Click here to explore the Part 2 Codebase](./part2/README.md)***.
+
+### ➡️ [Part 3: Authentication and Database Integration](./part3/README.md)
+This phase secures the backend and replaces in-memory storage with a persistent database. Key implementations include:
+* **Authentication:** JWT-based login (**Flask-JWT-Extended**) with bcrypt-hashed passwords, never returned by the API.
+* **Authorization:** Role-based access control — ownership checks on places and reviews, admin bypass, and admin-only user/amenity management.
+* **Persistence:** In-memory repositories replaced by **SQLAlchemy**-backed SQLite storage, plus raw SQL scripts and a Mermaid ER diagram of the schema.
+
+*👉 **[Click here to explore the Part 3 Codebase](./part3/README.md)***.
