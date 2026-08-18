@@ -1,4 +1,11 @@
-const API_BASE_URL = 'http://localhost:5000/api/v1';
+// On the academy sandbox, the page is served from a proxy domain like
+// "web-8000-142-110.cod-eu-west-3.hbtn.io" -- in that case "localhost"
+// would wrongly point back at the student's own laptop, so we rewrite the
+// port segment of that same hostname to reach the Flask backend instead.
+// Outside the sandbox (plain localhost testing) nothing changes.
+const API_BASE_URL = window.location.hostname.includes('.hbtn.io')
+  ? `${window.location.protocol}//${window.location.hostname.replace(/^web-\d+-/, 'web-5000-')}/api/v1`
+  : 'http://localhost:5000/api/v1';
 
 document.addEventListener('DOMContentLoaded', () => {
   const isLoggedIn = getCookie('access_token') !== null;
@@ -70,6 +77,17 @@ document.addEventListener('DOMContentLoaded', () => {
         card.style.display = show ? '' : 'none';
       });
     });
+  }
+
+  /* Task 3: place.html only has #place-details when we're actually on
+     that page, so this block is a no-op everywhere else. */
+  if (document.getElementById('place-details')) {
+    initPlacePage();
+  }
+
+  /* Task 4: same guard pattern, keyed off the review form's id. */
+  if (document.getElementById('review-form')) {
+    initReviewPage();
   }
 });
 
@@ -163,4 +181,226 @@ if (document.getElementById('atlas-svg')) {
       if (window.__hbnbMap) window.__hbnbMap(db.places);
     })
     .catch(() => {});
+}
+
+/* ---------- Task 3: place details, Task 4: add review ---------- */
+
+function getPlaceIdFromURL () {
+  return new URLSearchParams(window.location.search).get('id');
+}
+
+async function fetchPlace (id, token) {
+  const headers = {};
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+  return fetch(`${API_BASE_URL}/places/${id}`, { headers });
+}
+
+async function fetchUser (id, token) {
+  const headers = {};
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+  return fetch(`${API_BASE_URL}/users/${id}`, { headers });
+}
+
+async function submitReview (token, placeId, rating, text) {
+  return fetch(`${API_BASE_URL}/reviews/`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ place_id: placeId, rating: Number(rating), text })
+  });
+}
+
+async function initPlacePage () {
+  const placeId = getPlaceIdFromURL();
+  if (!placeId) return;
+
+  const token = getCookie('access_token');
+  const response = await fetchPlace(placeId, token);
+  if (!response.ok) return;
+
+  const place = await response.json();
+  renderPlaceDetails(place);
+  renderReviews(place.reviews || [], token);
+
+  const addReviewLink = document.querySelector('#add-review-cta a');
+  if (addReviewLink) {
+    addReviewLink.href = `add_review.html?id=${encodeURIComponent(placeId)}`;
+  }
+}
+
+function renderPlaceDetails (place) {
+  const eyebrow = document.querySelector('.place-main .eyebrow');
+  if (eyebrow) eyebrow.textContent = place.location || '';
+
+  const heading = document.querySelector('.place-main h1');
+  if (heading) heading.textContent = place.title;
+
+  const figureImg = document.querySelector('.place-figure img');
+  if (figureImg && place.image_url) {
+    figureImg.src = place.image_url;
+    figureImg.alt = place.title;
+  }
+
+  const description = document.getElementById('place-description');
+  if (description) description.textContent = place.description || '';
+
+  const priceTag = document.querySelector('.price-tag');
+  if (priceTag) priceTag.innerHTML = `SAR ${place.price} <small>/ night</small>`;
+
+  if (place.owner) {
+    const hostName = document.getElementById('host-name');
+    const hostAvatar = document.querySelector('.host-avatar');
+    if (hostName) hostName.textContent = `Hosted by ${place.owner.first_name}`;
+    if (hostAvatar) hostAvatar.textContent = place.owner.first_name.charAt(0);
+  }
+
+  const amenitiesList = document.querySelector('.amenities-list');
+  if (amenitiesList) {
+    amenitiesList.innerHTML = '';
+    (place.amenities || []).forEach((amenity) => {
+      const item = document.createElement('li');
+      item.textContent = amenity.name;
+      amenitiesList.appendChild(item);
+    });
+  }
+
+  const crumb = document.querySelector('.breadcrumb [aria-current="page"]');
+  if (crumb) crumb.textContent = place.title;
+}
+
+function renderReviews (reviews, token) {
+  const list = document.querySelector('.reviews-list');
+  const summary = document.getElementById('reviews-summary');
+  if (!list) return;
+
+  list.innerHTML = '';
+
+  if (summary) {
+    summary.textContent = reviews.length
+      ? `${reviews.length} guest${reviews.length === 1 ? '' : 's'} shared what stood out.`
+      : 'No reviews yet -- be the first to share.';
+  }
+
+  reviews.forEach((review) => {
+    const card = document.createElement('li');
+    card.className = 'review-card';
+
+    const head = document.createElement('div');
+    head.className = 'review-head';
+
+    const reviewer = document.createElement('span');
+    reviewer.className = 'reviewer';
+    reviewer.textContent = 'Guest';
+
+    const rating = document.createElement('span');
+    rating.className = 'rating';
+    rating.textContent = `${'\u2605'.repeat(review.rating)}${'\u2606'.repeat(5 - review.rating)} ${review.rating}/5`;
+
+    head.append(reviewer, rating);
+
+    const text = document.createElement('p');
+    text.textContent = review.text;
+
+    card.append(head, text);
+    list.appendChild(card);
+
+    fetchUser(review.user_id, token).then((userResponse) => {
+      if (!userResponse.ok) return;
+      return userResponse.json();
+    }).then((user) => {
+      if (user) reviewer.textContent = `${user.first_name} ${user.last_name.charAt(0)}.`;
+    });
+  });
+}
+
+async function initReviewPage () {
+  const token = getCookie('access_token');
+  const reviewForm = document.getElementById('review-form');
+  const reviewError = document.getElementById('review-error');
+  const reviewGate = document.getElementById('review-gate');
+
+  if (!token) {
+    window.location.href = 'index.html';
+    return;
+  }
+
+  const placeId = getPlaceIdFromURL();
+  if (!placeId) {
+    if (reviewGate) {
+      reviewGate.textContent = 'No place was specified. Go back and pick a place first.';
+      reviewGate.hidden = false;
+    }
+    if ( reviewForm) reviewForm.hidden = true;
+    return;
+  }
+
+  const placeResponse = await fetchPlace(placeId, token);
+  if (placeResponse.ok) {
+    const place = await placeResponse.json();
+
+    const nameEl = document.getElementById('ctx-place-name');
+    if (nameEl) nameEl.textContent = place.title;
+
+    const locEl = document.getElementById('ctx-loc');
+    if (locEl) locEl.textContent = place.location || '';
+
+    const coverImg = document.getElementById('review-cover');
+    if (coverImg && place.image_url) {
+      coverImg.src = place.image_url;
+      coverImg.alt = place.title;
+    }
+
+    document.querySelectorAll('#ctx-back, #header-place-link, #footer-place-link')
+      .forEach((link) => { link.href = `place.html?id=${encodeURIComponent(placeId)}`; });
+  }
+
+  const commentField = document.getElementById('comment');
+  const charCount = document.getElementById('character-count');
+  if (commentField && charCount) {
+    commentField.addEventListener('input', () => {
+      charCount.textContent = `${commentField.value.length} / 1200`;
+    });
+  }
+
+  if (reviewForm) {
+    reviewForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (reviewError) reviewError.hidden = true;
+
+      const ratingField = document.getElementById('rating');
+      const rating = ratingField ? ratingField.value : '';
+      const comment = commentField ? commentField.value.trim() : '';
+
+      if (!rating || !comment) {
+        if (reviewError) {
+          reviewError.textContent = 'Choose a rating and write a comment first.';
+          reviewError.hidden = false;
+        }
+        return;
+      }
+
+      try {
+        const response = await submitReview(token, placeId, rating, comment);
+        const data = await response.json();
+
+        if (response.ok) {
+          window.location.href = `place.html?id=${encodeURIComponent(placeId)}`;
+        } else if (reviewError) {
+          reviewError.textContent = data.message || data.error || 'Could not submit the review.';
+          reviewError.hidden = false;
+        }
+      } catch (error) {
+        if (reviewError) {
+          reviewError.textContent = 'Unable to reach the server. Please try again.';
+          reviewError.hidden = false;
+        }
+      }
+    });
+  }
 }

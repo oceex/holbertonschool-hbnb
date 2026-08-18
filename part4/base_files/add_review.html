@@ -1,86 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HBnB — Add a review</title>
-  <meta name="theme-color" content="#16302B">
-  <link rel="icon" type="image/png" href="images/icon.png">
-  <link rel="stylesheet" href="styles.css">
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>HBnB - Add a review</title>
+ <meta name="theme-color" content="#16302B">
+ <link rel="icon" type="image/png" href="images/icon.png">
+ <link rel="stylesheet" href="styles.css">
 </head>
 <body class="page-review page-form">
 
-  <a class="skip-link" href="#main-content">Skip to content</a>
+ <a class="skip-link" href="#main-content">Skip to content</a>
 
-  <header class="site-header">
-    <div class="header-inner">
-      <div class="brand">
-          <a href="index.html" aria-label="HBnB home"><img src="images/logo.png" alt="HBnB logo" class="logo" width="112" height="44" fetchpriority="high"></a>
-      </div>
-      <nav class="main-nav" aria-label="Primary">
-        <a href="index.html#listings" class="nav-link">Browse stays</a>
-        <a href="place.html" class="nav-link" id="header-place-link">Place details</a>
-        <a href="login.html" class="login-button has-tip" id="login-link">Log in</a>
-      </nav>
-    </div>
-    <div class="sadu regional-thread" aria-hidden="true"></div>
-  </header>
+ <header class="site-header">
+ <div class="header-inner">
+ <div class="brand">
+ <a href="index.html" aria-label="HBnB home"><img src="images/logo.png" alt="HBnB logo" class="logo" width="112" height="44" fetchpriority="high"></a>
+ </div>
+ <nav class="main-nav" aria-label="Primary">
+ <a href="index.html#listings" class="nav-link">Browse stays</a>
+ <a href="place.html" class="nav-link" id="header-place-link">Place details</a>
+ <a href="login.html" class="login-button has-tip" id="login-link">Log in</a>
+ </nav>
+ </div>
+ <div class="sadu regional-thread" aria-hidden="true"></div>
+ </header>
 
-  <main id="main-content">
-    <nav class="breadcrumb" aria-label="Breadcrumb">
-      <ol>
-        <li><a href="index.html">Home</a></li>
-        <li><a href="place.html">Sandstone Retreat</a></li>
-        <li aria-current="page">Add a review</li>
-      </ol>
-    </nav>
+ <main id="main-content">
+ <nav class="breadcrumb" aria-label="Breadcrumb">
+ <ol>
+ <li><a href="index.html">Home</a></li>
+ <li><a href="place.html">Sandstone Retreat</a></li>
+ <li aria-current="page">Add a review</li>
+ </ol>
+ </nav>
 
-    <p class="place-context">You’re reviewing <strong>Sandstone Retreat</strong> in <span id="ctx-loc">AlUla, Saudi Arabia</span>. <a id="ctx-back" href="place.html">View place details</a></p>
+ <p class="place-context">You're reviewing <strong id="ctx-place-name">Sandstone Retreat</strong> in <span id="ctx-loc">AlUla, Saudi Arabia</span>. <a id="ctx-back" href="place.html">View place details</a></p>
 
-    <p class="review-gate" id="review-gate" hidden></p>
+ <p class="review-gate" id="review-gate" hidden></p>
 
-    <section class="form-shell form-shell-split">
-      <figure class="form-visual review-visual">
-        <img id="review-cover" src="images/places/alula-sandstone-v2.webp" alt="Sandstone Retreat in AlUla" width="1536" height="1024" fetchpriority="high">
-        <figcaption id="review-visual-caption">Write about the detail that changed your stay.</figcaption>
-      </figure>
-      <div class="form-content">
-      <span class="eyebrow">Guest field note</span>
-      <h1>Leave the useful detail.</h1>
-      <p>Focus on the stay itself—comfort, setting, amenities and anything the next guest should plan for.</p>
+ <section class="form-shell form-shell-split">
+ <figure class="form-visual review-visual">
+ <img id="review-cover" src="images/places/alula-sandstone-v2.webp" alt="Sandstone Retreat in AlUla" width="1536" height="1024" fetchpriority="high">
+ <figcaption id="review-visual-caption">Write about the detail that changed your stay.</figcaption>
+ </figure>
+ <div class="form-content">
+ <span class="eyebrow">Guest field note</span>
+ <h1>Leave the useful detail.</h1>
+ <p>Focus on the stay itself - comfort, setting, amenities and anything the next guest should plan for.</p>
 
-      <form class="add-review form" id="review-form" action="#" method="post">
-        <label for="rating">Rating</label>
-        <select id="rating" name="rating" autocomplete="off" required>
-          <option value="">Select a rating</option>
-          <option value="5">★★★★★ — Excellent</option>
-          <option value="4">★★★★☆ — Great</option>
-          <option value="3">★★★☆☆ — Good</option>
-          <option value="2">★★☆☆☆ — Fair</option>
-          <option value="1">★☆☆☆☆ — Poor</option>
-        </select>
+ <form class="add-review form" id="review-form" action="#" method="post">
+ <label for="rating">Rating</label>
+ <select id="rating" name="rating" autocomplete="off" required>
+ <option value="">Select a rating</option>
+ <option value="5">***** - Excellent</option>
+ <option value="4">****- - Great</option>
+ <option value="3">***-- - Good</option>
+ <option value="2">**--- - Fair</option>
+ <option value="1">*---- - Poor</option>
+ </select>
 
-        <label for="comment">Your review</label>
-        <textarea id="comment" name="comment" placeholder="Describe the stay, the setting and 1 useful detail…" autocomplete="off" maxlength="1200" required></textarea>
-        <p class="form-meta"><span>Be specific, fair and focused on the place.</span><span id="character-count" aria-live="polite">0 / 1200</span></p>
+ <label for="comment">Your review</label>
+ <textarea id="comment" name="comment" placeholder="Describe the stay, the setting and 1 useful detail..." autocomplete="off" maxlength="1200" required></textarea>
+ <p class="form-meta"><span>Be specific, fair and focused on the place.</span><span id="character-count" aria-live="polite">0 / 1200</span></p>
 
-        <button type="submit" class="form-submit"><span>Post review</span></button>
-        <p class="form-error" id="review-error" aria-live="polite" hidden></p>
-      </form>
-      </div>
-    </section>
-  </main>
+ <button type="submit" class="form-submit"><span>Post review</span></button>
+ <p class="form-error" id="review-error" aria-live="polite" hidden></p>
+ </form>
+ </div>
+ </section>
+ </main>
 
-  <footer class="site-footer">
-    <div class="sadu regional-thread" aria-hidden="true"></div>
-    <div class="footer-inner">
-      <div class="footer-brand"><p class="footer-mark">HBnB</p><p class="footer-tag">Small details make reviews worth reading.</p></div>
-      <nav class="footer-nav" aria-label="Footer"><a href="index.html#listings">Browse stays</a><a href="place.html" id="footer-place-link">Place details</a></nav>
-      <p class="footer-legal">&copy; 2026 HBnB. All rights reserved.</p>
-    </div>
-  </footer>
+ <footer class="site-footer">
+ <div class="sadu regional-thread" aria-hidden="true"></div>
+ <div class="footer-inner">
+ <div class="footer-brand"><p class="footer-mark">HBnB</p><p class="footer-tag">Small details make reviews worth reading.</p></div>
+ <nav class="footer-nav" aria-label="Footer"><a href="index.html#listings">Browse stays</a><a href="place.html" id="footer-place-link">Place details</a></nav>
+ <p class="footer-legal">&copy; 2026 HBnB. All rights reserved.</p>
+ </div>
+ </footer>
 
-  <script src="scripts.js" defer></script>
-  <script src="atlas.js" defer></script>
+ <script src="scripts.js" defer></script>
+ <script src="atlas.js" defer></script>
 </body>
 </html>
