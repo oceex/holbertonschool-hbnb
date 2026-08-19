@@ -320,6 +320,7 @@ function renderReviews (reviews, token) {
 }
 
 async function initReviewPage () {
+  initStarPicker();
   const token = getCookie('access_token');
   const reviewForm = document.getElementById('review-form');
   const reviewError = document.getElementById('review-error');
@@ -403,4 +404,24 @@ async function initReviewPage () {
       }
     });
   }
+}
+
+function initStarPicker () {
+  const picker = document.getElementById('star-picker');
+  const ratingInput = document.getElementById('rating');
+  if (!picker || !ratingInput) return;
+  const buttons = Array.from(picker.querySelectorAll('.star-btn'));
+  function paint (value) {
+    buttons.forEach((btn) => {
+      const active = Number(btn.dataset.value) <= value;
+      btn.textContent = active ? '\u2605' : '\u2606';
+    });
+  }
+  buttons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      ratingInput.value = btn.dataset.value;
+      paint(Number(btn.dataset.value));
+    });
+  });
+  paint(0);
 }

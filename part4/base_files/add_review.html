@@ -50,15 +50,20 @@
  <p>Focus on the stay itself - comfort, setting, amenities and anything the next guest should plan for.</p>
 
  <form class="add-review form" id="review-form" action="#" method="post">
- <label for="rating">Rating</label>
- <select id="rating" name="rating" autocomplete="off" required>
- <option value="">Select a rating</option>
- <option value="5">***** - Excellent</option>
- <option value="4">****- - Great</option>
- <option value="3">***-- - Good</option>
- <option value="2">**--- - Fair</option>
- <option value="1">*---- - Poor</option>
- </select>
+ <label id="rating-label">Rating</label>
+<div class="star-picker" id="star-picker" role="radiogroup" aria-labelledby="rating-label">
+<button type="button" class="star-btn" data-value="1" aria-label="1 star - Poor"></button>
+<button type="button" class="star-btn" data-value="2" aria-label="2 stars - Fair"></button>
+<button type="button" class="star-btn" data-value="3" aria-label="3 stars - Good"></button>
+<button type="button" class="star-btn" data-value="4" aria-label="4 stars - Great"></button>
+<button type="button" class="star-btn" data-value="5" aria-label="5 stars - Excellent"></button>
+</div>
+<input type="hidden" id="rating" name="rating" required>
+<style>
+.star-picker{display:flex;gap:6px;margin-bottom:4px}
+.star-btn{background:none;border:none;font-size:28px;line-height:1;cursor:pointer;color:#c9973e;padding:2px;transition:transform .1s}
+.star-btn:hover,.star-btn:focus-visible{transform:scale(1.15)}
+</style>
 
  <label for="comment">Your review</label>
  <textarea id="comment" name="comment" placeholder="Describe the stay, the setting and 1 useful detail..." autocomplete="off" maxlength="1200" required></textarea>
