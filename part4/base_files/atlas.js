@@ -1,8 +1,9 @@
-/* =========================================================
-   HBnB — dependency-free Saudi atlas + restrained motion
-   The country outline is simplified from Natural Earth data.
-   Pins and regional keys are rendered from data/places.json.
-   ========================================================= */
+/* Decorative atlas for the index page, plus the restrained motion effects used
+   across the site. No third-party libraries: the outline is a simplified
+   Natural Earth polygon and everything else is plain SVG.
+
+   scripts.js supplies the places, so each pin carries a real place id and
+   leads to that place's detail page. */
 (function () {
   "use strict";
 
@@ -31,12 +32,14 @@
     [44.063,17.410],[43.792,17.320],[43.381,17.580],[43.116,17.088],[43.218,16.667]
   ];
 
+  /* Each colour fills a pin behind a cream numeral, so all of them are dark
+     enough to clear the 4.5:1 contrast minimum against that numeral. */
   var CULTURES = {
     "northwest": { short: "Northwest", color: "#9F5137" },
     "hejaz": { short: "Hejaz", color: "#30496A" },
-    "asir": { short: "Asir", color: "#C9473D" },
+    "asir": { short: "Asir", color: "#B94138" },
     "eastern": { short: "Eastern oasis", color: "#47705A" },
-    "najd": { short: "Najd", color: "#A56A32" },
+    "najd": { short: "Najd", color: "#98622E" },
     "south-coast": { short: "Southern coast", color: "#2D7780" },
     "atlas": { short: "Saudi atlas", color: "#B5562E" }
   };
@@ -129,13 +132,13 @@
       button.type = "button";
       button.className = "atlas-region-key";
       button.dataset.id = place.id;
+      button.dataset.name = place.name;
       button.dataset.culture = key;
-      button.dataset.region = place.region;
       button.style.setProperty("--region-color", meta.color);
-      button.setAttribute("aria-label", "Show " + place.name + " in " + place.location);
+      button.setAttribute("aria-label", "Open " + place.name + ", " + place.location);
       button.innerHTML = '<span aria-hidden="true"></span>' + meta.short;
       button.addEventListener("click", function () {
-        if (window.__hbnbSelectRegion) window.__hbnbSelectRegion(place.region);
+        location.href = "place.html?id=" + encodeURIComponent(place.id);
       });
       root.appendChild(button);
     });
@@ -146,6 +149,13 @@
     var status = document.getElementById("map-status");
     if (!svg || svg.dataset.drawn) return;
     svg.dataset.drawn = "1";
+
+    /* An empty catalogue is normal on a fresh database; a map with no pins
+       would read as a failure instead. */
+    if (!places.length) {
+      if (status) status.textContent = "No stays to plot yet.";
+      return;
+    }
 
     var title = svg.querySelector("title") ? svg.querySelector("title").textContent : "Saudi stay atlas";
     var description = svg.querySelector("desc") ? svg.querySelector("desc").textContent : "Interactive map of stays";
@@ -177,11 +187,15 @@
         tabindex: "0",
         role: "button",
         "data-id": place.id,
+        "data-name": place.name,
         "data-culture": key,
         "aria-label": place.name + ", " + place.location + ", SAR " + place.price + " per night",
         transform: "translate(" + point[0].toFixed(1) + " " + point[1].toFixed(1) + ")"
       });
       group.style.setProperty("--pin-color", meta.color);
+      /* The visible dot is about 11px on screen, too small to click reliably.
+         This invisible circle widens the target without changing the design. */
+      group.appendChild(el("circle", { class: "atlas-pin-hit", r: "18" }));
       group.appendChild(el("circle", { class: "atlas-pin-ring", r: "8" }));
       group.appendChild(el("circle", { class: "atlas-pin-dot", r: "7" }));
       group.appendChild(el("text", { class: "atlas-pin-num", x: "0", y: "4" }, String(i + 1)));
@@ -204,19 +218,14 @@
         group.classList.remove("active");
         if (mapFrame) delete mapFrame.dataset.culture;
         if (tooltip) tooltip.hidden = true;
-        if (coordsOut) coordsOut.textContent = places.length + " stays across the Kingdom";
+        if (coordsOut) {
+          coordsOut.textContent = places.length +
+            (places.length === 1 ? " stay" : " stays") + " across the Kingdom";
+        }
       }
 
       function go() {
-        var card = document.querySelector('.place-card[data-id="' + place.id + '"]');
-        if (card && card.hidden && window.__hbnbSelectRegion) window.__hbnbSelectRegion(place.region);
-        window.setTimeout(function () {
-          card = document.querySelector('.place-card[data-id="' + place.id + '"]');
-          if (!card) { location.href = "place.html?id=" + encodeURIComponent(place.id); return; }
-          card.scrollIntoView({ block: "center", behavior: reduce ? "auto" : "smooth" });
-          card.classList.add("card-flash");
-          window.setTimeout(function () { card.classList.remove("card-flash"); }, 1000);
-        }, 40);
+        location.href = "place.html?id=" + encodeURIComponent(place.id);
       }
 
       group.addEventListener("mouseenter", show);
@@ -229,12 +238,14 @@
       });
     });
 
-    window.__hbnbMapFilter = function (ids) {
-      pinNodes.forEach(function (pin) { pin.classList.toggle("is-muted", ids.indexOf(pin.dataset.id) === -1); });
+    /* Called by the price filter so the atlas dims the same stays the list
+       hides, instead of contradicting it. */
+    window.__hbnbMapFilter = function (visibleNames) {
+      pinNodes.forEach(function (pin) {
+        pin.classList.toggle("is-muted", visibleNames.indexOf(pin.dataset.name) === -1);
+      });
       document.querySelectorAll(".atlas-region-key").forEach(function (key) {
-        var visible = ids.indexOf(key.dataset.id) !== -1;
-        key.classList.toggle("is-muted", !visible);
-        key.setAttribute("aria-pressed", visible ? "true" : "false");
+        key.classList.toggle("is-muted", visibleNames.indexOf(key.dataset.name) === -1);
       });
     };
 

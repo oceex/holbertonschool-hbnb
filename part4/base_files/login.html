@@ -56,7 +56,6 @@
       </form>
 
       <p class="form-note">New here? Reach out to the HBnB team to get set up.</p>
-      <p class="login-hint" id="login-hint"></p>
       </div>
     </section>
   </main>
@@ -64,8 +63,16 @@
   <footer class="site-footer">
     <div class="sadu regional-thread" aria-hidden="true"></div>
     <div class="footer-inner">
-      <div class="footer-brand"><p class="footer-mark">HBnB</p><p class="footer-tag">Read freely. Sign in only when you have something useful to add.</p></div>
-      <nav class="footer-nav" aria-label="Footer"><a href="index.html#listings">Browse stays</a><a href="index.html#how">How it works</a></nav>
+      <div class="footer-brand">
+        <p class="footer-mark">HBnB</p>
+        <p class="footer-tag">A field guide to stays with regional character.</p>
+      </div>
+      <!-- Session control lives in the header only, so the footer cannot
+           contradict it by still offering "Log in" to a signed-in visitor. -->
+      <nav class="footer-nav" aria-label="Footer">
+        <a href="index.html#listings">Browse stays</a>
+        <a href="index.html#how">How it works</a>
+      </nav>
       <p class="footer-legal">&copy; 2026 HBnB. All rights reserved.</p>
     </div>
   </footer>

@@ -18,8 +18,8 @@
           <a href="index.html" aria-label="HBnB home"><img src="images/logo.png" alt="HBnB logo" class="logo" width="112" height="44" fetchpriority="high"></a>
       </div>
       <nav class="main-nav" aria-label="Primary">
-        <a href="#how" class="nav-link">How it works</a>
-        <a href="#listings" class="nav-link">Browse stays</a>
+        <a href="index.html#listings" class="nav-link">Browse stays</a>
+        <a href="index.html#how" class="nav-link">How it works</a>
         <a href="login.html" class="login-button has-tip" id="login-link">Log in</a>
       </nav>
     </div>
@@ -155,10 +155,11 @@
         <p class="footer-mark">HBnB</p>
         <p class="footer-tag">A field guide to stays with regional character.</p>
       </div>
+      <!-- Session control lives in the header only, so the footer cannot
+           contradict it by still offering "Log in" to a signed-in visitor. -->
       <nav class="footer-nav" aria-label="Footer">
-        <a href="#how">How it works</a>
-        <a href="#listings">Browse stays</a>
-        <a href="login.html">Log in to review</a>
+        <a href="index.html#listings">Browse stays</a>
+        <a href="index.html#how">How it works</a>
       </nav>
       <p class="footer-legal">&copy; 2026 HBnB. All rights reserved.</p>
     </div>

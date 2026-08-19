@@ -1,0 +1,29 @@
+{
+  "_note": "Decorative regional motifs for the atlas on the index page, keyed by place title. Everything a visitor reads as fact comes from the API; nothing in this file is treated as data. Unknown titles fall back to the generic 'atlas' motif.",
+  "regions": {
+    "Sandstone Retreat": {
+      "key": "northwest",
+      "motif": "Canyon-cut forms"
+    },
+    "Rawshan Loft": {
+      "key": "hejaz",
+      "motif": "Filtered rawshan light"
+    },
+    "Cloud-Top Chalet": {
+      "key": "asir",
+      "motif": "Al-Qatt colour"
+    },
+    "Palm Farm Bungalow": {
+      "key": "eastern",
+      "motif": "Palm-shadow rhythm"
+    },
+    "Najdi Mudbrick House": {
+      "key": "najd",
+      "motif": "Najdi plaster openings"
+    },
+    "Coral Coast Cabin": {
+      "key": "south-coast",
+      "motif": "Coral coast texture"
+    }
+  }
+}

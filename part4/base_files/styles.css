@@ -1,7 +1,13 @@
 /* =========================================================
-   HBnB — stylesheet
-   Design language: a travel journal of postcards & ticket stubs.
-   (refined pass — same identity, tightened rhythm & detail)
+   HBnB stylesheet.
+
+   Fonts are self-hosted in fonts/, so the pages make no external
+   requests. The palette and the card values the project fixes
+   (margin, padding, border, radius) are declared at the top.
+
+   The file is layered: base elements and components first, then a
+   regional colour layer, then motion. Later layers override earlier
+   ones, so a colour changed here may already be set further down.
    ========================================================= */
 
 @font-face {
@@ -39,7 +45,7 @@
   --surface: #FBF8F0;     /* card surface, lighter than paper */
   --gold: #E3AE4D;        /* stamp / accent */
   --gold-soft: #EFC06E;   /* gold hover */
-  --teal: #4C7A75;        /* secondary accent, links */
+  --teal: #46716C;        /* secondary accent, links; dark enough for 4.5:1 on paper */
   --clay: #B5562E;        /* rating / alert accent */
   --text: #22302B;        /* body ink */
   --text-muted: #5B6B62;  /* secondary ink */
@@ -232,7 +238,7 @@ main {
   box-shadow: 0 1px 0 rgba(0,0,0,0.15);
 }
 
-/* Signature interactive atlas -------------------------------- */
+/* Atlas frame, tooltip and region keys. --------------------- */
 .hero-map { margin: 0; }
 .map-frame {
   position: relative;
@@ -265,6 +271,8 @@ main {
   opacity: 0.9;
 }
 .atlas-pin { cursor: pointer; }
+/* Invisible, but still takes pointer events, so the pin is easy to hit. */
+.atlas-pin-hit { fill: transparent; }
 .atlas-pin:focus { outline: none; }
 .atlas-pin-ring { fill: none; stroke: var(--clay); stroke-width: 1.5; opacity: 0; }
 .atlas-pin.active .atlas-pin-ring { opacity: 0.55; animation: pinPulse 1.2s ease-out infinite; }
@@ -778,7 +786,8 @@ main {
 .form-shell .eyebrow { display: block; margin-bottom: 10px; }
 .form-shell > p { color: var(--text-muted); }
 
-.form label {
+.form label,
+.form .form-label {
   display: block;
   font-family: 'IBM Plex Mono', monospace;
   font-size: 0.72rem;
@@ -787,6 +796,26 @@ main {
   color: var(--text-muted);
   margin: 18px 0 6px;
 }
+
+.star-picker {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.star-btn {
+  background: none;
+  border: none;
+  padding: 2px;
+  font-size: 28px;
+  line-height: 1;
+  color: var(--clay);
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.star-btn:hover,
+.star-btn:focus-visible { transform: scale(1.15); }
 
 .form input,
 .form textarea,
@@ -842,6 +871,18 @@ main {
   margin-top: 16px;
   font-size: 0.85rem;
   color: var(--clay);
+  text-align: center;
+}
+
+.form-success {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--teal);
+  border-radius: 10px;
+  background: rgba(70, 113, 108, 0.08);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--teal);
   text-align: center;
 }
 
@@ -939,7 +980,7 @@ main {
 }
 .issue-mid { color: var(--gold); }
 
-/* Hero editorial */
+/* Index hero. */
 .hero .eyebrow {
   display: flex;
   align-items: center;
@@ -976,7 +1017,7 @@ main {
 .hero-cue:hover { text-decoration: none; }
 .hero-cue:hover span { transform: translateY(3px); }
 
-/* Perforated edges + postmark */
+/* Perforated edges and postmark. */
 .perf { position: relative; }
 .perf-left::before {
   content: "";
@@ -1013,7 +1054,7 @@ main {
   border-radius: 50%;
 }
 
-/* Full-bleed dark band */
+/* Full-bleed dark band. */
 .band {
   position: relative;
   width: 100vw;
@@ -1070,7 +1111,7 @@ main {
 .band .step p { color: #C4CFC5; }
 .band .step-no { background: var(--gold); color: var(--ink); }
 
-/* Mile-marker divider */
+/* Section divider. */
 .mile-marker {
   display: flex;
   align-items: center;
@@ -1092,7 +1133,7 @@ main {
 .mile-marker::after { flex: 1; }
 .mile-marker span:last-child { color: var(--teal); }
 
-/* Card craft: tape + index */
+/* Card decorations. */
 .tape {
   position: absolute;
   top: -9px; left: 50%;
@@ -1113,7 +1154,7 @@ main {
   color: var(--clay);
 }
 
-/* Richer footer */
+/* Footer. */
 .footer-inner { align-items: flex-start; }
 .footer-brand { display: flex; flex-direction: column; gap: 2px; }
 .footer-mark {
@@ -1194,7 +1235,7 @@ main {
   display: block;
 }
 
-/* result count + logged-in review flags */
+/* Result count and review-form states. */
 .result-count {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 0.72rem;
@@ -1216,7 +1257,7 @@ main {
   margin-left: 6px;
 }
 
-/* review gate / locked form */
+/* Review gate message. */
 .review-gate {
   max-width: 480px;
   margin: 0 auto 18px;
@@ -1308,9 +1349,8 @@ main {
 }
 
 /* =========================================================
-   Saudi regional atlas layer
-   Keeps the travel-journal base, but gives every stay a
-   location-specific mark instead of one repeated textile.
+   Regional layer: the atlas, its pins, and the per-region marks
+   that distinguish one place card from another.
    ========================================================= */
 
 :root {
@@ -1408,7 +1448,7 @@ body {
 .btn-ghost:hover,
 .btn-ghost:focus-visible { color: var(--ink); background: var(--gold); text-decoration: none; transform: translateY(-2px); }
 
-/* The map is the signature: an actual local, data-driven atlas. */
+/* Atlas: outline, grid, route and pins. */
 .map-frame {
   isolation: isolate;
   transition: box-shadow var(--motion-standard) var(--ease-atlas), border-color var(--motion-standard) var(--ease-atlas);
@@ -1541,7 +1581,7 @@ body {
 .atlas-region-key:focus-visible { color: var(--ink); border-color: var(--region-color); transform: translateY(-1px); }
 .atlas-region-key.is-muted { opacity: 0.42; }
 
-/* Process strip: a sequence, not 3 unrelated icon cards. */
+/* The numbered steps on the index page. */
 .how {
   position: relative;
   width: 100vw;
@@ -1719,8 +1759,11 @@ body {
 }
 
 /* =========================================================
-   Full-path refinement — regional colour, architectural
-   detailing and a single premium motion language.
+   Per-page accent colour and the shared motion rules.
+
+   Each page body carries a --page-accent used for backgrounds and
+   borders. It is deliberately not used for text on the dark
+   surfaces, where it fails the minimum contrast ratio.
    ========================================================= */
 
 .page-browse { --page-accent: var(--gold); --page-accent-ink: var(--ink); --page-glow: rgba(227, 174, 77, 0.22); }
@@ -1766,14 +1809,21 @@ h2[id], h3[id], section[id] { scroll-margin-top: 24px; }
 
 .site-header.is-scrolled .header-inner { padding-block: 11px; }
 
-.login-button {
-  color: var(--page-accent-ink, var(--ink));
-  background: var(--page-accent, var(--gold));
-  box-shadow: 0 8px 22px -13px var(--page-accent, var(--gold));
+/* Specificity has to beat ".main-nav a", which would otherwise paint this
+   label the same pale colour as the surrounding header links. The gold is
+   fixed rather than taken from --page-accent, so the button does not change
+   colour from one page to the next. */
+.main-nav a.login-button {
+  color: var(--ink);
+  background: var(--gold);
+  box-shadow: 0 8px 22px -13px var(--gold);
 }
 
-.login-button:hover,
-.login-button:focus-visible { color: var(--ink); background: var(--gold-soft); }
+.main-nav a.login-button:hover,
+.main-nav a.login-button:focus-visible {
+  color: var(--ink);
+  background: var(--gold-soft);
+}
 
 .main-nav .nav-link { position: relative; }
 .main-nav .nav-link::after {
@@ -1814,9 +1864,9 @@ h2[id], h3[id], section[id] { scroll-margin-top: 24px; }
 .footer-nav a:hover,
 .footer-nav a:focus-visible { color: var(--page-accent, var(--gold)); text-decoration: none; }
 .footer-legal { margin: 0; text-align: right; font-size: 0.76rem; }
-.footer-mark { color: var(--page-accent, #EFE9DA); }
+.footer-mark { color: #EFE9DA; }
 
-/* A carved-plaster corner sits quietly behind the page shell. */
+/* Decorative corner motif behind the page shell. */
 .page-form main,
 .page-place main { position: relative; isolation: isolate; }
 
@@ -1835,7 +1885,7 @@ h2[id], h3[id], section[id] { scroll-margin-top: 24px; }
   pointer-events: none;
 }
 
-/* Split form pages: photograph + task, choreographed together. */
+/* Login and review pages: image beside the form. */
 .page-form main { min-height: calc(100vh - 250px); }
 
 .form-shell-split {
@@ -1999,7 +2049,7 @@ h2[id], h3[id], section[id] { scroll-margin-top: 24px; }
 @keyframes shellArrival { from { opacity: 0; transform: translateY(22px) scale(0.985); } to { opacity: 1; transform: none; } }
 @keyframes contentArrival { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: none; } }
 
-/* Place cards: colour becomes part of the object, not an applied stripe. */
+/* Place cards. */
 .place-card[data-culture="northwest"] { --culture: var(--henna); --culture-wash: rgba(159, 81, 55, 0.11); }
 .place-card[data-culture="hejaz"] { --culture: var(--indigo); --culture-wash: rgba(48, 73, 106, 0.12); }
 .place-card[data-culture="asir"] { --culture: var(--qatt-red); --culture-wash: rgba(201, 71, 61, 0.11); }
@@ -2084,7 +2134,7 @@ h2[id], h3[id], section[id] { scroll-margin-top: 24px; }
 }
 .motion-ready.is-in-view { opacity: 1; transform: translate3d(0, 0, 0) rotate(0); }
 
-/* Place detail reads as an editorial feature, with motion in layers. */
+/* Place detail layout. */
 .place-details { position: relative; isolation: isolate; }
 .place-details::before {
   content: "";
@@ -2137,7 +2187,7 @@ h2[id], h3[id], section[id] { scroll-margin-top: 24px; }
   pointer-events: none;
 }
 .place-info > * { position: relative; z-index: 1; }
-.place-info .price-tag { color: var(--page-accent, var(--gold)); }
+.place-info .price-tag { color: var(--gold); }
 .place-coordinates { font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; font-variant-numeric: tabular-nums; }
 
 .heritage-note { transform-origin: left center; transition: transform 240ms var(--ease-atlas), background-color 240ms ease; }

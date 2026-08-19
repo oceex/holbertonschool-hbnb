@@ -1,124 +1,118 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8">
- <meta name="viewport" content="width=device-width, initial-scale=1.0">
- <title>HBnB - Sandstone Retreat, AlUla</title>
- <meta name="theme-color" content="#16302B">
- <link rel="icon" type="image/png" href="images/icon.png">
- <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HBnB — Place details</title>
+  <meta name="theme-color" content="#16302B">
+  <link rel="icon" type="image/png" href="images/icon.png">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body class="page-place">
 
- <a class="skip-link" href="#main-content">Skip to content</a>
+  <a class="skip-link" href="#main-content">Skip to content</a>
 
- <header class="site-header">
- <div class="header-inner">
- <div class="brand">
- <a href="index.html" aria-label="HBnB home"><img src="images/logo.png" alt="HBnB logo" class="logo" width="112" height="44" fetchpriority="high"></a>
- </div>
- <nav class="main-nav" aria-label="Primary">
- <a href="index.html#listings" class="nav-link">Browse stays</a>
- <a href="#reviews" class="nav-link">Guest notes</a>
- <a href="login.html" class="login-button has-tip" id="login-link">Log in</a>
- </nav>
- </div>
- <div class="sadu regional-thread" aria-hidden="true"></div>
- </header>
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand">
+        <a href="index.html" aria-label="HBnB home"><img src="images/logo.png" alt="HBnB logo" class="logo" width="112" height="44" fetchpriority="high"></a>
+      </div>
+      <nav class="main-nav" aria-label="Primary">
+        <a href="index.html#listings" class="nav-link">Browse stays</a>
+        <a href="index.html#how" class="nav-link">How it works</a>
+        <a href="login.html" class="login-button has-tip" id="login-link">Log in</a>
+      </nav>
+    </div>
+    <div class="sadu regional-thread" aria-hidden="true"></div>
+  </header>
 
- <main id="main-content">
- <nav class="breadcrumb" aria-label="Breadcrumb">
- <ol>
- <li><a href="index.html">Home</a></li>
- <li><a href="index.html">Places</a></li>
- <li aria-current="page">Sandstone Retreat</li>
- </ol>
- </nav>
+  <main id="main-content">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <ol>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="index.html#listings">Places</a></li>
+        <li aria-current="page">Sandstone Retreat</li>
+      </ol>
+    </nav>
 
- <section class="place-details" id="place-details">
- <div class="place-main">
- <p class="eyebrow">AlUla, Saudi Arabia</p>
- <h1>Sandstone Retreat</h1>
- <figure class="place-figure">
- <img src="images/places/alula-sandstone-v2.webp" alt="Sandstone retreat tucked into the canyons of AlUla" width="1536" height="1024" fetchpriority="high">
- <figcaption>Carved into the AlUla escarpment</figcaption>
- </figure>
- <p id="place-description">A stone-and-clay retreat tucked against the sandstone cliffs of AlUla, minutes from the tombs of Hegra and the old mudbrick town. Wake before dawn for the hot-air balloons, spend the heat of the day in the shaded courtyard, and watch the rock glow copper at sunset.</p>
- </div>
+    <!-- The markup below shows the intended structure and is what a visitor
+         sees while the request is in flight. scripts.js then replaces every
+         value with the place named in the ?id= query string. -->
+    <section class="place-details" id="place-details">
+      <div class="place-main">
+        <p class="eyebrow">AlUla, Saudi Arabia</p>
+        <h1>Sandstone Retreat</h1>
+        <figure class="place-figure">
+          <img src="images/places/alula-sandstone-v2.webp" alt="Sandstone retreat tucked into the canyons of AlUla" width="1536" height="1024" fetchpriority="high">
+          <figcaption id="place-figcaption">Carved into the AlUla escarpment</figcaption>
+        </figure>
+        <p id="place-description">A stone-and-clay retreat tucked against the sandstone cliffs of AlUla, minutes from the tombs of Hegra and the old mudbrick town.</p>
+      </div>
 
- <aside class="place-info">
- <p class="price-tag">SAR 480 <small>/ night</small></p>
+      <aside class="place-info">
+        <p class="price-tag">SAR 120 <small>/ night</small></p>
 
- <div class="host-line">
- <span class="host-avatar">N</span>
- <span id="host-name">Hosted by Noura</span>
- </div>
+        <div class="host-line">
+          <span class="host-avatar">N</span>
+          <span id="host-name">Hosted by Noura</span>
+        </div>
 
- <dl>
- <dt>Location</dt>
- <dd>AlUla, Saudi Arabia</dd>
+        <dl>
+          <dt>Location</dt>
+          <dd id="place-location">AlUla, Saudi Arabia</dd>
 
- <dt>Sleeps</dt>
- <dd>2-3 guests</dd>
+          <dt>Coordinates</dt>
+          <dd id="place-coordinates">26.6089&deg; N, 37.9216&deg; E</dd>
 
- <dt>Amenities</dt>
- <dd>
- <ul class="amenities-list">
- <li><span class="amenity-icon"><img src="images/icon_bath.svg" alt="" width="16" height="16"></span>Private Bath</li>
- <li><span class="amenity-icon"><img src="images/icon_wifi.svg" alt="" width="16" height="16"></span>Free WiFi</li>
- <li><span class="amenity-icon"><img src="images/icon_bed.svg" alt="" width="16" height="16"></span>2 Beds</li>
- </ul>
- </dd>
- </dl>
- </aside>
- </section>
+          <dt>Amenities</dt>
+          <dd>
+            <ul class="amenities-list">
+              <li><span class="amenity-icon"><img src="images/icon_bath.svg" alt="" width="16" height="16"></span>Private Bath</li>
+              <li><span class="amenity-icon"><img src="images/icon_wifi.svg" alt="" width="16" height="16"></span>Free WiFi</li>
+            </ul>
+          </dd>
+        </dl>
+      </aside>
+    </section>
 
- <section class="reviews" id="reviews" aria-labelledby="reviews-heading">
- <h2 id="reviews-heading">Guest field notes</h2>
- <p class="reviews-intro" id="reviews-summary">Three guests shared what stood out.</p>
+    <section class="reviews" id="reviews" aria-labelledby="reviews-heading">
+      <h2 id="reviews-heading">Guest field notes</h2>
+      <p class="reviews-intro" id="reviews-summary">Loading reviews&hellip;</p>
 
- <ul class="reviews-list">
- <li class="review-card">
- <div class="review-head">
- <span class="reviewer">Noura A.</span>
- <span class="rating">***** 5/5</span>
- </div>
- <p>Watched the balloons lift over Hegra with coffee in hand - exactly the reset I needed. Noura's directions for the last stretch of desert track were spot on.</p>
- </li>
+      <ul class="reviews-list">
+        <li class="review-card">
+          <div class="review-head">
+            <span class="reviewer">Guest</span>
+            <span class="rating">&#9733;&#9733;&#9733;&#9733;&#9733; 5/5</span>
+          </div>
+          <p>Watched the balloons lift over Hegra with coffee in hand.</p>
+        </li>
+      </ul>
 
- <li class="review-card">
- <div class="review-head">
- <span class="reviewer">Faisal M.</span>
- <span class="rating">****- 4/5</span>
- </div>
- <p>The courtyard is the whole point in the afternoon heat - bring a hat for the walk to the tombs. The retreat itself was spotless and cool inside.</p>
- </li>
+      <div class="add-review-cta" id="add-review-cta" hidden>
+        <a href="add_review.html" class="details-button">Add a review</a>
+      </div>
+    </section>
+  </main>
 
- <li class="review-card">
- <div class="review-head">
- <span class="reviewer">Reem S.</span>
- <span class="rating">***** 5/5</span>
- </div>
- <p>Second stay this year. The majlis nook at sunset, with the rock going copper, is my favourite spot in the whole Kingdom.</p>
- </li>
- </ul>
+  <footer class="site-footer">
+    <div class="sadu regional-thread" aria-hidden="true"></div>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <p class="footer-mark">HBnB</p>
+        <p class="footer-tag">A field guide to stays with regional character.</p>
+      </div>
+      <!-- Session control lives in the header only, so the footer cannot
+           contradict it by still offering "Log in" to a signed-in visitor. -->
+      <nav class="footer-nav" aria-label="Footer">
+        <a href="index.html#listings">Browse stays</a>
+        <a href="index.html#how">How it works</a>
+      </nav>
+      <p class="footer-legal">&copy; 2026 HBnB. All rights reserved.</p>
+    </div>
+  </footer>
 
- <div class="add-review-cta" id="add-review-cta">
- <a href="add_review.html" class="details-button">Add a review</a>
- </div>
- </section>
- </main>
-
- <footer class="site-footer">
- <div class="sadu regional-thread" aria-hidden="true"></div>
- <div class="footer-inner">
- <div class="footer-brand"><p class="footer-mark">HBnB</p><p class="footer-tag">A closer look at places shaped by their setting.</p></div>
- <nav class="footer-nav" aria-label="Footer"><a href="index.html#listings">Browse stays</a><a href="#reviews">Guest notes</a></nav>
- <p class="footer-legal">&copy; 2026 HBnB. All rights reserved.</p>
- </div>
- </footer>
-
- <script src="scripts.js" defer></script>
- <script src="atlas.js" defer></script>
+  <script src="scripts.js" defer></script>
+  <script src="atlas.js" defer></script>
 </body>
 </html>
