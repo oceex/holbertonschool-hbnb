@@ -1,9 +1,18 @@
 #!/usr/bin/python3
 """Common mapped identity and timestamp behavior for domain models."""
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 from app import db
+
+
+def utcnow():
+    """Return the current UTC time without a timezone attached.
+
+    ``datetime.utcnow`` is deprecated, but the mapped columns are naive,
+    so the offset is stripped again to keep stored values comparable.
+    """
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 class BaseModel(db.Model):
@@ -13,20 +22,20 @@ class BaseModel(db.Model):
 
     id = db.Column(db.String(36), primary_key=True,
                    default=lambda: str(uuid.uuid4()))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow,
+    created_at = db.Column(db.DateTime, default=utcnow,
                            nullable=False)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow,
-                           onupdate=datetime.utcnow, nullable=False)
+    updated_at = db.Column(db.DateTime, default=utcnow,
+                           onupdate=utcnow, nullable=False)
 
     def __init__(self):
         """Initialize a new instance with a unique id and timestamps."""
         self.id = str(uuid.uuid4())
-        self.created_at = datetime.utcnow()
-        self.updated_at = datetime.utcnow()
+        self.created_at = utcnow()
+        self.updated_at = utcnow()
 
     def save(self):
         """Refresh the modification timestamp."""
-        self.updated_at = datetime.utcnow()
+        self.updated_at = utcnow()
 
     def __eq__(self, other):
         """Compare mapped domain objects by concrete type and identity."""

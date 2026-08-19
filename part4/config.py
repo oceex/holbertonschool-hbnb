@@ -1,23 +1,23 @@
 """Application configuration profiles."""
 
 import os
+from datetime import timedelta
 
 
 class Config:
-    """Define settings shared by all environments."""
+    """Settings shared by every environment."""
 
-    # Fallback only -- always set a real SECRET_KEY via the environment in
-    # any deployment. This placeholder is deliberately long enough (32+
-    # bytes) to meet HS256's minimum recommended key length, but it is
-    # still a *public, checked-in* value and must never be used in
-    # production.
+    # Checked-in placeholder. A deployment must supply SECRET_KEY through the
+    # environment, since this value is public and therefore not secret.
     SECRET_KEY = os.getenv(
         'SECRET_KEY', 'dev-only-insecure-default-key-do-not-use-in-prod'
     )
-    # Flask-JWT-Extended falls back to SECRET_KEY when this is unset; setting
-    # it explicitly keeps the JWT signing key independent of Flask's own
-    # session/cookie signing key (defense in depth).
+    # Kept separate from SECRET_KEY so rotating one key does not invalidate
+    # what the other signs.
     JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', SECRET_KEY)
+    # The library default is 15 minutes, which expires mid-visit while the
+    # browser still holds the cookie and the interface still looks signed in.
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=12)
     DEBUG = False
     SQLALCHEMY_DATABASE_URI = os.getenv(
         'DATABASE_URL',
@@ -33,7 +33,7 @@ class DevelopmentConfig(Config):
 
 
 class TestingConfig(Config):
-    """Enable Flask testing behavior and diagnostics."""
+    """Run against a throwaway in-memory database."""
 
     TESTING = True
     DEBUG = True

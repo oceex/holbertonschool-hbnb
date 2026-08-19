@@ -1,3 +1,6 @@
+-- Demonstrates create, read, update and delete against every table using
+-- plain SQL. The final ROLLBACK leaves the database exactly as it was found.
+
 PRAGMA foreign_keys = ON;
 BEGIN TRANSACTION;
 
@@ -7,14 +10,18 @@ INSERT INTO users (
     last_name,
     email,
     password,
-    is_admin
+    is_admin,
+    created_at,
+    updated_at
 ) VALUES (
     '11111111-1111-4111-8111-111111111111',
     'SQL',
     'Tester',
     'sql.tester@hbnb.local',
     '$2b$12$AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
-    FALSE
+    FALSE,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
 );
 SELECT id, first_name, last_name, email, is_admin
 FROM users
@@ -23,9 +30,12 @@ UPDATE users
 SET first_name = 'Updated SQL'
 WHERE id = '11111111-1111-4111-8111-111111111111';
 
-INSERT INTO amenities (id, name) VALUES (
+INSERT INTO amenities (id, name, description, created_at, updated_at) VALUES (
     '22222222-2222-4222-8222-222222222222',
-    'SQL Test Amenity'
+    'SQL Test Amenity',
+    '',
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
 );
 SELECT id, name
 FROM amenities
@@ -41,7 +51,9 @@ INSERT INTO places (
     price,
     latitude,
     longitude,
-    owner_id
+    owner_id,
+    created_at,
+    updated_at
 ) VALUES (
     '33333333-3333-4333-8333-333333333333',
     'SQL Test Place',
@@ -49,7 +61,9 @@ INSERT INTO places (
     100.00,
     24.7136,
     46.6753,
-    '11111111-1111-4111-8111-111111111111'
+    '11111111-1111-4111-8111-111111111111',
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
 );
 SELECT id, title, price, owner_id
 FROM places
@@ -63,13 +77,17 @@ INSERT INTO reviews (
     text,
     rating,
     user_id,
-    place_id
+    place_id,
+    created_at,
+    updated_at
 ) VALUES (
     '44444444-4444-4444-8444-444444444444',
     'Direct SQL review',
     4,
     '11111111-1111-4111-8111-111111111111',
-    '33333333-3333-4333-8333-333333333333'
+    '33333333-3333-4333-8333-333333333333',
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
 );
 SELECT id, text, rating, user_id, place_id
 FROM reviews

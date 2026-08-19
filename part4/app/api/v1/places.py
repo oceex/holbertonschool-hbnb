@@ -26,17 +26,24 @@ user_model = api.model('PlaceUser', {
     'email': fields.String(description='Email of the owner')
 })
 
+# The author's display name is nested here because GET /users/<id> requires a
+# token; without it, reviews would be anonymous to signed-out visitors.
 review_model = api.model('PlaceReview', {
     'id': fields.String(description='Review ID'),
     'text': fields.String(description='Review text'),
     'rating': fields.Integer(description='Rating, 1 to 5'),
     'user_id': fields.String(attribute=lambda review: review.user.id,
-                             description='ID of the review author')
+                             description='ID of the review author'),
+    'author': fields.String(
+        attribute=lambda review: '{} {}.'.format(
+            review.user.first_name, review.user.last_name[:1]
+        ),
+        description='Display name of the review author'
+    )
 })
 
-# NOTE: 'owner_id' intentionally removed from the input model. The owner is
-# always taken from the JWT identity in POST below, never from client
-# input, otherwise anyone could create a place "owned" by someone else.
+# 'owner_id' is deliberately absent: the owner comes from the caller's token,
+# so nobody can create a place in someone else's name.
 place_input_model = api.model('PlaceInput', {
     'title': fields.String(required=True, description='Title of the place'),
     'description': fields.String(description='Description of the place'),
@@ -121,8 +128,6 @@ class PlaceList(Resource):
     def post(self):
         """Register a new place, owned by the authenticated user."""
         data = api.payload
-        # The owner is always the authenticated caller -- never trust a
-        # client-supplied owner_id.
         data['owner_id'] = get_jwt_identity()
         try:
             place = facade.create_place(data)
@@ -196,7 +201,10 @@ class PlaceReviewList(Resource):
                 "text": r.text,
                 "rating": r.rating,
                 "place_id": r.place.id,
-                "user_id": r.user.id
+                "user_id": r.user.id,
+                "author": "{} {}.".format(
+                    r.user.first_name, r.user.last_name[:1]
+                )
             } for r in reviews], 200
         except ValueError as e:
             api.abort(404, str(e))

@@ -8,16 +8,13 @@ from app.services import facade
 
 api = Namespace('auth', description='Authentication operations')
 
-# Hashed once at import time and checked on every login where the email
-# isn't found, so a failed login takes the same time either way. Without
-# this, verify_password() (bcrypt, deliberately slow) only runs when the
-# user exists, and the timing difference lets an attacker tell which
-# emails are registered without ever guessing a password.
+# Compared against whenever the email is unknown, so a failed login costs the
+# same either way. Otherwise the response time alone would reveal which email
+# addresses are registered.
 _DUMMY_HASH = bcrypt.generate_password_hash(
     'dummy-password-for-timing-safety'
 ).decode('utf-8')
 
-# Model for input validation
 login_model = api.model('Login', {
     'email': fields.String(required=True, description='User email'),
     'password': fields.String(required=True, description='User password')
@@ -32,15 +29,12 @@ class Login(Resource):
     @api.response(401, 'Invalid credentials')
     def post(self):
         """Authenticate user and return a JWT token"""
-        credentials = api.payload or {}  # Get the email and password from the request payload
-
-        # Step 1: Retrieve the user based on the provided email
+        credentials = api.payload or {}
         user = facade.get_user_by_email(credentials.get('email'))
         password = credentials.get('password', '')
 
-        # Step 2: Check if the user exists and the password is correct.
-        # Always run a bcrypt check, even for an unknown email, so this
-        # takes the same time in both cases (see _DUMMY_HASH above).
+        # A hash is always compared, even for an unknown email, so both
+        # outcomes take the same time.
         if user:
             password_ok = user.verify_password(password)
         else:
@@ -50,11 +44,11 @@ class Login(Resource):
         if not user or not password_ok:
             return {'error': 'Invalid credentials'}, 401
 
-        # Step 3: Create a JWT token with the user's id and is_admin flag
+        # The role travels as a claim so protected endpoints can authorise a
+        # request without loading the user again.
         access_token = create_access_token(
-            identity=str(user.id),   # only user ID goes here
-            additional_claims={"is_admin": user.is_admin}  # extra info here
+            identity=str(user.id),
+            additional_claims={"is_admin": user.is_admin}
         )
 
-        # Step 4: Return the JWT token to the client
         return {'access_token': access_token}, 200

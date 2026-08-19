@@ -13,9 +13,8 @@ def current_user_is_admin():
 
 api = Namespace("reviews", description="Review operations")
 
-# NOTE: 'user_id' intentionally removed from the input model. The author is
-# always the authenticated caller (from the JWT), never a client-supplied
-# value.
+# 'user_id' is deliberately absent: the author comes from the caller's token,
+# so nobody can post a review in someone else's name.
 review_model = api.model("Review", {
     "text": fields.String(required=True, description="Review text"),
     "rating": fields.Integer(required=True, description="Rating, 1 to 5"),
@@ -82,8 +81,6 @@ class ReviewList(Resource):
         if str(place.owner.id) == current_user_id:
             api.abort(400, "You cannot review your own place")
 
-        # The author is always the authenticated caller -- never trust a
-        # client-supplied user_id.
         data["user_id"] = current_user_id
 
         try:

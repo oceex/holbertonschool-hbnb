@@ -27,7 +27,6 @@ class HBnBFacade:
         email = user_data.get("email")
         if isinstance(email, str) and self.get_user_by_email(email.strip()):
             raise ValueError("Email already registered")
-        # Present construction errors through the facade's validation contract.
         try:
             user = User(**user_data)
         except TypeError as exc:
@@ -35,10 +34,8 @@ class HBnBFacade:
         try:
             self.user_repo.add(user)
         except IntegrityError as exc:
-            # Closes the race window between the check above and the
-            # commit: two concurrent signups for the same email can both
-            # pass the check, but the database's unique constraint still
-            # catches the second insert.
+            # Two concurrent signups can both pass the check above; the
+            # unique constraint still rejects the second insert.
             raise ValueError("Email already registered") from exc
         return user
 
@@ -102,7 +99,8 @@ class HBnBFacade:
         if not owner:
             raise ValueError(f"User with id '{owner_id}' not found.")
 
-        # Resolve all dependencies first to avoid partial relationship updates.
+        # Every amenity is resolved before the place is built, so a bad id
+        # cannot leave a half-linked place behind.
         resolved_amenities = []
         for amenity_id in place_data.get("amenities", []):
             amenity = self.get_amenity(amenity_id)
@@ -150,7 +148,7 @@ class HBnBFacade:
 
         resolved_amenities = None
         if amenity_ids is not None:
-            # Resolve the complete replacement before mutating the place.
+            # Same reason as in create_place: validate the whole set first.
             resolved_amenities = []
             for amenity_id in amenity_ids:
                 amenity = self.get_amenity(amenity_id)
@@ -161,7 +159,6 @@ class HBnBFacade:
                     resolved_amenities.append(amenity)
 
         if resolved_amenities is not None:
-            # The repository commits this relationship change with scalar data.
             place.amenities = resolved_amenities
 
         return self.place_repo.update(place_id, data)
