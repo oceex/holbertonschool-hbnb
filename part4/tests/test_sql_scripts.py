@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-"""Tests for the standalone Task 9 SQLite scripts."""
+"""Tests for the standalone SQL scripts in sql/."""
 
 import re
 import sqlite3
@@ -103,8 +103,10 @@ class SQLScriptTestCase(unittest.TestCase):
         self.connection.execute(
             """
             INSERT INTO places (
-                id, title, description, price, latitude, longitude, owner_id
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                id, title, description, price, latitude, longitude, owner_id,
+                created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?,
+                      CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
             """,
             (
                 place_id,
@@ -124,37 +126,67 @@ class TestSQLSchema(SQLScriptTestCase):
     EXPECTED_COLUMNS = {
         "users": {
             "id": "CHAR(36)",
-            "first_name": "VARCHAR(255)",
-            "last_name": "VARCHAR(255)",
-            "email": "VARCHAR(255)",
-            "password": "VARCHAR(255)",
+            "first_name": "VARCHAR(50)",
+            "last_name": "VARCHAR(50)",
+            "email": "VARCHAR(120)",
+            "password": "VARCHAR(128)",
             "is_admin": "BOOLEAN",
+            "created_at": "DATETIME",
+            "updated_at": "DATETIME",
         },
         "places": {
             "id": "CHAR(36)",
-            "title": "VARCHAR(255)",
-            "description": "TEXT",
+            "title": "VARCHAR(100)",
+            "description": "VARCHAR(1000)",
             "price": "DECIMAL(10, 2)",
             "latitude": "FLOAT",
             "longitude": "FLOAT",
+            "image_url": "VARCHAR(500)",
+            "location": "VARCHAR(150)",
             "owner_id": "CHAR(36)",
+            "created_at": "DATETIME",
+            "updated_at": "DATETIME",
         },
         "reviews": {
             "id": "CHAR(36)",
-            "text": "TEXT",
+            "text": "VARCHAR(1000)",
             "rating": "INT",
             "user_id": "CHAR(36)",
             "place_id": "CHAR(36)",
+            "created_at": "DATETIME",
+            "updated_at": "DATETIME",
         },
         "amenities": {
             "id": "CHAR(36)",
-            "name": "VARCHAR(255)",
+            "name": "VARCHAR(50)",
+            "description": "VARCHAR(1000)",
+            "created_at": "DATETIME",
+            "updated_at": "DATETIME",
         },
         "place_amenity": {
             "place_id": "CHAR(36)",
             "amenity_id": "CHAR(36)",
         },
     }
+
+    def test_schema_columns_match_the_mapped_models(self):
+        """Verify the raw schema and the ORM describe the same columns.
+
+        Without this the two definitions drift apart silently, and a database
+        built from schema.sql then fails at runtime on a missing column.
+        """
+        from app import db
+        from tests import app
+
+        with app.app_context():
+            orm_columns = {
+                table.name: {column.name for column in table.columns}
+                for table in db.metadata.sorted_tables
+            }
+
+        for table, columns in orm_columns.items():
+            with self.subTest(table=table):
+                self.assertEqual(set(self.table_info(table)), columns)
 
     def test_required_tables_and_declared_column_types(self):
         """Verify all required tables, columns, and SQL types."""
@@ -318,8 +350,9 @@ class TestSQLIntegrity(SQLScriptTestCase):
         self.insert_place()
         self.assert_integrity_error(
             """
-            INSERT INTO reviews (id, text, rating, user_id, place_id)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO reviews (
+                id, text, rating, user_id, place_id, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
             """,
             (TEST_REVIEW_ID, "Too low", 0, ADMIN_ID, TEST_PLACE_ID),
         )
@@ -328,8 +361,9 @@ class TestSQLIntegrity(SQLScriptTestCase):
         self.insert_place()
         self.assert_integrity_error(
             """
-            INSERT INTO reviews (id, text, rating, user_id, place_id)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO reviews (
+                id, text, rating, user_id, place_id, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
             """,
             (TEST_REVIEW_ID, "Too high", 6, ADMIN_ID, TEST_PLACE_ID),
         )
@@ -338,8 +372,9 @@ class TestSQLIntegrity(SQLScriptTestCase):
         self.insert_place()
         self.assert_integrity_error(
             """
-            INSERT INTO reviews (id, text, rating, user_id, place_id)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO reviews (
+                id, text, rating, user_id, place_id, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
             """,
             (
                 TEST_REVIEW_ID,
@@ -353,8 +388,9 @@ class TestSQLIntegrity(SQLScriptTestCase):
     def test_review_with_unknown_place_is_rejected(self):
         self.assert_integrity_error(
             """
-            INSERT INTO reviews (id, text, rating, user_id, place_id)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO reviews (
+                id, text, rating, user_id, place_id, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
             """,
             (
                 TEST_REVIEW_ID,
@@ -387,15 +423,17 @@ class TestSQLIntegrity(SQLScriptTestCase):
         self.insert_place()
         self.connection.execute(
             """
-            INSERT INTO reviews (id, text, rating, user_id, place_id)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO reviews (
+                id, text, rating, user_id, place_id, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
             """,
             (TEST_REVIEW_ID, "First", 4, ADMIN_ID, TEST_PLACE_ID),
         )
         self.assert_integrity_error(
             """
-            INSERT INTO reviews (id, text, rating, user_id, place_id)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO reviews (
+                id, text, rating, user_id, place_id, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
             """,
             (
                 UNKNOWN_USER_ID,

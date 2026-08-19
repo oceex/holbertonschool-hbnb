@@ -8,7 +8,7 @@ admin/self authorization rules enforced by the endpoints.
 import json
 import unittest
 import uuid
-from run import app
+from tests import app
 from app.models.user import User
 from app.services import facade
 from tests.auth_helpers import make_admin, make_user
@@ -129,8 +129,12 @@ class TestUserEndpoints(unittest.TestCase):
         self.assertNotEqual(stored_user.password, password)
         self.assertTrue(stored_user.verify_password(password))
 
-        item_response = self.client.get(f"/api/v1/users/{created['id']}")
-        list_response = self.client.get('/api/v1/users/')
+        item_response = self.client.get(
+            f"/api/v1/users/{created['id']}", headers=self.admin_headers
+        )
+        list_response = self.client.get(
+            '/api/v1/users/', headers=self.admin_headers
+        )
         self.assertEqual(item_response.status_code, 200)
         self.assertEqual(list_response.status_code, 200)
 
@@ -251,7 +255,9 @@ class TestUserEndpoints(unittest.TestCase):
 
     def test_get_all_users(self):
         """Verify retrieving all users returns HTTP 200 and a list."""
-        response = self.client.get('/api/v1/users/')
+        response = self.client.get(
+            '/api/v1/users/', headers=self.admin_headers
+        )
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
         self.assertIsInstance(data, list)
@@ -272,14 +278,18 @@ class TestUserEndpoints(unittest.TestCase):
         )
         user_id = json.loads(create_response.data.decode('utf-8'))['id']
 
-        response = self.client.get(f'/api/v1/users/{user_id}')
+        response = self.client.get(
+            f'/api/v1/users/{user_id}', headers=self.admin_headers
+        )
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['id'], user_id)
 
     def test_get_user_by_id_not_found(self):
         """Verify requesting a non-existent user ID returns HTTP 404."""
-        response = self.client.get('/api/v1/users/non-existent-id')
+        response = self.client.get(
+            '/api/v1/users/non-existent-id', headers=self.admin_headers
+        )
         self.assertEqual(response.status_code, 404)
 
     def test_update_user_success(self):

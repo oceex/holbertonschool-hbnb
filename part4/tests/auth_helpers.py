@@ -10,7 +10,7 @@ create further users through the real endpoint.
 """
 import uuid
 
-from run import app
+from tests import app
 from app.services import facade
 
 

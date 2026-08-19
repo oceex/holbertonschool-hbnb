@@ -7,7 +7,7 @@ admin-only authorization rule enforced by the write endpoints.
 
 import json
 import unittest
-from run import app
+from tests import app
 from tests.auth_helpers import make_admin, make_user
 
 

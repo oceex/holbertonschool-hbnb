@@ -7,7 +7,7 @@ The suite covers lifecycle operations, validation, and entity references.
 import json
 import unittest
 import uuid
-from run import app
+from tests import app
 from app.services import facade
 from tests.auth_helpers import make_admin, make_user
 
@@ -290,6 +290,7 @@ class TestReviewEndpoints(unittest.TestCase):
             "text": "Loved it",
             "rating": 5,
             "user_id": self.user_id,
+            "author": "Test U.",
         }])
 
     def test_update_review_success(self):

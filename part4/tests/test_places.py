@@ -4,7 +4,7 @@
 import json
 import unittest
 import uuid
-from run import app
+from tests import app
 from app.models.place import Place
 from app.models.user import User
 from app.services import facade
@@ -349,7 +349,7 @@ class TestPlaceEndpoints(unittest.TestCase):
 
     def test_add_review_rejects_non_review(self):
         """Verify place relationships reject non-review objects."""
-        some_user = User("Test", "Owner", f"{uuid.uuid4()}@test.com", "secret")
+        some_user = User("Test", "Owner", f"{uuid.uuid4()}@test.com", "secret12")
         place = Place("Cabin", "desc", 100, 45.0, -122.0, some_user)
         with self.assertRaises(TypeError):
             place.add_review("not a review")
