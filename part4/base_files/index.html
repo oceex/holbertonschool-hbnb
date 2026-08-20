@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HBnB — Unique stays across Saudi Arabia</title>
+  <meta name="theme-color" content="#16302B">
+  <link rel="icon" type="image/png" href="images/icon.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="page-browse">
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand">
+          <a href="index.html" aria-label="HBnB home"><img src="images/logo.png" alt="HBnB logo" class="logo" width="112" height="44" fetchpriority="high"></a>
+      </div>
+      <nav class="main-nav" aria-label="Primary">
+        <a href="index.html#listings" class="nav-link">Browse stays</a>
+        <a href="index.html#how" class="nav-link">How it works</a>
+        <a href="login.html" class="login-button has-tip" id="login-link">Log in</a>
+      </nav>
+    </div>
+    <div class="sadu regional-thread" aria-hidden="true"></div>
+  </header>
+
+  <main id="main-content">
+    <section class="hero">
+      <div class="hero-text">
+        <p class="eyebrow">An independent field guide to Saudi stays</p>
+        <h1>Stay somewhere with a story.</h1>
+        <p>Explore 6 homes shaped by their settings—from AlUla sandstone and Jeddah rawasheen to Asir cloud forests and Farasan reefs. Compare practical details and candid guest notes before choosing where to go next.</p>
+        <div class="hero-actions">
+          <a href="#listings" class="btn-primary">Browse stays</a>
+          <a href="#how" class="btn-ghost">How it works</a>
+        </div>
+      </div>
+      <figure class="hero-map" aria-label="Map of stays across Saudi Arabia">
+        <div class="map-frame">
+          <svg id="atlas-svg" viewBox="0 0 600 560" role="img" aria-labelledby="atlas-title atlas-description">
+            <title id="atlas-title">Map of Saudi Arabia with available stays</title>
+            <desc id="atlas-description">An interactive atlas with 6 stay locations. Select a pin to find its listing.</desc>
+          </svg>
+          <div class="map-tooltip" id="map-tooltip" hidden></div>
+          <p class="map-status" id="map-status" aria-live="polite">Drawing the atlas…</p>
+          <div class="atlas-regions" id="atlas-regions" role="group" aria-label="Regional design key"></div>
+        </div>
+        <figcaption>
+          <span class="map-legend">Choose a pin to meet the place</span>
+          <span class="map-coords" id="map-coords">6 stays across the Kingdom</span>
+        </figcaption>
+      </figure>
+    </section>
+
+    <section class="how" id="how" aria-labelledby="how-heading">
+      <h2 id="how-heading">From curiosity to a useful review</h2>
+      <ol class="steps">
+        <li class="step">
+          <span class="step-no">1</span>
+          <h3>Explore the collection</h3>
+          <p>Filter by nightly price, then use the atlas to see how each stay belongs to its region.</p>
+        </li>
+        <li class="step">
+          <span class="step-no">2</span>
+          <h3>See the full picture</h3>
+          <p>Open a place for its host, amenities, practical notes and first-hand impressions from previous guests.</p>
+        </li>
+        <li class="step">
+          <span class="step-no">3</span>
+          <h3>Add what you learned</h3>
+          <p>Sign in when you're ready to add your own field notes. Reading and browsing never require an account.</p>
+        </li>
+      </ol>
+    </section>
+
+    <section class="listings" id="listings" aria-labelledby="listings-heading">
+      <div class="section-head">
+        <div>
+          <h2 id="listings-heading">Browse by place</h2>
+          <p class="result-count" id="result-count" aria-live="polite">Loading stays…</p>
+        </div>
+        <form class="filter-bar" action="#" method="get">
+          <div class="field">
+            <label for="price-filter">Max price / night</label>
+            <select id="price-filter" name="price-filter" class="has-tip" data-tip="Filter by nightly price — no reload" autocomplete="off">
+              <option value="10">10</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+              <option value="all" selected>All</option>
+            </select>
+          </div>
+        </form>
+      </div>
+
+      <ul class="places-list" id="places-list">
+
+        <li class="place-card" data-price="120">
+          <span class="price-stamp">SAR 120<br>/night</span>
+          <div class="place-photo"><img src="images/places/alula-sandstone-v2.webp" alt="Sandstone Retreat in AlUla" width="1536" height="1024" loading="lazy"><span>AlUla</span></div>
+          <h2>Sandstone Retreat</h2>
+          <p class="location">AlUla, Saudi Arabia</p>
+          <a href="place.html?id=alula-sandstone" class="details-button">View details</a>
+        </li>
+
+        <li class="place-card" data-price="45">
+          <span class="price-stamp">SAR 45<br>/night</span>
+          <div class="place-photo"><img src="images/places/jeddah-rawshan-v2.webp" alt="Rawshan Loft in Al-Balad, Jeddah" width="1536" height="1024" loading="lazy"><span>Al-Balad, Jeddah</span></div>
+          <h2>Rawshan Loft</h2>
+          <p class="location">Al-Balad, Jeddah</p>
+          <a href="place.html?id=jeddah-rawshan" class="details-button">View details</a>
+        </li>
+
+        <li class="place-card" data-price="65">
+          <span class="price-stamp">SAR 65<br>/night</span>
+          <div class="place-photo"><img src="images/places/abha-chalet-v2.webp" alt="Cloud-Top Chalet in Abha" width="1536" height="1024" loading="lazy"><span>Abha, Asir</span></div>
+          <h2>Cloud-Top Chalet</h2>
+          <p class="location">Abha, Asir</p>
+          <a href="place.html?id=abha-chalet" class="details-button">View details</a>
+        </li>
+
+        <li class="place-card" data-price="30">
+          <span class="price-stamp">SAR 30<br>/night</span>
+          <div class="place-photo"><img src="images/places/ahsa-bungalow-v2.webp" alt="Palm Farm Bungalow in Al-Ahsa" width="1536" height="1024" loading="lazy"><span>Al-Ahsa Oasis</span></div>
+          <h2>Palm Farm Bungalow</h2>
+          <p class="location">Al-Ahsa Oasis</p>
+          <a href="place.html?id=ahsa-bungalow" class="details-button">View details</a>
+        </li>
+
+        <li class="place-card" data-price="150">
+          <span class="price-stamp">SAR 150<br>/night</span>
+          <div class="place-photo"><img src="images/places/diriyah-najdi-v2.webp" alt="Najdi Mudbrick House in Diriyah" width="1536" height="1024" loading="lazy"><span>Diriyah, Riyadh</span></div>
+          <h2>Najdi Mudbrick House</h2>
+          <p class="location">Diriyah, Riyadh</p>
+          <a href="place.html?id=diriyah-najdi" class="details-button">View details</a>
+        </li>
+
+        <li class="place-card" data-price="55">
+          <span class="price-stamp">SAR 55<br>/night</span>
+          <div class="place-photo"><img src="images/places/farasan-cabin-v2.webp" alt="Coral Coast Cabin on the Farasan Islands" width="1536" height="1024" loading="lazy"><span>Farasan Islands</span></div>
+          <h2>Coral Coast Cabin</h2>
+          <p class="location">Farasan Islands, Jazan</p>
+          <a href="place.html?id=farasan-cabin" class="details-button">View details</a>
+        </li>
+
+      </ul>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="sadu regional-thread" aria-hidden="true"></div>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <p class="footer-mark">HBnB</p>
+        <p class="footer-tag">A field guide to stays with regional character.</p>
+      </div>
+      <!-- Session control lives in the header only, so the footer cannot
+           contradict it by still offering "Log in" to a signed-in visitor. -->
+      <nav class="footer-nav" aria-label="Footer">
+        <a href="index.html#listings">Browse stays</a>
+        <a href="index.html#how">How it works</a>
+      </nav>
+      <p class="footer-legal">&copy; 2026 HBnB. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="scripts.js" defer></script>
+  <script src="atlas.js" defer></script>
+</body>
+</html>

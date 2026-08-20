@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HBnB — Add a review</title>
+  <meta name="theme-color" content="#16302B">
+  <link rel="icon" type="image/png" href="images/icon.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="page-review page-form">
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand">
+        <a href="index.html" aria-label="HBnB home"><img src="images/logo.png" alt="HBnB logo" class="logo" width="112" height="44" fetchpriority="high"></a>
+      </div>
+      <nav class="main-nav" aria-label="Primary">
+        <a href="index.html#listings" class="nav-link">Browse stays</a>
+        <a href="index.html#how" class="nav-link">How it works</a>
+        <a href="login.html" class="login-button has-tip" id="login-link">Log in</a>
+      </nav>
+    </div>
+    <div class="sadu regional-thread" aria-hidden="true"></div>
+  </header>
+
+  <main id="main-content">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <ol>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="place.html" id="ctx-crumb">Place details</a></li>
+        <li aria-current="page">Add a review</li>
+      </ol>
+    </nav>
+
+    <p class="place-context">You're reviewing <strong id="ctx-place-name">this place</strong> in <span id="ctx-loc"></span>. <a id="ctx-back" href="place.html">View place details</a></p>
+
+    <!-- Used for both the "no place selected" warning and the confirmation
+         shown after a review is accepted. -->
+    <p class="review-gate" id="review-gate" hidden></p>
+
+    <section class="form-shell form-shell-split">
+      <figure class="form-visual review-visual">
+        <img id="review-cover" src="images/places/alula-sandstone-v2.webp" alt="" width="1536" height="1024" fetchpriority="high">
+        <figcaption id="review-visual-caption">Write about the detail that changed your stay.</figcaption>
+      </figure>
+      <div class="form-content">
+        <span class="eyebrow">Guest field note</span>
+        <h1>Leave the useful detail.</h1>
+        <p>Focus on the stay itself — comfort, setting, amenities and anything the next guest should plan for.</p>
+
+        <form class="add-review form" id="review-form" action="#" method="post">
+          <!-- A group of buttons rather than a <select>, so the rating can be
+               shown as stars. scripts.js mirrors the choice into #rating. -->
+          <span class="form-label" id="rating-label">Rating</span>
+          <div class="star-picker" id="star-picker" role="radiogroup" aria-labelledby="rating-label">
+            <button type="button" class="star-btn" role="radio" aria-checked="false" data-value="1" aria-label="1 star - Poor"></button>
+            <button type="button" class="star-btn" role="radio" aria-checked="false" data-value="2" aria-label="2 stars - Fair"></button>
+            <button type="button" class="star-btn" role="radio" aria-checked="false" data-value="3" aria-label="3 stars - Good"></button>
+            <button type="button" class="star-btn" role="radio" aria-checked="false" data-value="4" aria-label="4 stars - Great"></button>
+            <button type="button" class="star-btn" role="radio" aria-checked="false" data-value="5" aria-label="5 stars - Excellent"></button>
+          </div>
+          <input type="hidden" id="rating" name="rating">
+
+          <label for="comment">Your review</label>
+          <textarea id="comment" name="comment" placeholder="Describe the stay, the setting and one useful detail…" autocomplete="off" maxlength="1200" required></textarea>
+          <p class="form-meta"><span>Be specific, fair and focused on the place.</span><span id="character-count" aria-live="polite">0 / 1200</span></p>
+
+          <button type="submit" class="form-submit"><span>Post review</span></button>
+          <p class="form-error" id="review-error" aria-live="polite" hidden></p>
+          <p class="form-success" id="review-success" aria-live="polite" hidden></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="sadu regional-thread" aria-hidden="true"></div>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <p class="footer-mark">HBnB</p>
+        <p class="footer-tag">A field guide to stays with regional character.</p>
+      </div>
+      <!-- Session control lives in the header only, so the footer cannot
+           contradict it by still offering "Log in" to a signed-in visitor. -->
+      <nav class="footer-nav" aria-label="Footer">
+        <a href="index.html#listings">Browse stays</a>
+        <a href="index.html#how">How it works</a>
+      </nav>
+      <p class="footer-legal">&copy; 2026 HBnB. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="scripts.js" defer></script>
+  <script src="atlas.js" defer></script>
+</body>
+</html>
