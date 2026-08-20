@@ -38,3 +38,36 @@ This phase secures the backend and replaces in-memory storage with a persistent 
 * **Persistence:** In-memory repositories replaced by **SQLAlchemy**-backed SQLite storage, plus raw SQL scripts and a Mermaid ER diagram of the schema.
 
 *👉 **[Click here to explore the Part 3 Codebase](./part3/README.md)***.
+
+### ➡️ [Part 4: Simple Web Client](./part4/README.md)
+This phase adds a browser-based client on top of the Part 3 API, built with plain HTML5, CSS3 and JavaScript ES6 — no frameworks, no build step. Key implementations include:
+* **Client Pages:** A place list with a price filter, a place detail view with amenities and reviews, a login form, and an add-review form.
+* **API Integration:** `fetch`-based calls to `/api/v1/...` with a JWT stored in a cookie after login and sent as a `Bearer` token on every subsequent request.
+* **Bundled API:** The Part 3 Flask API is included alongside the client so the two can run together as a full-stack demo.
+
+*👉 **[Click here to explore the Part 4 Codebase](./part4/README.md)***.
+
+---
+
+## ▶️ Running the Project (Part 4)
+
+Part 4 needs two servers running at the same time: the Flask API and a static file server for the client.
+
+**1. Start the API**
+```bash
+cd part4
+python -m venv venv && source venv/bin/activate   # if not already set up
+pip install -r requirements.txt
+python run.py
+```
+This serves the API on `http://localhost:5000` and automatically creates `instance/development.db` with a seeded admin account (`admin@hbnb.io` / `admin1234`) on first run.
+
+**2. Start the client (in a second terminal)**
+```bash
+cd part4/base_files
+python -m http.server 8000
+```
+
+**3. Open the client**
+
+Open `http://localhost:8000/index.html` in your browser. The client communicates with the API at `http://localhost:5000`, and CORS is enabled on the API to allow this cross-origin connection.
