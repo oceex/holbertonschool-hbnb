@@ -46,28 +46,3 @@ This phase adds a browser-based client on top of the Part 3 API, built with plai
 * **Bundled API:** The Part 3 Flask API is included alongside the client so the two can run together as a full-stack demo.
 
 *👉 **[Click here to explore the Part 4 Codebase](./part4/README.md)***.
-
----
-
-## ▶️ Running the Project (Part 4)
-
-Part 4 needs two servers running at the same time: the Flask API and a static file server for the client.
-
-**1. Start the API**
-```bash
-cd part4
-python -m venv venv && source venv/bin/activate   # if not already set up
-pip install -r requirements.txt
-python run.py
-```
-This serves the API on `http://localhost:5000` and automatically creates `instance/development.db` with a seeded admin account (`admin@hbnb.io` / `admin1234`) on first run.
-
-**2. Start the client (in a second terminal)**
-```bash
-cd part4/base_files
-python -m http.server 8000
-```
-
-**3. Open the client**
-
-Open `http://localhost:8000/index.html` in your browser. The client communicates with the API at `http://localhost:5000`, and CORS is enabled on the API to allow this cross-origin connection.
